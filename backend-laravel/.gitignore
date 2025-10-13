@@ -1,0 +1,50 @@
+# Laravel .gitignore
+
+# Dependencies (BERAT - jangan push!)
+/vendor/
+/node_modules/
+
+# Environment & Config
+.env
+.env.backup
+.env.production
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Laravel Cache & Storage (bisa di-generate ulang)
+/bootstrap/cache/*
+!/bootstrap/cache/.gitkeep
+/storage/*.key
+/storage/framework/cache/*
+!/storage/framework/cache/.gitkeep
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
+
+# Public Storage
+/public/storage
+/public/hot
+
+# Testing
+.phpunit.result.cache
+coverage/
+
+# Build files
+npm-debug.log
+yarn-error.log
+
+# Composer
+composer.lock
+composer.phar

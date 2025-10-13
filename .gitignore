@@ -1,0 +1,45 @@
+# S-Core ITBSS Project .gitignore
+
+# Dependencies (SANGAT BERAT!)
+**/node_modules/
+**/vendor/
+
+# Environment files
+**/.env
+**/.env.*
+!**/.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Logs
+**/*.log
+**/logs/
+
+# Build outputs
+**/dist/
+**/build/
+
+# Cache
+**/bootstrap/cache/*
+**/storage/framework/cache/*
+**/storage/framework/sessions/*
+**/storage/framework/views/*
+**/storage/logs/*
+
+# Composer
+**/composer.lock
+**/composer.phar
+
+# Package lock (optional - tergantung tim)
+# **/package-lock.json
+# **/yarn.lock
