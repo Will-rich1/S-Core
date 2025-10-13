@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loginAsAdmin, setLoginAsAdmin] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,8 +35,13 @@ export default function LoginPage() {
       const response = await axios.post("http://localhost:8000/api/login", { email, password });
       // Simpan token atau data user jika ada
       localStorage.setItem("user", JSON.stringify(response.data));
-      // Redirect ke dashboard
-      navigate("/dashboard");
+
+      // Redirect berdasarkan role atau checkbox
+      if (loginAsAdmin) {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
       setError("Incorrect email address or password");
     }
@@ -110,14 +116,24 @@ export default function LoginPage() {
 
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
-            <div className="flex justify-between items-center text-sm">
-              <a href="#" className="text-primary hover:underline">
-                Forgot your password?
-              </a>
-              <label className="flex items-center">
-                <input type="checkbox" className="mr-1" />
-                Remember me
-              </label>
+            <div className="flex flex-col gap-2">
+              <div className="flex justify-between items-center text-sm">
+                <a href="#" className="text-primary hover:underline">
+                  Forgot your password?
+                </a>
+                <label className="flex items-center">
+                  <input type="checkbox" className="mr-1" />
+                  Remember me
+                </label>
+              </div>
+
+              {/* Login as Admin Checkbox */}
+              <div className="flex items-center text-sm">
+                <label className="flex items-center cursor-pointer">
+                  <input type="checkbox" checked={loginAsAdmin} onChange={(e) => setLoginAsAdmin(e.target.checked)} className="mr-2" />
+                  <span className="text-gray-600">Login as Admin</span>
+                </label>
+              </div>
             </div>
 
             <button type="submit" className="w-full bg-primary text-white py-2 rounded-md font-semibold hover:bg-blue-700 transition-colors duration-200">
