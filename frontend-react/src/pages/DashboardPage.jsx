@@ -64,14 +64,14 @@ export default function DashboardPage() {
   ];
 
   const menuItems = [
-    { icon: "📊", label: "Dashboard" },
-    { icon: "📋", label: "KPRS" },
-    { icon: "📅", label: "Jadwal" },
-    { icon: "📝", label: "Daftar Hadir" },
-    { icon: "📚", label: "Nilai Semester" },
-    { icon: "📄", label: "Transkrip Nilai" },
+    // { icon: "📊", label: "Dashboard" },
+    // { icon: "📋", label: "KPRS" },
+    // { icon: "📅", label: "Jadwal" },
+    // { icon: "📝", label: "Daftar Hadir" },
+    // { icon: "📚", label: "Nilai Semester" },
+    // { icon: "📄", label: "Transkrip Nilai" },
     { icon: "🎓", label: "Kemahasiswaan", hasSubmenu: true },
-    { icon: "👥", label: "Bimbingan" },
+    // { icon: "👥", label: "Bimbingan" },
     { icon: "❓", label: "Help" },
     { icon: "🚪", label: "Logout" },
   ];
