@@ -1,4 +1,5 @@
 # S-Core ITBSS
+
 ## Sabda Setia Student Point System
 
 Sistem informasi akademik untuk manajemen SKPI (Surat Keterangan Pendamping Ijazah) mahasiswa Institut Teknologi & Bisnis Sabda Setia.
@@ -26,6 +27,7 @@ S-Core/
 ## 🚀 Cara Install & Menjalankan
 
 ### **Prerequisites:**
+
 - PHP 8.1 atau lebih tinggi
 - Composer
 - Node.js & npm
@@ -84,6 +86,7 @@ Frontend akan berjalan di: `http://localhost:5173`
 ## 🔑 Testing Login
 
 **Credential untuk testing:**
+
 - Email: `admin@itbss.ac.id`
 - Password: `password`
 
@@ -92,6 +95,7 @@ Frontend akan berjalan di: `http://localhost:5173`
 ## 📦 Folder yang TIDAK PERLU di-push ke GitHub
 
 ### **Backend Laravel:**
+
 - ❌ `/vendor/` - Dependencies PHP (~100-200 MB)
 - ❌ `/node_modules/` - Dependencies Node.js
 - ❌ `.env` - File konfigurasi sensitif
@@ -100,6 +104,7 @@ Frontend akan berjalan di: `http://localhost:5173`
 - ✅ `.env.example` - Template environment (boleh push)
 
 ### **Frontend React:**
+
 - ❌ `/node_modules/` - Dependencies (~300-500 MB)
 - ❌ `/dist/` - Build output
 - ❌ `.env` - Environment variables
@@ -110,23 +115,25 @@ Frontend akan berjalan di: `http://localhost:5173`
 
 ## 📝 API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/login` | Login authentication |
-| POST | `/api/logout` | Logout |
-| GET | `/api/test` | Test API connection |
+| Method | Endpoint      | Description          |
+| ------ | ------------- | -------------------- |
+| POST   | `/api/login`  | Login authentication |
+| POST   | `/api/logout` | Logout               |
+| GET    | `/api/test`   | Test API connection  |
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### **Backend:**
+
 - Laravel 10
 - PHP 8.1+
 - Laravel Sanctum (Authentication)
 - CORS enabled
 
 ### **Frontend:**
+
 - React 18
 - Vite
 - Tailwind CSS
