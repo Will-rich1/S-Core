@@ -128,12 +128,12 @@ export default function LoginPage() {
               </div>
 
               {/* Login as Admin Checkbox */}
-              <div className="flex items-center text-sm">
+              {/* <div className="flex items-center text-sm">
                 <label className="flex items-center cursor-pointer">
                   <input type="checkbox" checked={loginAsAdmin} onChange={(e) => setLoginAsAdmin(e.target.checked)} className="mr-2" />
                   <span className="text-gray-600">Login as Admin</span>
                 </label>
-              </div>
+              </div> */}
             </div>
 
             <button type="submit" className="w-full bg-primary text-white py-2 rounded-md font-semibold hover:bg-blue-700 transition-colors duration-200">

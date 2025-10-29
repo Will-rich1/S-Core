@@ -77,10 +77,13 @@ export default function DashboardPage() {
   ];
 
   const categories = [
-    { kategori: "Internship/Practical Work", minimal: 1, capaian: 2, point: 22 },
-    { kategori: "Independent Learning Campus Program", minimal: 1, capaian: 16, point: 292 },
-    { kategori: "New Student Campus Life Introduction (PKKMB)", minimal: 1, capaian: 2, point: 40 },
-    { kategori: "Workshop/Training/Seminar Activities", minimal: 5, capaian: 29, point: 230 },
+    { kategori: "OrKeSS (Orientasi Kemahasiswaan Sabda Setia)", suggestion: 1, capaian: 2, point: 22 },
+    { kategori: "Retreat", suggestion: 1, capaian: 16, point: 292 },
+    { kategori: "Penguasaan Bahasa Inggris Aktif (ITP TOEFL 450 atau setara)", suggestion: 1, capaian: 2, point: 40 },
+    { kategori: "Penguasaan Bahasa Mandarin Aktif (HSK setara 4)", suggestion: 5, capaian: 29, point: 230 },
+    { kategori: "Penguasaan Bahasa Asing lain", suggestion: 5, capaian: 29, point: 230 },
+    { kategori: "Peningkatan kemampuan ilmiah dan penalaran", suggestion: 5, capaian: 29, point: 230 },
+    { kategori: "Pemakalah/Pemateri/Presenter/Trainer", suggestion: 5, capaian: 29, point: 230 },
   ];
 
   // Get unique categories for filter dropdown
@@ -253,13 +256,13 @@ export default function DashboardPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
                 <select name="category" value={formData.category} onChange={handleInputChange} className="w-full border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option value="">Select Category</option>
-                  <option value="Internship/Practical Work">Internship/Practical Work</option>
-                  <option value="Independent Learning Campus Program">Independent Learning Campus Program</option>
-                  <option value="New Student Campus Life Introduction (PKKMB)">New Student Campus Life Introduction (PKKMB)</option>
-                  <option value="Workshop/Training/Seminar Activities">Workshop/Training/Seminar Activities</option>
-                  <option value="Achievement in Science, Literature and Other Academic Activities (olympiad, pitmapres, etc)">Achievement in Science, Literature and Other Academic Activities</option>
-                  <option value="Participant in Interest and Talent Activities (sports, arts, and spirituality)">Participant in Interest and Talent Activities</option>
-                  <option value="IPR/Patent">IPR/Patent</option>
+                  <option value="OrKeSS (Orientasi Kemahasiswaan Sabda Setia)">OrKeSS (Orientasi Kemahasiswaan Sabda Setia)</option>
+                  <option value="Retreat">Retreat</option>
+                  <option value="Penguasaan Bahasa Inggris Aktif (ITP TOEFL 450 atau setara)">Penguasaan Bahasa Inggris Aktif (ITP TOEFL 450 atau setara)</option>
+                  <option value="Penguasaan Bahasa Mandarin Aktif (HSK setara 4)">Penguasaan Bahasa Mandarin Aktif (HSK setara 4)</option>
+                  <option value="Penguasaan Bahasa Asing lain">Penguasaan Bahasa Asing lain</option>
+                  <option value="Peningkatan kemampuan ilmiah dan penalaran">Peningkatan kemampuan ilmiah dan penalaran</option>
+                  <option value="Pemakalah/Pemateri/Presenter/Trainer">Pemakalah/Pemateri/Presenter/Trainer</option>
                 </select>
               </div>
 
@@ -341,13 +344,13 @@ export default function DashboardPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
                 <select name="category" value={formData.category} onChange={handleInputChange} className="w-full border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option value="">Select Category</option>
-                  <option value="Internship/Practical Work">Internship/Practical Work</option>
-                  <option value="Independent Learning Campus Program">Independent Learning Campus Program</option>
-                  <option value="New Student Campus Life Introduction (PKKMB)">New Student Campus Life Introduction (PKKMB)</option>
-                  <option value="Workshop/Training/Seminar Activities">Workshop/Training/Seminar Activities</option>
-                  <option value="Achievement in Science, Literature and Other Academic Activities (olympiad, pitmapres, etc)">Achievement in Science, Literature and Other Academic Activities</option>
-                  <option value="Participant in Interest and Talent Activities (sports, arts, and spirituality)">Participant in Interest and Talent Activities</option>
-                  <option value="IPR/Patent">IPR/Patent</option>
+                  <option value="OrKeSS (Orientasi Kemahasiswaan Sabda Setia)">OrKeSS (Orientasi Kemahasiswaan Sabda Setia)</option>
+                  <option value="Retreat">Retreat</option>
+                  <option value="Penguasaan Bahasa Inggris Aktif (ITP TOEFL 450 atau setara)">Penguasaan Bahasa Inggris Aktif (ITP TOEFL 450 atau setara)</option>
+                  <option value="Penguasaan Bahasa Mandarin Aktif (HSK setara 4)">Penguasaan Bahasa Mandarin Aktif (HSK setara 4)</option>
+                  <option value="Penguasaan Bahasa Asing lain">Penguasaan Bahasa Asing lain</option>
+                  <option value="Peningkatan kemampuan ilmiah dan penalaran">Peningkatan kemampuan ilmiah dan penalaran</option>
+                  <option value="Pemakalah/Pemateri/Presenter/Trainer">Pemakalah/Pemateri/Presenter/Trainer</option>
                 </select>
               </div>
 
@@ -488,7 +491,7 @@ export default function DashboardPage() {
               <thead>
                 <tr className="border-b">
                   <th className="text-left py-3 px-4">Category</th>
-                  <th className="text-center py-3 px-4">Minimum</th>
+                  <th className="text-center py-3 px-4">Point Suggested</th>
                   <th className="text-center py-3 px-4">Achievement</th>
                   <th className="text-center py-3 px-4">Points</th>
                 </tr>
@@ -497,7 +500,7 @@ export default function DashboardPage() {
                 {categories.map((cat, index) => (
                   <tr key={index} className="border-b hover:bg-gray-50">
                     <td className="py-3 px-4">{cat.kategori}</td>
-                    <td className="text-center py-3 px-4">{cat.minimal}</td>
+                    <td className="text-center py-3 px-4">{cat.suggestion}</td>
                     <td className="text-center py-3 px-4">{cat.capaian}</td>
                     <td className="text-center py-3 px-4">{cat.point}</td>
                   </tr>
