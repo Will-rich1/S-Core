@@ -1,17 +1,17 @@
-# S-Core ITBSS Project .gitignore
+# Laravel .gitignore
 
-# Dependencies (SANGAT BERAT!)
-**/node_modules/
-**/vendor/
+# Dependencies (BERAT - jangan push!)
+/vendor/
+/node_modules/
 
-# Environment files
-**/.env
-**/.env.*
-!**/.env.example
+# Environment & Config
+.env
+.env.backup
+.env.production
 
 # IDE
-.vscode/
 .idea/
+.vscode/
 *.swp
 *.swo
 *~
@@ -19,27 +19,32 @@
 # OS
 .DS_Store
 Thumbs.db
-*.tmp
 
-# Logs
-**/*.log
-**/logs/
+# Laravel Cache & Storage (bisa di-generate ulang)
+/bootstrap/cache/*
+!/bootstrap/cache/.gitkeep
+/storage/*.key
+/storage/framework/cache/*
+!/storage/framework/cache/.gitkeep
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
 
-# Build outputs
-**/dist/
-**/build/
+# Public Storage
+/public/storage
+/public/hot
 
-# Cache
-**/bootstrap/cache/*
-**/storage/framework/cache/*
-**/storage/framework/sessions/*
-**/storage/framework/views/*
-**/storage/logs/*
+# Testing
+.phpunit.result.cache
+coverage/
+
+# Build files
+npm-debug.log
+yarn-error.log
 
 # Composer
-**/composer.lock
-**/composer.phar
-
-# Package lock (optional - tergantung tim)
-# **/package-lock.json
-# **/yarn.lock
+composer.lock
+composer.phar
