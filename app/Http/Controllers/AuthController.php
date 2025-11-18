@@ -28,7 +28,7 @@ class AuthController extends Controller
 
         // Untuk testing, kita hardcode user
         // Nanti bisa diganti dengan database
-        $testEmail = 'admin@itbss.ac.id';
+        $testEmail = 'admin1@itbss.ac.id';
         $testPassword = 'password';
 
         if ($request->email === $testEmail && $request->password === $testPassword) {
