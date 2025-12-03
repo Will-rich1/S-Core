@@ -3,64 +3,48 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    /**
-     * Handle login request
-     */
-    public function login(Request $request)
+    // --- FUNGSI 1: MENAMPILKAN FORM LOGIN (INI YANG HILANG TADI) ---
+    public function showLoginForm(Request $request)
     {
-        // Validasi input
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|min:6',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation error',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        // Untuk testing, kita hardcode user
-        // Nanti bisa diganti dengan database
-        $testEmail = 'admin1@itbss.ac.id';
-        $testPassword = 'password';
-
-        if ($request->email === $testEmail && $request->password === $testPassword) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Login successful',
-                'data' => [
-                    'user' => [
-                        'id' => 1,
-                        'name' => 'Manda Aprikasari',
-                        'email' => $request->email,
-                        'role' => 'student'
-                    ],
-                    'token' => 'dummy-token-' . time()
-                ]
-            ], 200);
-        }
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Incorrect email address or password'
-        ], 401);
+        $request->session()->regenerateToken();
+        return view('login');
     }
 
-    /**
-     * Handle logout request
-     */
+    // --- FUNGSI 2: MEMPROSES LOGIN (DENGAN JEBAKAN DIAGNOSA) ---
+    public function login(Request $request)
+    {
+        // 1. Validasi Input
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        // 2. Cek apakah Auth Berhasil di Database?
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+
+            if (Auth::user()->role === 'admin') {
+                return redirect()->intended('/admin');
+            }
+
+            return redirect()->intended('/dashboard');
+        }
+
+        return back()->withErrors([
+            'email' => 'Email atau password salah.',
+        ])->onlyInput('email');
+    }
+
+    // --- FUNGSI 3: LOGOUT ---
     public function logout(Request $request)
     {
-        return response()->json([
-            'success' => true,
-            'message' => 'Logout successful'
-        ], 200);
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect('/login');
     }
 }

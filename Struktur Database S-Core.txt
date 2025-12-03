@@ -1,0 +1,310 @@
+📊 Struktur Database
+1. users - Tabel Pengguna Utama
+CREATE TABLE users (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    student_id VARCHAR(20) UNIQUE NULL,        -- NIM mahasiswa (null untuk admin)
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('student', 'admin') NOT NULL DEFAULT 'student',
+    
+    -- Data Mahasiswa
+    major ENUM('IF', 'SI', 'BD') NULL,         -- Jurusan
+    year VARCHAR(4) NULL,                       -- Angkatan (2021, 2022, dst)
+    
+    -- Metadata
+    email_verified_at TIMESTAMP NULL,
+    remember_token VARCHAR(100) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_student_id (student_id),
+    INDEX idx_role (role),
+    INDEX idx_year (year),
+    INDEX idx_major (major)
+);
+
+2. categories - Kategori Utama
+CREATE TABLE categories (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,                -- "OrKeSS dan Retreat", "Kegiatan Ilmiah", dst
+    is_mandatory BOOLEAN DEFAULT FALSE,        -- Apakah kategori wajib
+    display_order INT DEFAULT 0,               -- Urutan tampilan
+    is_active BOOLEAN DEFAULT TRUE,
+    created_by BIGINT UNSIGNED NULL,           -- Admin yang membuat
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_display_order (display_order)
+);
+
+3. subcategories - Subkategori
+CREATE TABLE subcategories (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    category_id BIGINT UNSIGNED NOT NULL,
+    name VARCHAR(255) NOT NULL,                -- "OrKeSS", "Retreat", "Magang", dst
+    points INT NOT NULL DEFAULT 0,             -- Poin yang diberikan
+    description TEXT NULL,                      -- Deskripsi detail
+    is_active BOOLEAN DEFAULT TRUE,
+    created_by BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_category (category_id),
+    INDEX idx_points (points)
+);
+
+4. submissions - Pengajuan S-Core Mahasiswa
+CREATE TABLE submissions (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    student_id BIGINT UNSIGNED NOT NULL,
+    
+    -- Kategori yang dipilih mahasiswa
+    student_category_id BIGINT UNSIGNED NOT NULL,
+    student_subcategory_id BIGINT UNSIGNED NOT NULL,
+    
+    -- Kategori yang di-assign admin (bisa berbeda)
+    assigned_category_id BIGINT UNSIGNED NULL,
+    assigned_subcategory_id BIGINT UNSIGNED NULL,
+    
+    -- Detail kegiatan
+    title VARCHAR(500) NOT NULL,               -- Judul kegiatan
+    description TEXT NOT NULL,                  -- Keterangan detail
+    activity_date DATE NOT NULL,                -- Tanggal kegiatan dilakukan
+    
+    -- File sertifikat
+    certificate_path VARCHAR(500) NULL,         -- Path file di storage
+    certificate_original_name VARCHAR(255) NULL,
+    
+    -- Status dan approval
+    status ENUM('Waiting', 'Approved', 'Rejected', 'Cancel') DEFAULT 'Waiting',
+    points_awarded INT NULL,                    -- Poin yang diberikan (setelah approved)
+    
+    -- Rejection/Appeal
+    rejection_reason TEXT NULL,
+    rejection_type ENUM('certificate_invalid', 'duplicate', 'incomplete', 'other') NULL,
+    category_change_reason TEXT NULL,           -- Alasan admin ubah kategori
+    
+    -- Review info
+    reviewed_by BIGINT UNSIGNED NULL,           -- Admin yang mereview
+    reviewed_at TIMESTAMP NULL,
+    
+    -- Timestamps
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (student_category_id) REFERENCES categories(id),
+    FOREIGN KEY (student_subcategory_id) REFERENCES subcategories(id),
+    FOREIGN KEY (assigned_category_id) REFERENCES categories(id),
+    FOREIGN KEY (assigned_subcategory_id) REFERENCES subcategories(id),
+    FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL,
+    
+    INDEX idx_student (student_id),
+    INDEX idx_status (status),
+    INDEX idx_activity_date (activity_date),
+    INDEX idx_submitted_at (submitted_at)
+);
+
+5. complaints - Komplain/Banding Mahasiswa
+CREATE TABLE complaints (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    submission_id BIGINT UNSIGNED NOT NULL,
+    student_id BIGINT UNSIGNED NOT NULL,
+    
+    type ENUM('appeal_rejection', 'appeal_points', 'appeal_category', 'other') NOT NULL,
+    explanation TEXT NOT NULL,
+    supporting_document_path VARCHAR(500) NULL, -- File pendukung opsional
+    
+    -- Status komplain
+    status ENUM('pending', 'under_review', 'resolved', 'rejected') DEFAULT 'pending',
+    admin_response TEXT NULL,
+    
+    -- Review
+    reviewed_by BIGINT UNSIGNED NULL,
+    reviewed_at TIMESTAMP NULL,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (submission_id) REFERENCES submissions(id) ON DELETE CASCADE,
+    FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL,
+    
+    INDEX idx_submission (submission_id),
+    INDEX idx_student (student_id),
+    INDEX idx_status (status)
+);
+
+6. activity_logs - Log Aktivitas Sistem
+CREATE TABLE activity_logs (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NULL,
+    action VARCHAR(100) NOT NULL,               -- 'submission_created', 'submission_approved', dst
+    entity_type VARCHAR(50) NULL,               -- 'submission', 'category', 'user', dst
+    entity_id BIGINT UNSIGNED NULL,
+    details JSON NULL,                        
+  -- Data tambahan dalam format JSON
+    ip_address VARCHAR(45) NULL,
+    user_agent TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    INDEX idx_user (user_id),
+    INDEX idx_action (action),
+    INDEX idx_created_at (created_at)
+);
+
+7. system_settings - Pengaturan Sistem
+CREATE TABLE system_settings (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    key_name VARCHAR(100) UNIQUE NOT NULL,      -- 'min_points_to_pass', 'category_pin', dst
+    value TEXT NULL,
+    data_type ENUM('string', 'integer', 'boolean', 'json') DEFAULT 'string',
+    description TEXT NULL,
+    is_public BOOLEAN DEFAULT FALSE,            -- Apakah bisa diakses mahasiswa
+    updated_by BIGINT UNSIGNED NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
+);
+
+8. password_reset_tokens - Reset Password
+CREATE TABLE password_reset_tokens (
+    email VARCHAR(255) PRIMARY KEY,
+    token VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    INDEX idx_token (token)
+);
+
+9. sessions - Session Management (Laravel)
+CREATE TABLE sessions (
+    id VARCHAR(255) PRIMARY KEY,
+    user_id BIGINT UNSIGNED NULL,
+    ip_address VARCHAR(45) NULL,
+    user_agent TEXT NULL,
+    payload LONGTEXT NOT NULL,
+    last_activity INT NOT NULL,
+    
+    INDEX idx_user (user_id),
+    INDEX idx_last_activity (last_activity)
+);
+
+
+🔗 Relasi Database
+users (1) ----< (N) submissions
+users (1) ----< (N) complaints
+users (1) ----< (N) activity_logs
+
+categories (1) ----< (N) subcategories
+categories (1) ----< (N) submissions (student_category)
+categories (1) ----< (N) submissions (assigned_category)
+
+subcategories (1) ----< (N) submissions (student_subcategory)
+subcategories (1) ----< (N) submissions (assigned_subcategory)
+
+submissions (1) ----< (N) complaints
+
+
+📝 Data Seed untuk Testing
+1. System Settings
+INSERT INTO system_settings (key_name, value, data_type, description, is_public) VALUES
+('min_points_to_pass', '20', 'integer', 'Minimum points required to pass S-Core', TRUE),
+('category_management_pin', '123456', 'string', 'PIN for category management access', FALSE),
+('max_file_size_mb', '10', 'integer', 'Maximum file upload size in MB', TRUE),
+('submission_date_range_months', '1', 'integer', 'Activity date must be within X months', TRUE);
+
+2. Sample Categories & Subcategories
+-- Kategori 1: OrKeSS (Wajib)
+INSERT INTO categories (name, is_mandatory, display_order) VALUES 
+('OrKeSS dan Retreat (WAJIB)', TRUE, 1);
+
+INSERT INTO subcategories (category_id, name, points, description) VALUES
+(1, 'OrKeSS (Orientasi Kemahasiswaan Sabda Setia)', 1, 'Per kegiatan'),
+(1, 'Retreat', 1, 'Per kegiatan');
+
+-- Kategori 2: Kegiatan Ilmiah
+INSERT INTO categories (name, is_mandatory, display_order) VALUES 
+('Kegiatan Ilmiah dan Penalaran', FALSE, 2);
+
+INSERT INTO subcategories (category_id, name, points, description) VALUES
+(2, 'Magang/Kerja Praktek', 20, 'Minimal 1 bulan'),
+(2, 'Program Kampus Merdeka', 20, 'Mengikuti program resmi Kemendikbud'),
+(2, 'HKI/Paten', 20, 'Per HKI yang terdaftar');
+
+-- Dan seterusnya untuk 4 kategori lainnya...
+
+
+🎯 Query Penting untuk Fitur
+1. Dashboard Mahasiswa - Total Poin
+SELECT 
+    u.name,
+    u.student_id,
+    COALESCE(SUM(s.points_awarded), 0) as total_points,
+    COUNT(CASE WHEN s.status = 'Approved' THEN 1 END) as approved_count,
+    COUNT(CASE WHEN s.status = 'Waiting' THEN 1 END) as pending_count,
+    COUNT(CASE WHEN s.status = 'Rejected' THEN 1 END) as rejected_count
+FROM users u
+LEFT JOIN submissions s ON u.id = s.student_id AND s.status = 'Approved'
+WHERE u.id = ?
+GROUP BY u.id;
+
+2. Admin - Submissions dengan Filter
+SELECT 
+    s.*,
+    u.name as student_name,
+    u.student_id,
+    u.major,
+    u.year,
+    c.name as category_name,
+    sc.name as subcategory_name,
+    sc.points as subcategory_points
+FROM submissions s
+JOIN users u ON s.student_id = u.id
+JOIN categories c ON s.student_category_id = c.id
+JOIN subcategories sc ON s.student_subcategory_id = sc.id
+WHERE 
+    (? IS NULL OR s.status = ?)
+    AND (? IS NULL OR c.name = ?)
+    AND (? IS NULL OR u.name LIKE CONCAT('%', ?, '%'))
+ORDER BY s.submitted_at DESC;
+
+3. Student Report - Kategori Mandatory
+SELECT 
+    c.name as category_name,
+    sc.name as subcategory_name,
+    COUNT(s.id) as approved_count,
+    SUM(s.points_awarded) as total_points
+FROM categories c
+JOIN subcategories sc ON c.id = sc.category_id
+LEFT JOIN submissions s ON sc.id = s.assigned_subcategory_id 
+    AND s.student_id = ? 
+    AND s.status = 'Approved'
+WHERE c.is_mandatory = TRUE
+GROUP BY c.id, sc.id
+ORDER BY c.display_order, sc.name;
+
+4. Admin - Student Statistics
+SELECT 
+    u.student_id,
+    u.name,
+    u.major,
+    u.year,
+    COALESCE(SUM(CASE WHEN s.status = 'Approved' THEN s.points_awarded ELSE 0 END), 0) as total_points,
+    COUNT(CASE WHEN s.status = 'Waiting' THEN 1 END) as pending_count,
+    CASE 
+        WHEN COALESCE(SUM(CASE WHEN s.status = 'Approved' THEN s.points_awarded ELSE 0 END), 0) >= 1000 
+        THEN 'PASSED' 
+        ELSE 'NOT PASSED' 
+    END as status
+FROM users u
+LEFT JOIN submissions s ON u.id = s.student_id
+WHERE u.role = 'student'
+GROUP BY u.id
+ORDER BY total_points DESC;
