@@ -80,7 +80,7 @@
                                 <div class="space-y-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Student</label>
-                                        <div class="bg-gray-50 border rounded-lg px-4 py-3 text-sm text-gray-700">2210426 - CALVIN WILLIAM</div>
+                                        <div class="bg-gray-50 border rounded-lg px-4 py-3 text-sm text-gray-700">{{ Auth::user()->name }}</div>
                                     </div>
 
                                     <div>
@@ -184,7 +184,9 @@
                                     <div class="space-y-4">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-2">Student</label>
-                                            <div class="bg-gray-50 border rounded-lg px-4 py-3 text-sm text-gray-700">2210426 - CALVIN WILLIAM</div>
+                                            <div class="bg-gray-50 border rounded-lg px-4 py-3 text-sm text-gray-700">
+                                                {{ $user->student_id }} - {{ $user->name }}
+                                            </div>
                                         </div>
 
                                         <div>
@@ -275,7 +277,7 @@
                                     <div class="space-y-4">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-2">Student</label>
-                                            <div class="bg-gray-50 border rounded-lg px-4 py-3 text-sm text-gray-700">2210426 - CALVIN WILLIAM</div>
+                                            <div class="bg-gray-50 border rounded-lg px-4 py-3 text-sm text-gray-700">{{ Auth::user()->name }}</div>
                                         </div>
 
                                         <div>
@@ -581,7 +583,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                     </div>
-                    <span class="text-sm font-medium">CALVIN WILLIAM</span>
+                    <span class="text-sm font-medium">{{ Auth::user()->name }}</span>
                 </div>
             </div>
 
@@ -850,7 +852,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                                    <input type="text" value="CALVIN WILLIAM" disabled class="w-full border rounded-lg px-4 py-2.5 text-sm bg-gray-50 text-gray-600" />
+                                    <input type="text" value="{{ Auth::user()->name }}" disabled class="w-full border rounded-lg px-4 py-2.5 text-sm bg-gray-50 text-gray-600" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
@@ -1125,440 +1127,250 @@
     </div>
 
     <script>
-        function dashboardData() {
-            return {
-                activeMenu: 'Dashboard',
-                isSidebarOpen: false,
-                showLogoutModal: false,
-                showAddModal: false,
-                showEditModal: false,
-                showViewModal: false,
-                showDeleteModal: false,
-                showComplaintModal: false,
-                appealFormOpen: false,
-                appealSubmissionId: null,
-                appealMessage: '',
-                selectedActivity: null,
-                statusFilter: '',
-                categoryFilter: '',
-                searchQuery: '',
-                dateValidationError: '',
-                formData: {
-                    mainCategory: '',
-                    subcategory: '',
-                    activityTitle: '',
-                    description: '',
-                    activityDate: '',
-                    fileName: '',
-                },
-                availableSubcategories: [],
-                complaintData: {
-                    type: '',
-                    explanation: '',
-                    fileName: '',
-                },
-                passwordData: {
-                    currentPassword: '',
-                    newPassword: '',
-                    confirmPassword: '',
-                },
-                showCurrentPassword: false,
-                showNewPassword: false,
-                showConfirmPassword: false,
-                passwordError: '',
-                passwordSuccess: '',
-                showAlertModal: false,
-                alertType: 'info',
-                alertTitle: '',
-                alertMessage: '',
-                alertHasCancel: false,
-                alertCallback: null,
-                categoryGroups: [
-                    {
-                        name: "OrKeSS dan Retreat (WAJIB)",
-                        subcategories: [
-                            { name: "OrKeSS (Orientasi Kemahasiswaan Sabda Setia)", points: 1, approvedCount: 1, description: "Per kegiatan" },
-                            { name: "Retreat", points: 1, approvedCount: 1, description: "Per kegiatan" }
-                        ]
-                    },
-                    {
-                        name: "Kegiatan Ilmiah dan Penalaran",
-                        subcategories: [
-                            { name: "Penguasaan Bahasa Inggris Aktif (ITP TOEFL 450 atau setara) (WAJIB)", points: 2, approvedCount: 0, description: "Per kegiatan" },
-                            { name: "Penguasaan Bahasa Mandarin Aktif (HSK setara 4)", points: 2, approvedCount: 0, description: "Per kegiatan" },
-                            { name: "Penguasaan Bahasa Asing lain", points: 2, approvedCount: 0, description: "Per bahasa asing yang dikuasai dengan level penguasaan minimal aktif/lancar" },
-                            { name: "Peserta seminar, kuliah umum, dan sejenisnya", points: 1, approvedCount: 0, description: "Per kegiatan" },
-                            { name: "Peserta pelatihan, workshop, lokakarya, upgrading program, dan sejenisnya", points: 3, approvedCount: 0, description: "Per kegiatan" },
-                            { name: "Menyelesaikan online course/bootcamp bersertifikat", points: 3, approvedCount: 0, description: "Per course" },
-                            { name: "Pemakalah/Pemateri/Presenter/Trainer - seminar/workshop kota/provinsi", points: 6, approvedCount: 0, description: "Per kegiatan" },
-                            { name: "Pemakalah/Pemateri/Presenter/Trainer - seminar/workshop nasional", points: 8, approvedCount: 0, description: "Per kegiatan" },
-                            { name: "Pemakalah/Pemateri/Presenter/Trainer - seminar/workshop internasional", points: 10, approvedCount: 0, description: "Per kegiatan" },
-                            { name: "Publikasi tulisan/karya di media massa bereputasi (online/offline)", points: 2, approvedCount: 0, description: "Per karya" },
-                            { name: "Publikasi tulisan/karya di media massa bereputasi (online/offline) dalam Bahasa Asing", points: 4, approvedCount: 0, description: "Per karya" },
-                            { name: "Asistensi dosen/lab", points: 3, approvedCount: 0, description: "Per semester" },
-                            { name: "Tenaga pengajar sukarela", points: 2, approvedCount: 0, description: "Per kegiatan" }
-                        ]
-                    },
-                    {
-                        name: "Organisasi dan Kepanitiaan",
-                        subcategories: [
-                            { name: "Organisasi Kemahasiswaan - Pengurus Harian (Ketua, Wakil Ketua, Sekretaris, Bendahara)", points: 5, approvedCount: 0, description: "Per periode kepengurusan" },
-                            { name: "Organisasi Kemahasiswaan - Koordinator/Anggota Seksi", points: 3, approvedCount: 0, description: "Per periode kepengurusan" },
-                            { name: "Organisasi Kemahasiswaan - Anggota", points: 1, approvedCount: 0, description: "Per periode kepengurusan" },
-                            { name: "Organisasi di luar kampus - Pengurus Harian (Ketua, Wakil Ketua, Sekretaris, Bendahara)", points: 4, approvedCount: 0, description: "Per periode kepengurusan" },
-                            { name: "Organisasi di luar kampus - Koordinator/Anggota Seksi", points: 2, approvedCount: 0, description: "Per periode kepengurusan" },
-                            { name: "Organisasi di luar kampus - Anggota", points: 1, approvedCount: 0, description: "Per periode kepengurusan" }
-                        ]
-                    },
-                    {
-                        name: "Perlombaan/Kompetisi",
-                        subcategories: [
-                            { name: "Peserta lomba - tingkat lokal", points: 2, approvedCount: 0, description: "Per lomba" },
-                            { name: "Peserta lomba - tingkat kota/provinsi", points: 3, approvedCount: 0, description: "Per lomba" },
-                            { name: "Peserta lomba - tingkat nasional", points: 4, approvedCount: 0, description: "Per lomba" },
-                            { name: "Peserta lomba - tingkat internasional", points: 5, approvedCount: 0, description: "Per lomba" },
-                            { name: "Pemenang lomba - tingkat lokal", points: 3, approvedCount: 0, description: "Per lomba" },
-                            { name: "Pemenang lomba - tingkat kota/provinsi", points: 5, approvedCount: 0, description: "Per lomba" },
-                            { name: "Pemenang lomba - tingkat nasional", points: 8, approvedCount: 0, description: "Per lomba" },
-                            { name: "Pemenang lomba - tingkat internasional", points: 10, approvedCount: 0, description: "Per lomba" }
-                        ]
-                    },
-                    {
-                        name: "Performance",
-                        subcategories: [
-                            { name: "Parade budaya/seni - tingkat lokal", points: 1, approvedCount: 0, description: "Per kegiatan" },
-                            { name: "Parade budaya/seni - tingkat kota/provinsi", points: 3, approvedCount: 0, description: "Per kegiatan" },
-                            { name: "Parade budaya/seni - tingkat nasional", points: 5, approvedCount: 0, description: "Per kegiatan" },
-                            { name: "Parade budaya/seni - tingkat internasional", points: 8, approvedCount: 0, description: "Per kegiatan" }
-                        ]
-                    },
-                    {
-                        name: "Kegiatan Sosial Kemasyarakatan",
-                        subcategories: [
-                            { name: "Internship di badan bereputasi nasional", points: 6, approvedCount: 0, description: "Per periode" },
-                            { name: "Internship di badan bereputasi internasional", points: 10, approvedCount: 0, description: "Per periode" },
-                            { name: "Kegiatan bakti sosial", points: 1, approvedCount: 0, description: "Per kegiatan" },
-                            { name: "Social campaign (online/offline) pribadi", points: 2, approvedCount: 0, description: "Per karya" },
-                            { name: "Social campaign (online/offline) sebagai bagian kegiatan dari badan berputasi", points: 4, approvedCount: 0, description: "Per karya" },
-                            { name: "Mengembangkan hal bermanfaat bagi masyarakat (pembuatan aplikasi/produk) yang diakui dan digunakan oleh masyarakat", points: 5, approvedCount: 0, description: "Per karya" }
-                        ]
-                    }
-                ],
-                getCategoryTotal(subcategories, field) {
-                    if (field === 'approvedCount') {
-                        return subcategories.reduce((sum, sub) => sum + sub.approvedCount, 0);
-                    } else if (field === 'totalPoints') {
-                        return subcategories.reduce((sum, sub) => sum + (sub.approvedCount * sub.points), 0);
-                    }
-                    return 0;
-                },
-                activities: [
-                    { mainCategory: "OrKeSS dan Retreat (WAJIB)", subcategory: "OrKeSS", judul: "OrKeSS Participation Certificate", keterangan: "Attended OrKeSS as a participant, completing all required activities and assessments", point: 5, waktu: "12 Aug 2025 20:31:51:823", status: "Approved" },
-                    { mainCategory: "Kegiatan Ilmiah dan Penalaran", subcategory: "Magang/Kerja Praktek", judul: "Software Engineering Internship", keterangan: "6-month internship at Tech Company as Full Stack Developer, built 3 production features", point: "-", waktu: "12 Aug 2025 20:31:10:010", status: "Rejected", rejectionReason: "Certificate does not show the duration of internship clearly. Please upload a certificate that explicitly states the internship period (start date and end date)." },
-                    { mainCategory: "Kegiatan Ilmiah dan Penalaran", subcategory: "Program Kampus Merdeka", judul: "MSIB - Backend Developer", keterangan: "Completed Kampus Merdeka program as Backend Developer intern at Tech Startup for 6 months", point: "-", waktu: "08 Aug 2025 21:23:33:303", status: "Waiting" },
-                    { mainCategory: "Kegiatan Ilmiah dan Penalaran", subcategory: "Prestasi dalam kegiatan ilmiah, sastra dan kegiatan akademik lainnya (olimpiade, pitmapres, dll)", judul: "Pilmapres Region III Finalist", keterangan: "Became Finalist of Pilmapres Region III representing ITBSS with research on AI applications", point: 18, waktu: "07 Aug 2025 21:19:52:307", status: "Approved" },
-                    { mainCategory: "Perlombaan/Kompetisi", subcategory: "Peserta kegiatan minat dan bakat (olah raga, seni, dan kerohanian)", judul: "National Web Development Competition Participant", keterangan: "Participated in National Web Development Competition organized by HMTI with team of 3", point: 10, waktu: "07 Aug 2025 21:18:27:867", status: "Approved" },
-                    { mainCategory: "Kegiatan Ilmiah dan Penalaran", subcategory: "HKI/Paten", judul: "IPR Terrafrace Application (UI UX Design)", keterangan: "Proof of IPR Terrafrace application design registered at Ministry of Law and Human Rights", point: 20, waktu: "10 Jul 2025 22:28:37:203", status: "Approved" },
-                    { mainCategory: "Kegiatan Ilmiah dan Penalaran", subcategory: "Kegiatan Workshop/Pelatihan/Seminar", judul: "AI and Machine Learning Workshop", keterangan: "Attended 3-day AI workshop covering neural networks and deep learning fundamentals", point: 2, waktu: "05 Aug 2025 14:20:00:100", status: "Approved" },
-                    { mainCategory: "Organisasi dan Kepanitiaan", subcategory: "Pengurus Pusat Organisasi Kemahasiswaan Internal", judul: "HIMATIKA Secretary 2025", keterangan: "Served as Secretary of HIMATIKA for one period, managing administrative tasks", point: 10, waktu: "03 Aug 2025 16:45:00:500", status: "Approved" }
-                ],
-                get uniqueCategories() {
-                    const categorySet = new Set();
-                    this.activities.forEach(a => {
-                        if (a.mainCategory) {
-                            categorySet.add(a.mainCategory);
-                        }
-                    });
-                    return Array.from(categorySet).sort();
-                },
-                get maxDate() {
-                    const today = new Date();
-                    const maxDate = new Date(today);
-                    maxDate.setMonth(maxDate.getMonth() + 1);
-                    return maxDate.toISOString().split('T')[0];
-                },
-                get stats() {
-                    const approvedActivities = this.activities.filter(a => a.status === 'Approved');
-                    const approvedPoints = approvedActivities.reduce((sum, a) => sum + (parseInt(a.point) || 0), 0);
-                    return {
-                        approvedPoints: approvedPoints,
-                        waiting: this.activities.filter(a => a.status === 'Waiting').length,
-                        approved: this.activities.filter(a => a.status === 'Approved').length,
-                        rejected: this.activities.filter(a => a.status === 'Rejected').length
-                    };
-                },
-                get filteredActivities() {
-                    return this.activities.filter(activity => {
-                        const matchesSearch = this.searchQuery === '' || 
-                            activity.judul.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                            activity.keterangan.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                            (activity.mainCategory && activity.mainCategory.toLowerCase().includes(this.searchQuery.toLowerCase())) ||
-                            (activity.subcategory && activity.subcategory.toLowerCase().includes(this.searchQuery.toLowerCase()));
-                        const matchesStatus = this.statusFilter === '' || activity.status === this.statusFilter;
-                        const matchesCategory = this.categoryFilter === '' || activity.mainCategory === this.categoryFilter;
-                        return matchesSearch && matchesStatus && matchesCategory;
-                    });
-                },
-                confirmLogout() {
-                    window.location.href = '/login';
-                },
-                handleFileSelect(event) {
-                    const file = event.target.files[0];
-                    if (file) {
-                        this.formData.fileName = file.name;
-                    }
-                },
-                openEditModal(activity) {
-                    this.selectedActivity = activity;
-                    this.formData = {
-                        category: activity.kategori,
-                        activityTitle: activity.judul,
-                        description: activity.keterangan,
-                        activityDate: '',
-                        fileName: '',
-                    };
-                    this.showEditModal = true;
-                },
-                openViewModal(activity) {
-                    this.selectedActivity = activity;
-                    this.showViewModal = true;
-                },
-                openDeleteModal(activity) {
-                    this.selectedActivity = activity;
-                    this.showDeleteModal = true;
-                },
-                closeModal() {
-                    this.showAddModal = false;
-                    this.showEditModal = false;
-                    this.showViewModal = false;
-                    this.showDeleteModal = false;
-                    this.showComplaintModal = false;
-                    this.selectedActivity = null;
-                    this.dateValidationError = '';
-                    this.formData = {
-                        mainCategory: '',
-                        subcategory: '',
-                        activityTitle: '',
-                        description: '',
-                        activityDate: '',
-                        fileName: '',
-                    };
-                    this.availableSubcategories = [];
-                    this.complaintData = {
-                        type: '',
-                        explanation: '',
-                        fileName: '',
-                    };
-                },
-                updateAvailableSubcategories() {
-                    if (this.formData.mainCategory !== '') {
-                        const categoryIndex = parseInt(this.formData.mainCategory);
-                        this.availableSubcategories = this.categoryGroups[categoryIndex].subcategories;
-                        this.formData.subcategory = '';
-                    } else {
-                        this.availableSubcategories = [];
-                        this.formData.subcategory = '';
-                    }
-                },
-                validateActivityDate(date) {
-                    if (!date) return false;
-                    
-                    const activityDate = new Date(date);
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    
-                    const oneMonthAgo = new Date(today);
-                    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-                    
-                    if (activityDate > today) {
-                        this.dateValidationError = 'Activity date cannot be in the future';
-                        return false;
-                    }
-                    
-                    if (activityDate < oneMonthAgo) {
-                        this.dateValidationError = 'Activity date cannot be more than 1 month ago';
-                        return false;
-                    }
-                    
-                    this.dateValidationError = '';
-                    return true;
-                },
-                saveActivity() {
-                    if (!this.formData.mainCategory || !this.formData.subcategory || !this.formData.activityTitle || !this.formData.description || !this.formData.activityDate || !this.formData.fileName) {
-                        this.showAlert('warning', 'Missing Information', 'Please fill all required fields and upload a certificate');
-                        return;
-                    }
-                    
-                    if (!this.validateActivityDate(this.formData.activityDate)) {
-                        this.showAlert('warning', 'Invalid Date', this.dateValidationError);
-                        return;
-                    }
-                    
-                    console.log('Saving activity:', this.formData);
-                    this.showAlert('success', 'Submission Successful', 'Activity submitted successfully! It will be reviewed within 3-5 business days.');
-                    // Add your save logic here
-                    this.closeModal();
-                },
-                updateActivity() {
-                    if (!this.formData.mainCategory || !this.formData.subcategory || !this.formData.activityTitle || !this.formData.description || !this.formData.activityDate) {
-                        this.showAlert('warning', 'Missing Information', 'Please fill all required fields');
-                        return;
-                    }
-                    console.log('Updating activity:', this.formData);
-                    // Add your update logic here
-                    this.closeModal();
-                },
-                confirmDelete() {
-                    console.log('Deleting activity:', this.selectedActivity);
-                    // Add your delete logic here
-                    const index = this.activities.findIndex(a => a.judul === this.selectedActivity.judul && a.waktu === this.selectedActivity.waktu);
-                    if (index !== -1) {
-                        this.activities.splice(index, 1);
-                    }
-                    this.closeModal();
-                },
-                openComplaintModal(activity) {
-                    this.selectedActivity = activity;
-                    this.complaintData = {
-                        type: '',
-                        explanation: '',
-                        fileName: '',
-                    };
-                    this.showComplaintModal = true;
-                    this.showViewModal = false;
-                },
-                handleComplaintFileSelect(event) {
-                    const file = event.target.files[0];
-                    if (file) {
-                        if (file.size > 10 * 1024 * 1024) {
-                            this.showAlert('warning', 'File Too Large', 'File size must be less than 10MB');
-                            event.target.value = '';
-                            return;
-                        }
-                        this.complaintData.fileName = file.name;
-                    }
-                },
-                submitComplaint() {
-                    if (!this.complaintData.type || !this.complaintData.explanation) {
-                        this.showAlert('warning', 'Missing Information', 'Please fill all required fields');
-                        return;
-                    }
-                    
-                    if (this.complaintData.explanation.length < 50) {
-                        this.showAlert('warning', 'Explanation Too Short', 'Please provide a more detailed explanation (minimum 50 characters)');
-                        return;
-                    }
-                    
-                    console.log('Submitting complaint:', {
-                        activity: this.selectedActivity,
-                        complaint: this.complaintData
-                    });
-                    
-                    this.showAlert('success', 'Complaint Submitted', 'Your complaint has been submitted successfully. The admin will review your appeal within 3-5 business days.');
-                    // Add your complaint submission logic here
-                    this.closeModal();
-                },
-                openAppealForm(submissionId) {
-                    this.appealFormOpen = true;
-                    this.appealSubmissionId = submissionId;
-                    this.appealMessage = '';
-                },
-                closeAppealForm() {
-                    this.appealFormOpen = false;
-                    this.appealSubmissionId = null;
-                    this.appealMessage = '';
-                },
-                submitAppeal(submissionId) {
-                    if (!this.appealMessage.trim()) {
-                        this.showAlert('warning', 'Missing Message', 'Please provide an appeal message');
-                        return;
-                    }
+    function dashboardData() {
+        return {
+            activeMenu: 'Dashboard',
+            isSidebarOpen: false,
+            
+            // --- DATA DINAMIS DARI CONTROLLER ---
+            
+            // 1. Data Aktivitas (Ambil dari $activities controller)
+            activities: @json($activities), 
 
-                    if (this.appealMessage.length < 50) {
-                        this.showAlert('warning', 'Message Too Short', 'Please provide a more detailed explanation (minimum 50 characters)');
-                        return;
-                    }
+            // 2. Data Kategori untuk Dropdown (Ambil dari $categoryGroups controller)
+            categoryGroups: @json($categoryGroups),
 
-                    console.log('Submitting appeal:', {
-                        submissionId: submissionId,
-                        message: this.appealMessage
-                    });
+            // 3. Statistik (Ambil dari $stats controller)
+            stats: @json($stats),
 
-                    this.showAlert('success', 'Appeal Submitted', 'Your appeal has been submitted successfully. The admin will review your appeal within 3-5 business days.');
-                    this.closeAppealForm();
-                    this.closeModal();
-                },
-                changePassword() {
-                    this.passwordError = '';
-                    this.passwordSuccess = '';
+            // --- END DATA DINAMIS ---
+
+            // Variable Form & UI (Biarkan default kosong)
+            showLogoutModal: false,
+            showAddModal: false,
+            showEditModal: false,
+            showViewModal: false,
+            showDeleteModal: false,
+            showComplaintModal: false,
+            appealFormOpen: false,
+            appealSubmissionId: null,
+            appealMessage: '',
+            selectedActivity: null,
+            statusFilter: '',
+            categoryFilter: '',
+            searchQuery: '',
+            dateValidationError: '',
+            formData: {
+                mainCategory: '',
+                subcategory: '',
+                activityTitle: '',
+                description: '',
+                activityDate: '',
+                fileName: '',
+            },
+            availableSubcategories: [],
+            complaintData: { type: '', explanation: '', fileName: '' },
+            passwordData: { currentPassword: '', newPassword: '', confirmPassword: '' },
+            showCurrentPassword: false,
+            showNewPassword: false,
+            showConfirmPassword: false,
+            passwordError: '',
+            passwordSuccess: '',
+            showAlertModal: false,
+            alertType: 'info',
+            alertTitle: '',
+            alertMessage: '',
+            alertHasCancel: false,
+            alertCallback: null,
+
+            // --- COMPUTED PROPERTIES (Filter & Helper) ---
+            
+            get uniqueCategories() {
+                const categorySet = new Set();
+                this.activities.forEach(a => {
+                    if (a.mainCategory) categorySet.add(a.mainCategory);
+                });
+                return Array.from(categorySet).sort();
+            },
+
+            get maxDate() {
+                const today = new Date();
+                return today.toISOString().split('T')[0]; // Batas hari ini
+            },
+
+            // Stats sudah dikirim dari Controller, jadi tidak perlu dihitung ulang di JS
+            // Tapi kalau mau filter frontend tetap jalan, biarkan computed filteredActivities
+
+            get filteredActivities() {
+                return this.activities.filter(activity => {
+                    const matchesSearch = this.searchQuery === '' || 
+                        activity.judul.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                        activity.keterangan.toLowerCase().includes(this.searchQuery.toLowerCase());
                     
-                    if (!this.passwordData.currentPassword || !this.passwordData.newPassword || !this.passwordData.confirmPassword) {
-                        this.passwordError = 'Please fill all password fields';
-                        return;
-                    }
+                    const matchesStatus = this.statusFilter === '' || activity.status === this.statusFilter;
+                    const matchesCategory = this.categoryFilter === '' || activity.mainCategory === this.categoryFilter;
                     
-                    if (this.passwordData.newPassword.length < 8) {
-                        this.passwordError = 'New password must be at least 8 characters long';
-                        return;
-                    }
-                    
-                    const hasUpperCase = /[A-Z]/.test(this.passwordData.newPassword);
-                    const hasLowerCase = /[a-z]/.test(this.passwordData.newPassword);
-                    const hasNumbers = /\d/.test(this.passwordData.newPassword);
-                    
-                    if (!hasUpperCase || !hasLowerCase || !hasNumbers) {
-                        this.passwordError = 'Password must include uppercase, lowercase, and numbers';
-                        return;
-                    }
-                    
-                    if (this.passwordData.newPassword !== this.passwordData.confirmPassword) {
-                        this.passwordError = 'New password and confirmation do not match';
-                        return;
-                    }
-                    
-                    if (this.passwordData.currentPassword === this.passwordData.newPassword) {
-                        this.passwordError = 'New password must be different from current password';
-                        return;
-                    }
-                    
-                    console.log('Changing password...');
-                    // Add your password change logic here
-                    
-                    this.passwordSuccess = 'Password changed successfully!';
-                    setTimeout(() => {
-                        this.resetPasswordForm();
-                        this.passwordSuccess = '';
-                    }, 3000);
-                },
-                resetPasswordForm() {
-                    this.passwordData = {
-                        currentPassword: '',
-                        newPassword: '',
-                        confirmPassword: '',
-                    };
-                    this.passwordError = '';
-                    this.passwordSuccess = '';
-                    this.showCurrentPassword = false;
-                    this.showNewPassword = false;
-                    this.showConfirmPassword = false;
-                },
-                showAlert(type, title, message, hasCancel = false, callback = null) {
-                    this.alertType = type;
-                    this.alertTitle = title;
-                    this.alertMessage = message;
-                    this.alertHasCancel = hasCancel;
-                    this.alertCallback = callback;
-                    this.showAlertModal = true;
-                },
-                closeAlertModal(confirmed) {
-                    this.showAlertModal = false;
-                    if (confirmed && this.alertCallback) {
-                        this.alertCallback();
-                    }
-                    this.alertCallback = null;
+                    return matchesSearch && matchesStatus && matchesCategory;
+                });
+            },
+
+            // --- FUNGSI LOGIC ---
+
+            getCategoryTotal(subcategories, field) {
+                // Fungsi ini menghitung total poin per kategori untuk tabel Mandatory
+                if (field === 'approvedCount') {
+                    return subcategories.reduce((sum, sub) => sum + (sub.approvedCount || 0), 0);
+                } else if (field === 'totalPoints') {
+                    return subcategories.reduce((sum, sub) => sum + ((sub.approvedCount || 0) * sub.points), 0);
                 }
+                return 0;
+            },
+
+            updateAvailableSubcategories() {
+                if (this.formData.mainCategory !== '') {
+                    // Karena mainCategory sekarang adalah Index Array, ini aman
+                    const categoryIndex = parseInt(this.formData.mainCategory);
+                    if (this.categoryGroups[categoryIndex]) {
+                        this.availableSubcategories = this.categoryGroups[categoryIndex].subcategories;
+                    }
+                    this.formData.subcategory = '';
+                } else {
+                    this.availableSubcategories = [];
+                    this.formData.subcategory = '';
+                }
+            },
+
+            validateActivityDate(date) {
+                if (!date) return false;
+                
+                // Fix timezone issue by parsing date manually
+                const parts = date.split('-');
+                const activityDate = new Date(parts[0], parts[1] - 1, parts[2]);
+                
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                const oneMonthAgo = new Date(today);
+                oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+                
+                if (activityDate > today) {
+                    this.dateValidationError = 'Activity date cannot be in the future';
+                    return false;
+                }
+                if (activityDate < oneMonthAgo) {
+                    this.dateValidationError = 'Activity date cannot be more than 1 month ago';
+                    return false;
+                }
+                this.dateValidationError = '';
+                return true;
+            },
+
+            // FUNGSI SIMPAN (SUBMIT) KE DATABASE
+            saveActivity() {
+                // 1. Validasi Input Kosong
+                if (!this.formData.mainCategory || !this.formData.subcategory || !this.formData.activityTitle || !this.formData.description || !this.formData.activityDate || !this.formData.fileName) {
+                    this.showAlert('warning', 'Missing Information', 'Please fill all required fields and upload a certificate');
+                    return;
+                }
+    
+                // 2. Validasi Tanggal (PENTING: Pakai fungsi validasi yang baru kita perbaiki tadi)
+                if (!this.validateActivityDate(this.formData.activityDate)) {
+                    this.showAlert('warning', 'Invalid Date', this.dateValidationError);
+                    return;
+                }
+
+                // 3. Siapkan Data
+                let data = new FormData();
+                data.append('title', this.formData.activityTitle);
+                data.append('description', this.formData.description);
+                data.append('activity_date', this.formData.activityDate);
+    
+                // Ambil Nama Kategori dari index array
+                const catIndex = this.formData.mainCategory;
+                data.append('mainCategory', this.categoryGroups[catIndex].name); 
+                data.append('subcategory', this.formData.subcategory);
+    
+                // Ambil file dari input HTML
+                data.append('certificate_file', this.$refs.fileInput.files[0]);
+                data.append('_token', '{{ csrf_token() }}');
+
+                // 4. Kirim ke Server
+                fetch('{{ route("submissions.store") }}', {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json' },
+                    body: data
+                })
+                .then(async response => {
+                    const json = await response.json();
+                    if (!response.ok) throw new Error(json.message || 'Error submitting');
+                    return json;
+                })
+                .then(result => {
+                    // --- SUKSES ---
+                    this.showAlert('success', 'Submission Successful', 'Activity submitted! Page will reload.');
+        
+                    // 5. RELOAD HALAMAN (Supaya data baru muncul di tabel)
+                    setTimeout(() => {
+                        window.location.reload(); 
+                    }, 1500);
+                    
+                    this.closeModal();
+                })
+                .catch(error => {
+                    console.error(error);
+                    this.showAlert('error', 'Submission Failed', error.message);
+                });
+            },
+
+            // --- FUNGSI LAINNYA (Logout, Modal, dll - TETAP SAMA) ---
+            confirmLogout() {
+                fetch('{{ route("logout") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(() => window.location.href = '/login')
+                .catch(() => window.location.href = '/login');
+            },
+
+            handleFileSelect(event) {
+                const file = event.target.files[0];
+                if (file) this.formData.fileName = file.name;
+            },
+            
+            // ... Copy sisa fungsi modal (openEditModal, openViewModal, dll) dari kode lamamu ...
+            // Pastikan tutup kurung kurawal fungsi dashboardData() ada di akhir
+            closeModal() {
+                this.showAddModal = false;
+                this.showEditModal = false;
+                this.showViewModal = false;
+                this.showDeleteModal = false;
+                this.showComplaintModal = false;
+                this.selectedActivity = null;
+                this.dateValidationError = '';
+                this.formData = { mainCategory: '', subcategory: '', activityTitle: '', description: '', activityDate: '', fileName: '' };
+                this.availableSubcategories = [];
+            },
+            
+            showAlert(type, title, message, hasCancel = false, callback = null) {
+                this.alertType = type;
+                this.alertTitle = title;
+                this.alertMessage = message;
+                this.alertHasCancel = hasCancel;
+                this.alertCallback = callback;
+                this.showAlertModal = true;
+            },
+            
+            closeAlertModal(confirmed) {
+                this.showAlertModal = false;
+                if (confirmed && this.alertCallback) this.alertCallback();
+                this.alertCallback = null;
             }
         }
-    </script>
+    }
+</script>
 </body>
 </html>

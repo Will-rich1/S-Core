@@ -2,47 +2,48 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\UserController; // Pastikan UserController diimport
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SubmissionController;
+use App\Http\Controllers\UserController;
 
-// --- JALUR LOGIN & LOGOUT ---
-Route::get('/', [AuthController::class, 'showLoginForm']);
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.process');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
 
+// --- 1. JALUR TAMU (Belum Login) ---
+Route::middleware('guest')->group(function () {
+    Route::get('/', [AuthController::class, 'showLoginForm']);
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.process');
+});
 
-// --- JALUR SETELAH LOGIN (Diproteksi Middleware) ---
+// --- 2. JALUR SETELAH LOGIN (Wajib Login) ---
 Route::middleware(['auth'])->group(function () {
+    
+    // Logout & Ganti Password
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::post('/change-password', [AuthController::class, 'changePassword'])->name('password.change');
 
-    // Jalur Mahasiswa
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    // --- AREA MAHASISWA ---
+    // (Pengecekan role dilakukan di dalam DashboardController)
+    Route::get('/dashboard', [DashboardController::class, 'studentDashboard'])->name('dashboard');
+    
+    Route::post('/submissions', [SubmissionController::class, 'store'])->name('submissions.store');
+    Route::post('/submissions/{id}/update', [SubmissionController::class, 'update'])->name('submissions.update');
+    Route::post('/submissions/{id}/delete', [SubmissionController::class, 'destroy'])->name('submissions.delete');
+    Route::post('/complaints', [SubmissionController::class, 'storeComplaint'])->name('complaints.store');
 
-    // Jalur Admin
-    Route::get('/admin', function () {
-        return view('admin_review');
-    })->name('admin.review');
+    // --- AREA ADMIN ---
+    // (Pengecekan role dilakukan di dalam DashboardController)
+    Route::get('/admin', [DashboardController::class, 'adminDashboard'])->name('admin.dashboard');
 
-    // Jalur User Management
-    // Students
+    Route::post('/admin/submissions/{id}/approve', [SubmissionController::class, 'approve'])->name('admin.approve');
+    Route::post('/admin/submissions/{id}/reject', [SubmissionController::class, 'reject'])->name('admin.reject');
+
+    // User Management
     Route::post('/students/store', [UserController::class, 'storeStudent'])->name('students.store');
     Route::post('/students/import', [UserController::class, 'importStudents'])->name('students.import');
-    
-    // Admins
     Route::post('/admins/store', [UserController::class, 'storeAdmin'])->name('admins.store');
-
-});
-
-// ==========================================
-// AREA TEST SESSION (Untuk Debugging Session)
-// ==========================================
-Route::get('/tes-simpan', function () {
-    session(['uji_coba' => 'Berhasil! Session berfungsi.']);
-    return 'Data session telah disimpan. <a href="/tes-baca">Klik di sini untuk membaca</a>';
-});
-
-Route::get('/tes-baca', function () {
-    $data = session('uji_coba', 'GAGAL! Session kosong/hilang.');
-    return 'Hasil Baca Session: <strong>' . $data . '</strong>';
 });
