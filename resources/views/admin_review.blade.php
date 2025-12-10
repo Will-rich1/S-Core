@@ -691,7 +691,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                     </div>
-                    <span class="text-sm font-medium">ADMIN USER</span>
+                    <span class="text-sm font-medium">{{ Auth::user()->name }}</span>
                 </div>
             </div>
 
@@ -1871,574 +1871,304 @@
 </div>
 
     <script>
-        function adminReviewData() {
-            return {
-                activeMenu: 'Review Submissions',
-                isSidebarOpen: false,
-                showLogoutModal: false,
-                showDetailModal: false,
-                showRejectModal: false,
-                showCategoryModal: false,
-                showPinModal: false,
-                showEditConfirmModal: false,
-                showDeleteConfirmModal: false,
-                showApproveModal: false,
-                showAlertModal: false,
-                alertType: 'info',
-                alertTitle: '',
-                alertMessage: '',
-                alertHasCancel: false,
-                alertCallback: null,
-                approveModalMainCategory: '',
-                approveModalSubcategory: '',
-                approveModalPoints: 0,
-                pinInput: '',
-                pinError: false,
-                isPinVerified: false,
-                editingCategory: null,
-                deletingCategory: null,
-                pendingSaveIndex: null, 
-                selectedSubmission: null,
-                rejectReason: '',
-                rejectReasonType: '',
-                categoryChangeReason: '',
-                categoryChanged: false,
-                originalCategory: '',
-                assignedPoints: '',
-                assignedCategory: '',
-                assignedMainCategory: '',
-                assignedSubcategory: '',
-                assignedAvailableSubcategories: [],
-                newMainCategory: '',
-                statusFilter: 'Waiting',
-                categoryFilter: '',
-                searchQuery: '',
-                studentFilter: '',
-                studentSearchQuery: '',
-                yearFilter: '',
-                majorFilter: '',
-                statusPassFilter: '',
-                newCategory: {
-                    mainCategoryIndex: '',
-                    name: '',
-                    points: '',
-                    description: ''
-                },
-                categoryGroups: [
-                    {
-                        name: "OrKeSS dan Retreat (WAJIB)",
-                        isEditing: false,
-                        subcategories: [
-                            { name: "OrKeSS (Orientasi Kemahasiswaan Sabda Setia)", points: 1, description: "Per kegiatan", isEditing: false },
-                            { name: "Retreat", points: 1, description: "Per kegiatan", isEditing: false }
-                        ]
-                    },
-                    {
-                        name: "Kegiatan Ilmiah dan Penalaran",
-                        isEditing: false,
-                        subcategories: [
-                            { name: "Penguasaan Bahasa Inggris Aktif (ITP TOEFL 450 atau setara) (WAJIB)", points: 2, description: "Per kegiatan", isEditing: false },
-                            { name: "Penguasaan Bahasa Mandarin Aktif (HSK setara 4)", points: 2, description: "Per kegiatan", isEditing: false },
-                            { name: "Penguasaan Bahasa Asing lain", points: 2, description: "Per bahasa asing yang dikuasai dengan level penguasaan minimal aktif/lancar", isEditing: false },
-                            { name: "Peserta seminar, kuliah umum, dan sejenisnya", points: 1, description: "Per kegiatan", isEditing: false },
-                            { name: "Peserta pelatihan, workshop, lokakarya, upgrading program, dan sejenisnya", points: 3, description: "Per kegiatan", isEditing: false },
-                            { name: "Menyelesaikan online course/bootcamp bersertifikat", points: 3, description: "Per course", isEditing: false },
-                            { name: "Pemakalah/Pemateri/Presenter/Trainer - seminar/workshop kota/provinsi", points: 6, description: "Per kegiatan", isEditing: false },
-                            { name: "Pemakalah/Pemateri/Presenter/Trainer - seminar/workshop nasional", points: 8, description: "Per kegiatan", isEditing: false },
-                            { name: "Pemakalah/Pemateri/Presenter/Trainer - seminar/workshop internasional", points: 10, description: "Per kegiatan", isEditing: false },
-                            { name: "Publikasi tulisan/karya di media massa bereputasi (online/offline)", points: 2, description: "Per karya", isEditing: false },
-                            { name: "Publikasi tulisan/karya di media massa bereputasi (online/offline) dalam Bahasa Asing", points: 4, description: "Per karya", isEditing: false },
-                            { name: "Asistensi dosen/lab", points: 3, description: "Per semester", isEditing: false },
-                            { name: "Tenaga pengajar sukarela", points: 2, description: "Per kegiatan", isEditing: false }
-                        ]
-                    },
-                    {
-                        name: "Organisasi dan Kepanitiaan",
-                        isEditing: false,
-                        subcategories: [
-                            { name: "Organisasi Kemahasiswaan - Pengurus Harian (Ketua, Wakil Ketua, Sekretaris, Bendahara)", points: 5, description: "Per periode kepengurusan", isEditing: false },
-                            { name: "Organisasi Kemahasiswaan - Koordinator/Anggota Seksi", points: 3, description: "Per periode kepengurusan", isEditing: false },
-                            { name: "Organisasi Kemahasiswaan - Anggota", points: 1, description: "Per periode kepengurusan", isEditing: false },
-                            { name: "Organisasi di luar kampus - Pengurus Harian (Ketua, Wakil Ketua, Sekretaris, Bendahara)", points: 4, description: "Per periode kepengurusan", isEditing: false },
-                            { name: "Organisasi di luar kampus - Koordinator/Anggota Seksi", points: 2, description: "Per periode kepengurusan", isEditing: false },
-                            { name: "Organisasi di luar kampus - Anggota", points: 1, description: "Per periode kepengurusan", isEditing: false }
-                        ]
-                    },
-                    {
-                        name: "Perlombaan/Kompetisi",
-                        isEditing: false,
-                        subcategories: [
-                            { name: "Peserta lomba - tingkat lokal", points: 2, description: "Per lomba", isEditing: false },
-                            { name: "Peserta lomba - tingkat kota/provinsi", points: 3, description: "Per lomba", isEditing: false },
-                            { name: "Peserta lomba - tingkat nasional", points: 4, description: "Per lomba", isEditing: false },
-                            { name: "Peserta lomba - tingkat internasional", points: 5, description: "Per lomba", isEditing: false },
-                            { name: "Pemenang lomba - tingkat lokal", points: 3, description: "Per lomba", isEditing: false },
-                            { name: "Pemenang lomba - tingkat kota/provinsi", points: 5, description: "Per lomba", isEditing: false },
-                            { name: "Pemenang lomba - tingkat nasional", points: 8, description: "Per lomba", isEditing: false },
-                            { name: "Pemenang lomba - tingkat internasional", points: 10, description: "Per lomba", isEditing: false }
-                        ]
-                    },
-                    {
-                        name: "Performance",
-                        isEditing: false,
-                        subcategories: [
-                            { name: "Parade budaya/seni - tingkat lokal", points: 1, description: "Per kegiatan", isEditing: false },
-                            { name: "Parade budaya/seni - tingkat kota/provinsi", points: 3, description: "Per kegiatan", isEditing: false },
-                            { name: "Parade budaya/seni - tingkat nasional", points: 5, description: "Per kegiatan", isEditing: false },
-                            { name: "Parade budaya/seni - tingkat internasional", points: 8, description: "Per kegiatan", isEditing: false }
-                        ]
-                    },
-                    {
-                        name: "Kegiatan Sosial Kemasyarakatan",
-                        isEditing: false,
-                        subcategories: [
-                            { name: "Internship di badan bereputasi nasional", points: 6, description: "Per periode", isEditing: false },
-                            { name: "Internship di badan bereputasi internasional", points: 10, description: "Per periode", isEditing: false },
-                            { name: "Kegiatan bakti sosial", points: 1, description: "Per kegiatan", isEditing: false },
-                            { name: "Social campaign (online/offline) pribadi", points: 2, description: "Per karya", isEditing: false },
-                            { name: "Social campaign (online/offline) sebagai bagian kegiatan dari badan bereputasi", points: 4, description: "Per karya", isEditing: false },
-                            { name: "Mengembangkan hal bermanfaat bagi masyarakat (pembuatan aplikasi/produk) yang diakui dan digunakan oleh masyarakat", points: 5, description: "Per karya", isEditing: false }
-                        ]
-                    }
-                ],
-                studentFilter: '',
-                submissions: [
-                    { id: 1, studentId: "2210426", studentName: "CALVIN WILLIAM", major: "STI", mainCategory: "OrKeSS dan Retreat (WAJIB)", subcategory: "OrKeSS", judul: "OrKeSS Participation Certificate", keterangan: "Attended OrKeSS as a participant, completing all required activities and assessments", point: null, suggestedPoint: 5, waktu: "12 Aug 2025 20:31:51", status: "Waiting", certificate: "orkess_cert.pdf", activityDate: "2025-06-15", submittedDate: "2025-08-12", year: "2022" },
-                    { id: 2, studentId: "2210427", studentName: "JANE DOE", major: "BD", mainCategory: "Kegiatan Ilmiah dan Penalaran", subcategory: "Program Kampus Merdeka", judul: "MSIB - Backend Developer", keterangan: "Completed Kampus Merdeka program as Backend Developer intern at Tech Startup for 6 months", point: null, suggestedPoint: 15, waktu: "08 Aug 2025 21:23:33", status: "Waiting", certificate: "msib_cert.pdf", activityDate: "2025-07-20", submittedDate: "2025-08-08", year: "2022" },
-                    { id: 3, studentId: "2210428", studentName: "JOHN SMITH", major: "KWU", mainCategory: "Kegiatan Ilmiah dan Penalaran", subcategory: "Kegiatan Workshop/Pelatihan/Seminar", judul: "Web Development Workshop", keterangan: "Attended 3-day intensive web development workshop covering HTML, CSS, and JavaScript fundamentals", point: null, suggestedPoint: 2, waktu: "10 Aug 2025 15:45:12", status: "Waiting", certificate: "workshop_cert.pdf", activityDate: "2025-08-01", submittedDate: "2025-08-10", year: "2022" },
-                    { id: 4, studentId: "2210426", studentName: "CALVIN WILLIAM", major: "STI", mainCategory: "Kegiatan Ilmiah dan Penalaran", subcategory: "Prestasi dalam kegiatan ilmiah, sastra dan kegiatan akademik lainnya (olimpiade, pitmapres, dll)", judul: "Pilmapres Region III Finalist", keterangan: "Became Finalist of Pilmapres Region III representing ITBSS with research on AI applications", point: 18, waktu: "07 Aug 2025 21:19:52", status: "Approved", certificate: "pilmapres_cert.pdf", activityDate: "2025-07-15", submittedDate: "2025-08-07", year: "2022" },
-                    { id: 5, studentId: "2210429", studentName: "ALICE JOHNSON", major: "BD", mainCategory: "Kegiatan Ilmiah dan Penalaran", subcategory: "HKI/Paten", judul: "Mobile App UI/UX Design Patent", keterangan: "Registered intellectual property rights for innovative mobile application design system", point: 20, waktu: "11 Aug 2025 10:30:00", status: "Approved", certificate: "ipr_cert.pdf", activityDate: "2025-07-25", submittedDate: "2025-08-11", year: "2022" },
-                    { id: 6, studentId: "2210426", studentName: "CALVIN WILLIAM", major: "STI", mainCategory: "Perlombaan/Kompetisi", subcategory: "Peserta kegiatan minat dan bakat (olah raga, seni, dan kerohanian)", judul: "National Web Development Competition Participant", keterangan: "Participated in National Web Development Competition organized by HMTI with team of 3", point: 10, waktu: "07 Aug 2025 21:18:27", status: "Approved", certificate: "competition_cert.pdf", activityDate: "2025-07-10", submittedDate: "2025-08-07", year: "2022" },
-                    { id: 7, studentId: "2210427", studentName: "JANE DOE", major: "BD", mainCategory: "Kegiatan Ilmiah dan Penalaran", subcategory: "Kegiatan Workshop/Pelatihan/Seminar", judul: "AI Workshop 2025", keterangan: "Attended AI and Machine Learning workshop covering deep learning fundamentals", point: 2, waktu: "05 Aug 2025 14:20:00", status: "Approved", certificate: "ai_workshop.pdf", activityDate: "2025-07-28", submittedDate: "2025-08-05", year: "2022" },
-                    { id: 8, studentId: "2230001", studentName: "MICHAEL BROWN", major: "STI", mainCategory: "Kegiatan Ilmiah dan Penalaran", subcategory: "Magang/Kerja Praktek", judul: "Software Engineering Internship", keterangan: "6-month internship at Tech Company as Full Stack Developer, built 3 production features", point: 22, waktu: "01 Aug 2025 09:15:00", status: "Approved", certificate: "intern_cert.pdf", activityDate: "2025-06-01", submittedDate: "2025-08-01", year: "2023" },
-                    { id: 9, studentId: "2210428", studentName: "JOHN SMITH", major: "KWU", mainCategory: "Organisasi dan Kepanitiaan", subcategory: "Pengurus Pusat Organisasi Kemahasiswaan Internal", judul: "HIMATIKA Secretary 2025", keterangan: "Served as Secretary of HIMATIKA for one period, managing administrative tasks and documentation", point: 10, waktu: "03 Aug 2025 16:45:00", status: "Approved", certificate: "himatika_cert.pdf", activityDate: "2025-01-15", submittedDate: "2025-08-03", year: "2022" },
-                    { id: 10, studentId: "2210429", studentName: "ALICE JOHNSON", major: "BD", mainCategory: "Kegiatan Sosial Kemasyarakatan", subcategory: "Mengajar", judul: "Volunteer Teacher at Rural School", keterangan: "Volunteered as English teacher for elementary students in rural area for 2 months", point: 5, waktu: "02 Aug 2025 11:20:00", status: "Approved", certificate: "volunteer_cert.pdf", activityDate: "2025-07-01", submittedDate: "2025-08-02", year: "2022" }
-                ],
-                get uniqueCategories() {
-                    const categorySet = new Set();
-                    this.submissions.forEach(s => {
-                        if (s.mainCategory) {
-                            categorySet.add(s.mainCategory);
-                        }
-                    });
-                    return Array.from(categorySet).sort();
-                },
-                get uniqueStudents() {
-                    return [...new Set(this.submissions.map(s => `${s.studentId} - ${s.studentName}`))];
-                },
-                get filteredSubmissions() {
-                    return this.submissions.filter(submission => {
-                        const matchesSearch = this.searchQuery === '' ||
-                            submission.judul.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                            submission.keterangan.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                            (submission.mainCategory && submission.mainCategory.toLowerCase().includes(this.searchQuery.toLowerCase())) ||
-                            (submission.subcategory && submission.subcategory.toLowerCase().includes(this.searchQuery.toLowerCase())) ||
-                            submission.studentName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                            submission.studentId.includes(this.searchQuery);
-                        const matchesStatus = this.statusFilter === '' || submission.status === this.statusFilter;
-                        const matchesCategory = this.categoryFilter === '' || submission.mainCategory === this.categoryFilter;
-                        const matchesStudent = this.studentFilter === '' || `${submission.studentId} - ${submission.studentName}` === this.studentFilter;
-                        return matchesSearch && matchesStatus && matchesCategory && matchesStudent;
-                    });
-                },
-                get stats() {
-                    return {
-                        total: this.submissions.length,
-                        waiting: this.submissions.filter(s => s.status === 'Waiting').length,
-                        approved: this.submissions.filter(s => s.status === 'Approved').length,
-                        rejected: this.submissions.filter(s => s.status === 'Rejected').length
-                    };
-                },
-                get uniqueStudentsList() {
-                    const studentMap = new Map();
-                    this.submissions.forEach(sub => {
-                        const key = sub.studentId;
-                        if (!studentMap.has(key)) {
-                            studentMap.set(key, {
-                                id: sub.studentId,
-                                name: sub.studentName,
-                                major: sub.major,
-                                year: sub.year || sub.studentId.substring(0, 4),
-                                totalSubmissions: 0,
-                                approvedPoints: 0,
-                                approvedCount: 0,
-                                pending: 0,
-                                categoryBreakdown: {}
-                            });
-                        }
-                        const student = studentMap.get(key);
-                        student.totalSubmissions++;
-                        if (sub.status === 'Approved') {
-                            student.approvedPoints += sub.point || 0;
-                            student.approvedCount++;
-                            // Category breakdown
-                            if (!student.categoryBreakdown[sub.kategori]) {
-                                student.categoryBreakdown[sub.kategori] = 0;
-                            }
-                            student.categoryBreakdown[sub.kategori] += sub.point || 0;
-                        }
-                        if (sub.status === 'Waiting') {
-                            student.pending++;
-                        }
-                    });
-                    return Array.from(studentMap.values());
-                },
-                get filteredStudentsList() {
-                    return this.uniqueStudentsList.filter(student => {
-                        const matchesSearch = this.studentSearchQuery === '' ||
-                            student.name.toLowerCase().includes(this.studentSearchQuery.toLowerCase()) ||
-                            student.id.includes(this.studentSearchQuery);
-                        const matchesMajor = this.majorFilter === '' || student.major === this.majorFilter;
-                        const matchesYear = this.yearFilter === '' || student.year === this.yearFilter;
-                        const matchesStatus = this.statusPassFilter === '' ||
-                            (this.statusPassFilter === 'pass' && student.approvedPoints >= 1000) ||
-                            (this.statusPassFilter === 'fail' && student.approvedPoints < 1000);
-                        return matchesSearch && matchesMajor && matchesYear && matchesStatus;
-                    });
-                },
-                get studentStats() {
-                    const students = this.filteredStudentsList;
-                    const passed = students.filter(s => s.approvedPoints >= 1000).length;
-                    const failed = students.filter(s => s.approvedPoints < 1000).length;
-                    const totalPoints = students.reduce((sum, s) => sum + s.approvedPoints, 0);
-                    const average = students.length > 0 ? Math.round(totalPoints / students.length) : 0;
-                    return {
-                        passed,
-                        failed,
-                        average
-                    };
-                },
-                confirmLogout() {
-                    window.location.href = '/login';
-                },
-                checkCategoryChange() {
-                    if (this.selectedSubmission) {
-                        this.categoryChanged = this.assignedCategory !== this.selectedSubmission.kategori && this.assignedCategory !== '';
-                        if (!this.categoryChanged) {
-                            this.categoryChangeReason = '';
-                        }
-                    }
-                },
-                viewDetail(submission) {
-                    this.selectedSubmission = submission;
-                    this.assignedPoints = submission.suggestedPoint?.toString() || '';
+    function adminReviewData() {
+        return {
+            activeMenu: 'Review Submissions',
+            isSidebarOpen: false,
+            
+            // --- DATA DINAMIS DARI DATABASE ---
+            // Mengambil data yang dikirim dari DashboardController::adminDashboard
+            submissions: @json($submissions),
+            stats: @json($stats),
+            categoryGroups: @json($categories), // Data kategori untuk dropdown/management
+            // ----------------------------------
+
+            // Variable UI
+            showLogoutModal: false,
+            showDetailModal: false,
+            showRejectModal: false,
+            showCategoryModal: false,
+            showPinModal: false,
+            showEditConfirmModal: false,
+            showDeleteConfirmModal: false,
+            showApproveModal: false,
+            showAlertModal: false,
+            
+            alertType: 'info',
+            alertTitle: '',
+            alertMessage: '',
+            alertHasCancel: false,
+            alertCallback: null,
+            
+            approveModalMainCategory: '',
+            approveModalSubcategory: '',
+            approveModalPoints: 0,
+            
+            pinInput: '',
+            pinError: false,
+            isPinVerified: false,
+            
+            editingCategory: null,
+            deletingCategory: null,
+            selectedSubmission: null,
+            
+            rejectReason: '',
+            rejectReasonType: '',
+            categoryChangeReason: '',
+            categoryChanged: false,
+            
+            assignedPoints: '',
+            assignedCategory: '',
+            assignedMainCategory: '',
+            assignedSubcategory: '',
+            assignedAvailableSubcategories: [],
+            
+            newMainCategory: '',
+            newCategory: { mainCategoryIndex: '', name: '', points: '', description: '' },
+            
+            // Filter Variables
+            statusFilter: 'Waiting', // Default filter 'Waiting' biar admin langsung lihat tugas
+            categoryFilter: '',
+            studentFilter: '',
+            searchQuery: '',
+            studentSearchQuery: '',
+            majorFilter: '',
+            yearFilter: '',
+            statusPassFilter: '',
+
+            // --- COMPUTED PROPERTIES ---
+
+            get uniqueCategories() {
+                const categorySet = new Set();
+                this.submissions.forEach(s => {
+                    if (s.mainCategory) categorySet.add(s.mainCategory);
+                });
+                return Array.from(categorySet).sort();
+            },
+
+            get uniqueStudents() {
+                // Format: "NIM - NAMA"
+                return [...new Set(this.submissions.map(s => `${s.studentId} - ${s.studentName}`))];
+            },
+
+            get filteredSubmissions() {
+                return this.submissions.filter(submission => {
+                    const matchesSearch = this.searchQuery === '' || 
+                        submission.judul.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                        submission.studentName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                        submission.studentId.includes(this.searchQuery);
                     
-                    // Auto-populate with student's selected categories
-                    if (submission.mainCategory && submission.subcategory) {
-                        // Find the main category index
-                        const mainCatIndex = this.categoryGroups.findIndex(cat => cat.name === submission.mainCategory);
-                        if (mainCatIndex !== -1) {
-                            this.assignedMainCategory = mainCatIndex.toString();
-                            this.assignedAvailableSubcategories = this.categoryGroups[mainCatIndex].subcategories;
-                            
-                            // Find the subcategory index
-                            const subCatIndex = this.assignedAvailableSubcategories.findIndex(sub => sub.name === submission.subcategory);
-                            if (subCatIndex !== -1) {
-                                this.assignedSubcategory = subCatIndex.toString();
-                            }
-                        }
+                    const matchesStatus = this.statusFilter === '' || submission.status === this.statusFilter;
+                    const matchesCategory = this.categoryFilter === '' || submission.mainCategory === this.categoryFilter;
+                    const matchesStudent = this.studentFilter === '' || `${submission.studentId} - ${submission.studentName}` === this.studentFilter;
+                    
+                    return matchesSearch && matchesStatus && matchesCategory && matchesStudent;
+                });
+            },
+
+            // --- ACTION: APPROVE SUBMISSION ---
+            confirmApprove() {
+                // 1. Ambil data kategori final yang dipilih admin
+                // Note: assignedMainCategory & assignedSubcategory adalah INDEX array di categoryGroups
+                const mainCat = this.categoryGroups[this.assignedMainCategory];
+                const subCat = mainCat.subcategories[this.assignedSubcategory];
+                
+                // 2. Kirim ke Server
+                const url = `/admin/submissions/${this.selectedSubmission.id}/approve`;
+                
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        // Kirim ID Subkategori agar database tahu poin pastinya
+                        assigned_subcategory_id: subCat.id, 
+                        points: subCat.points
+                    })
+                })
+                .then(async response => {
+                    if (response.ok) {
+                        this.showApproveModal = false;
+                        this.showAlert('success', 'Approved', 'Submission successfully approved! Page will reload.');
+                        setTimeout(() => window.location.reload(), 1500);
+                        this.closeModal();
                     } else {
-                        this.assignedMainCategory = '';
-                        this.assignedSubcategory = '';
-                        this.assignedAvailableSubcategories = [];
+                        const data = await response.json();
+                        throw new Error(data.message || 'Failed to approve');
                     }
-                    
-                    this.showDetailModal = true;
-                },
-                updateAssignedSubcategories() {
-                    if (this.assignedMainCategory !== '') {
-                        const categoryIndex = parseInt(this.assignedMainCategory);
-                        this.assignedAvailableSubcategories = this.categoryGroups[categoryIndex].subcategories;
-                        this.assignedSubcategory = '';
-                    } else {
-                        this.assignedAvailableSubcategories = [];
-                        this.assignedSubcategory = '';
-                    }
-                },
-                handleApprove() {
-                    // Auto-use student's selected categories if admin hasn't changed them
-                    if (this.assignedMainCategory === '' || this.assignedSubcategory === '') {
-                        // Use student's original categories
-                        const mainCatIndex = this.categoryGroups.findIndex(cat => cat.name === this.selectedSubmission.mainCategory);
-                        if (mainCatIndex !== -1) {
-                            this.assignedMainCategory = mainCatIndex.toString();
-                            this.assignedAvailableSubcategories = this.categoryGroups[mainCatIndex].subcategories;
-                            
-                            const subCatIndex = this.assignedAvailableSubcategories.findIndex(sub => sub.name === this.selectedSubmission.subcategory);
-                            if (subCatIndex !== -1) {
-                                this.assignedSubcategory = subCatIndex.toString();
-                            }
-                        }
-                    }
-                    
-                    // Final validation - if still empty, show error
-                    if (this.assignedMainCategory === '' || this.assignedSubcategory === '') {
-                        this.showAlert('warning', 'Missing Information', 'Category information is not available. Please select categories manually.');
-                        return;
-                    }
-                    
-                    const mainCat = this.categoryGroups[this.assignedMainCategory];
-                    const subCat = mainCat.subcategories[this.assignedSubcategory];
-                    
-                    // Show approve confirmation modal
-                    this.approveModalMainCategory = mainCat.name;
-                    this.approveModalSubcategory = subCat.name;
-                    this.approveModalPoints = subCat.points;
-                    this.showApproveModal = true;
-                },
-                confirmApprove() {
-                    const mainCat = this.categoryGroups[this.assignedMainCategory];
-                    const subCat = mainCat.subcategories[this.assignedSubcategory];
-                    
-                    const index = this.submissions.findIndex(s => s.id === this.selectedSubmission.id);
-                    if (index !== -1) {
-                        this.submissions[index].status = 'Approved';
-                        this.submissions[index].mainCategory = mainCat.name;
-                        this.submissions[index].subcategory = subCat.name;
-                        this.submissions[index].point = subCat.points;
-                    }
-                    
-                    this.showApproveModal = false;
-                    this.showAlert('success', 'Submission Approved', 'The submission has been approved successfully!');
-                    this.closeModal();
-                },
-                showAlert(type, title, message, hasCancel = false, callback = null) {
-                    this.alertType = type;
-                    this.alertTitle = title;
-                    this.alertMessage = message;
-                    this.alertHasCancel = hasCancel;
-                    this.alertCallback = callback;
-                    this.showAlertModal = true;
-                },
-                closeAlertModal(confirmed) {
-                    this.showAlertModal = false;
-                    if (confirmed && this.alertCallback) {
-                        this.alertCallback();
-                    }
-                    this.alertCallback = null;
-                },
-                handleRejectConfirm() {
-                    if (!this.rejectReason.trim()) {
-                        this.showAlert('warning', 'Missing Reason', 'Please provide a reason for rejection.');
-                        return;
-                    }
-                    
-                    this.showAlert('warning', 'Confirm Rejection', `Reject submission for ${this.selectedSubmission.studentName}?\n\nReason: ${this.rejectReason}`, true, () => {
-                        const index = this.submissions.findIndex(s => s.id === this.selectedSubmission.id);
-                        if (index !== -1) {
-                            this.submissions[index].status = 'Cancel';
-                            this.submissions[index].rejectReason = this.rejectReason;
-                        }
-                        this.showAlert('success', 'Submission Rejected', 'Submission rejected successfully!');
-                        this.showRejectModal = false;
-                        this.showDetailModal = false;
-                        this.selectedSubmission = null;
-                        this.assignedPoints = '';
-                        this.assignedCategory = '';
-                        this.rejectReason = '';
-                        this.rejectReasonType = '';
-                        this.categoryChangeReason = '';
-                        this.categoryChanged = false;
-                    });
-                },
-                viewStudentDetail(student) {
-                    const statusText = student.approvedPoints >= 1000 ? 'PASSED ✓' : 'NOT PASSED ✗';
-                    this.showAlert('info', `Student Report: ${student.name}`, `Total Points: ${student.approvedPoints}\nStatus: ${statusText}\n\nThis will open a detailed view in production.`);
-                },
-                exportReport() {
-                    const reportData = this.filteredStudentsList.map(s => ({
-                        id: s.id,
-                        name: s.name,
-                        major: s.major,
-                        year: s.year,
-                        totalPoints: s.approvedPoints,
-                        status: s.approvedPoints >= 1000 ? 'PASSED' : 'NOT PASSED',
-                        pending: s.pending
-                    }));
-                    console.log('Exporting report:', reportData);
-                    this.showAlert('info', 'Export Report', `Report export feature will download Excel/PDF in production.\n\nTotal students: ${reportData.length}`);
-                },
-                requestCategoryManagement() {
-                    this.showPinModal = true;
-                    this.pinInput = '';
-                    this.pinError = false;
-                },
-                verifyPin() {
-                    if (this.pinInput === '123456') {
-                        this.isPinVerified = true;
-                        this.pinError = false;
-                        this.closePinModal();
-                        this.openCategoryModal();
-                    } else {
-                        this.pinError = true;
-                        this.pinInput = '';
-                        this.showAlert('error', 'Incorrect PIN', 'The PIN you entered is incorrect. Please try again.');
-                    }
-                },
-                closePinModal() {
-                    this.showPinModal = false;
-                    this.pinInput = '';
-                    this.pinError = false;
-                },
-                openCategoryModal() {
-                    this.showCategoryModal = true;
-                },
-                closeCategoryModal() {
-                    this.showCategoryModal = false;
-                    this.isPinVerified = false;
-                    this.newCategory = { mainCategoryIndex: '', name: '', points: '', description: '' };
-                    this.newMainCategory = '';
-                    // Cancel any pending edits
-                    this.categoryGroups.forEach(catGroup => {
-                        catGroup.subcategories.forEach(sub => {
-                            sub.isEditing = false;
-                        });
-                    });
-                },
-                addMainCategory() {
-                    if (!this.newMainCategory.trim()) {
-                        this.showAlert('warning', 'Invalid Input', 'Please enter main category name.');
-                        return;
-                    }
-                    
-                    if (this.categoryGroups.some(cat => cat.name.toLowerCase() === this.newMainCategory.trim().toLowerCase())) {
-                        this.showAlert('warning', 'Duplicate Category', 'Main category with this name already exists.');
-                        return;
-                    }
-                    
-                    this.categoryGroups.push({
-                        name: this.newMainCategory.trim(),
-                        subcategories: [],
-                        isEditing: false
-                    });
-                    
-                    this.showAlert('success', 'Category Added', 'Main category added successfully!');
-                    this.newMainCategory = '';
-                },
-                saveMainCategory(catIndex) {
-                    const category = this.categoryGroups[catIndex];
-                    if (!category.name.trim()) {
-                        this.showAlert('warning', 'Invalid Input', 'Category name cannot be empty.');
-                        return;
-                    }
-                    
-                    // Check for duplicates (excluding current category)
-                    const isDuplicate = this.categoryGroups.some((cat, idx) => 
-                        idx !== catIndex && cat.name.toLowerCase() === category.name.trim().toLowerCase()
-                    );
-                    
-                    if (isDuplicate) {
-                        this.showAlert('warning', 'Duplicate Category', 'A category with this name already exists.');
-                        return;
-                    }
-                    
-                    category.name = category.name.trim();
-                    category.isEditing = false;
-                    this.showAlert('success', 'Category Updated', 'Main category updated successfully!');
-                },
-                deleteMainCategory(catIndex) {
-                    const category = this.categoryGroups[catIndex];
-                    const subcatCount = category.subcategories.length;
-                    
-                    let confirmMsg = `Are you sure you want to delete "${category.name}"?`;
-                    if (subcatCount > 0) {
-                        confirmMsg += `\n\nThis category has ${subcatCount} subcategory(ies). All subcategories will also be deleted.`;
-                    }
-                    
-                    this.showAlert('warning', 'Delete Main Category', confirmMsg, true, () => {
-                        this.categoryGroups.splice(catIndex, 1);
-                        this.showAlert('success', 'Category Deleted', 'Main category deleted successfully!');
-                    });
-                },
-                addSubcategory() {
-                    if (!this.newCategory.mainCategoryIndex || !this.newCategory.name || !this.newCategory.points || !this.newCategory.description) {
-                        this.showAlert('warning', 'Missing Fields', 'Please fill in all fields');
-                        return;
-                    }
-                    
-                    const catIndex = parseInt(this.newCategory.mainCategoryIndex);
-                    const mainCategory = this.categoryGroups[catIndex];
-                    
-                    if (mainCategory.subcategories.some(sub => sub.name.toLowerCase() === this.newCategory.name.toLowerCase())) {
-                        this.showAlert('warning', 'Duplicate Subcategory', 'Subcategory with this name already exists in this main category');
-                        return;
-                    }
-                    
-                    mainCategory.subcategories.push({
-                        name: this.newCategory.name,
-                        points: parseInt(this.newCategory.points),
-                        description: this.newCategory.description,
-                        isEditing: false
-                    });
-                    
-                    this.showAlert('success', 'Subcategory Added', 'Subcategory added successfully!');
-                    this.newCategory = { mainCategoryIndex: '', name: '', points: '', description: '' };
-                },
-                editSubcategory(catIndex, subIndex) {
-                    const subcat = this.categoryGroups[catIndex].subcategories[subIndex];
-                    subcat.originalName = subcat.name;
-                    subcat.originalPoints = subcat.points;
-                    subcat.originalDescription = subcat.description;
-                    subcat.isEditing = true;
-                },
-                saveSubcategory(catIndex, subIndex) {
-                    const subcat = this.categoryGroups[catIndex].subcategories[subIndex];
-                    
-                    if (!subcat.name.trim() || !subcat.points || !subcat.description.trim()) {
-                        this.showAlert('warning', 'Missing Fields', 'All fields are required');
-                        return;
-                    }
-                    
-                    if (subcat.points <= 0) {
-                        this.showAlert('warning', 'Invalid Points', 'Points must be greater than 0');
-                        return;
-                    }
-                    
-                    // Check duplicates within same main category
-                    const mainCategory = this.categoryGroups[catIndex];
-                    const duplicate = mainCategory.subcategories.some((sub, idx) => 
-                        idx !== subIndex && sub.name.toLowerCase() === subcat.name.trim().toLowerCase()
-                    );
-                    
-                    if (duplicate) {
-                        this.showAlert('warning', 'Duplicate Subcategory', 'A subcategory with this name already exists in this main category');
-                        return;
-                    }
-                    
-                    subcat.isEditing = false;
-                    this.showAlert('success', 'Subcategory Updated', 'Subcategory updated successfully!');
-                },
-                cancelEditSubcategory(catIndex, subIndex) {
-                    const subcat = this.categoryGroups[catIndex].subcategories[subIndex];
-                    if (subcat.originalName) {
-                        subcat.name = subcat.originalName;
-                        subcat.points = subcat.originalPoints;
-                        subcat.description = subcat.originalDescription;
-                    }
-                    subcat.isEditing = false;
-                },
-                deleteSubcategory(catIndex, subIndex) {
-                    const mainCategory = this.categoryGroups[catIndex];
-                    const subcat = mainCategory.subcategories[subIndex];
-                    
-                    this.showAlert('warning', 'Delete Subcategory', `Delete subcategory "${subcat.name}"?\n\nThis action cannot be undone.`, true, () => {
-                        mainCategory.subcategories.splice(subIndex, 1);
-                        this.showAlert('success', 'Subcategory Deleted', 'Subcategory deleted successfully!');
-                    });
-                },
-                closeModal() {
-                    this.showDetailModal = false;
-                    this.showRejectModal = false;
-                    this.selectedSubmission = null;
-                    this.assignedPoints = '';
-                    this.assignedCategory = '';
-                    this.rejectReason = '';
-                    this.rejectReasonType = '';
-                    this.categoryChangeReason = '';
-                    this.categoryChanged = false;
+                })
+                .catch(error => {
+                    console.error(error);
+                    this.showAlert('error', 'Error', error.message);
+                });
+            },
+
+            // --- ACTION: REJECT SUBMISSION ---
+            handleRejectConfirm() {
+                if (!this.rejectReason.trim()) {
+                    this.showAlert('warning', 'Missing Reason', 'Please provide a reason.');
+                    return;
                 }
-            }
+
+                const url = `/admin/submissions/${this.selectedSubmission.id}/reject`;
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        rejectReason: this.rejectReason
+                    })
+                })
+                .then(async response => {
+                    if (response.ok) {
+                        this.showRejectModal = false;
+                        this.showAlert('success', 'Rejected', 'Submission rejected. Page will reload.');
+                        setTimeout(() => window.location.reload(), 1500);
+                        this.closeModal();
+                    } else {
+                        throw new Error('Failed to reject submission');
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                    this.showAlert('error', 'Error', error.message);
+                });
+            },
+
+            // --- UI HELPERS ---
+
+            viewDetail(submission) {
+                this.selectedSubmission = submission;
+                
+                // Reset form assign category
+                this.assignedMainCategory = '';
+                this.assignedSubcategory = '';
+                this.assignedAvailableSubcategories = [];
+
+                // Coba otomatis isi dropdown berdasarkan data submission
+                // Kita cari index kategori yang namanya sama dengan data submission
+                if (submission.mainCategory) {
+                    const mainIndex = this.categoryGroups.findIndex(c => c.name === submission.mainCategory);
+                    if (mainIndex !== -1) {
+                        this.assignedMainCategory = mainIndex;
+                        this.assignedAvailableSubcategories = this.categoryGroups[mainIndex].subcategories;
+                        
+                        const subIndex = this.assignedAvailableSubcategories.findIndex(s => s.name === submission.subcategory);
+                        if (subIndex !== -1) {
+                            this.assignedSubcategory = subIndex;
+                        }
+                    }
+                }
+
+                this.showDetailModal = true;
+            },
+
+            handleApprove() {
+                // Validasi sebelum buka modal konfirmasi
+                if (this.assignedMainCategory === '' || this.assignedSubcategory === '') {
+                    this.showAlert('warning', 'Incomplete', 'Please verify/select the correct Category and Subcategory.');
+                    return;
+                }
+
+                // Siapkan data untuk modal konfirmasi
+                const mainCat = this.categoryGroups[this.assignedMainCategory];
+                const subCat = mainCat.subcategories[this.assignedSubcategory];
+
+                this.approveModalMainCategory = mainCat.name;
+                this.approveModalSubcategory = subCat.name;
+                this.approveModalPoints = subCat.points;
+                
+                this.showApproveModal = true;
+            },
+            
+            updateAssignedSubcategories() {
+                if (this.assignedMainCategory !== '') {
+                    this.assignedAvailableSubcategories = this.categoryGroups[this.assignedMainCategory].subcategories;
+                    this.assignedSubcategory = '';
+                } else {
+                    this.assignedAvailableSubcategories = [];
+                    this.assignedSubcategory = '';
+                }
+            },
+
+            // --- LOGOUT FUNCTION (YANG SUDAH DIPERBAIKI) ---
+            confirmLogout() {
+                fetch('{{ route("logout") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(() => {
+                    window.location.href = '/login';
+                })
+                .catch(error => {
+                    console.error('Logout error:', error);
+                    window.location.href = '/login';
+                });
+            },
+
+            // --- MODAL & ALERT UTILS ---
+            closeModal() {
+                this.showDetailModal = false;
+                this.showRejectModal = false;
+                this.showApproveModal = false;
+                this.selectedSubmission = null;
+                this.rejectReason = '';
+                this.rejectReasonType = '';
+            },
+            
+            showAlert(type, title, message, hasCancel = false, callback = null) {
+                this.alertType = type;
+                this.alertTitle = title;
+                this.alertMessage = message;
+                this.alertHasCancel = hasCancel;
+                this.alertCallback = callback;
+                this.showAlertModal = true;
+            },
+            
+            closeAlertModal(confirmed) {
+                this.showAlertModal = false;
+                if (confirmed && this.alertCallback) {
+                    this.alertCallback();
+                }
+                this.alertCallback = null;
+            },
+
+            // ... (Fungsi Category Management & Pin bisa dibiarkan/dicopy dari sebelumnya) ...
+            requestCategoryManagement() { this.showPinModal = true; this.pinInput = ''; this.pinError = false; },
+            closePinModal() { this.showPinModal = false; },
+            verifyPin() {
+                if (this.pinInput === '123456') {
+                    this.isPinVerified = true;
+                    this.showPinModal = false;
+                    this.showCategoryModal = true;
+                } else {
+                    this.pinError = true;
+                }
+            },
+            closeCategoryModal() { this.showCategoryModal = false; },
+            
+            // Placeholder fungsi kategori (karena belum ada Controller-nya)
+            addMainCategory() { this.showAlert('info', 'Demo', 'Category management will be connected to database later.'); },
+            saveMainCategory() {},
+            deleteMainCategory() {},
+            addSubcategory() {},
+            editSubcategory() {},
+            saveSubcategory() {},
+            deleteSubcategory() {},
+            cancelEditSubcategory() {}
         }
-    </script>
+    }
+</script>
 </body>
 </html>

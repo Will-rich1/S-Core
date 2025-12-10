@@ -4,34 +4,39 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash; // Tambahkan ini untuk hashing password
 
 class AuthController extends Controller
 {
-    // --- FUNGSI 1: MENAMPILKAN FORM LOGIN (INI YANG HILANG TADI) ---
     public function showLoginForm(Request $request)
     {
-        $request->session()->regenerateToken();
+        // Jika user sudah login, langsung lempar ke dashboard masing-masing
+        if (Auth::check()) {
+            if (Auth::user()->role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            }
+            return redirect()->route('dashboard');
+        }
+
         return view('login');
     }
 
-    // --- FUNGSI 2: MEMPROSES LOGIN (DENGAN JEBAKAN DIAGNOSA) ---
     public function login(Request $request)
     {
-        // 1. Validasi Input
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        // 2. Cek apakah Auth Berhasil di Database?
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
+            // Redirect sesuai role
             if (Auth::user()->role === 'admin') {
-                return redirect()->intended('/admin');
+                return redirect()->route('admin.dashboard');
             }
 
-            return redirect()->intended('/dashboard');
+            return redirect()->route('dashboard');
         }
 
         return back()->withErrors([
@@ -39,12 +44,27 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    // --- FUNGSI 3: LOGOUT ---
     public function logout(Request $request)
     {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/login');
+    }
+
+    // --- TAMBAHAN: FITUR GANTI PASSWORD ---
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|current_password', // Validasi password lama
+            'new_password' => 'required|min:8|confirmed',      // Validasi password baru
+        ]);
+
+        // Update password di database
+        $request->user()->update([
+            'password' => Hash::make($request->new_password),
+        ]);
+
+        return back()->with('success', 'Password berhasil diubah!');
     }
 }

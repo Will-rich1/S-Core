@@ -6,19 +6,30 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->string('student_id', 20)->nullable()->unique(); // NIM
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('role', ['student', 'admin'])->default('student');
+            
+            // Data Mahasiswa
+            $table->enum('major', ['STI', 'BD', 'KWU'])->nullable();
+            $table->string('year', 4)->nullable(); // Angkatan
+            
+            $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
+
+            // --- PERBAIKAN DI SINI (INDEX DIPISAH) ---
+            // Supaya filter per kolom lebih cepat
+            $table->index('student_id');
+            $table->index('role');
+            $table->index('year');
+            $table->index('major');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
@@ -37,9 +48,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('users');

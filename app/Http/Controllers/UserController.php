@@ -15,9 +15,9 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6',
-            'student_id' => 'required|string',
+            'student_id' => 'required|string|unique:users', // Tambahkan unique
             'major' => 'required|in:STI,BD,KWU',
-            'batch_year' => 'required|integer',
+            'batch_year' => 'required|integer', // Di form namanya batch_year
         ]);
 
         User::create([
@@ -27,7 +27,7 @@ class UserController extends Controller
             'role' => 'student',
             'student_id' => $validated['student_id'],
             'major' => $validated['major'],
-            'batch_year' => $validated['batch_year'],
+            'year' => $validated['batch_year'], // Petakan ke kolom 'year' di DB
         ]);
 
         return redirect()->back()->with('success', 'Student account created successfully!');
@@ -39,7 +39,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
-            'password' => 'required|min:6|confirmed',
+            'password' => 'required|min:6|confirmed', // Pastikan input confirm password ada
         ]);
 
         User::create([
@@ -49,7 +49,7 @@ class UserController extends Controller
             'role' => 'admin',
             'student_id' => null,
             'major' => null,
-            'batch_year' => null,
+            'year' => null,
         ]);
 
         return redirect()->back()->with('success', 'Admin account created successfully!');
@@ -58,9 +58,8 @@ class UserController extends Controller
     // 3. Import Students dari CSV
     public function importStudents(Request $request)
     {
-        // Validasi file
         $request->validate([
-            'csv_file' => 'required|file|mimes:csv,txt|max:2048', // Max 2MB
+            'csv_file' => 'required|file|mimes:csv,txt|max:2048',
         ]);
 
         $file = $request->file('csv_file');
@@ -77,25 +76,27 @@ class UserController extends Controller
         while (($row = fgetcsv($handle, 1000, ',')) !== false) {
             $lineNumber++;
             
+            // Skip header row if exists (optional logic, simple check if row[0] is 'name')
+            if ($lineNumber == 1 && strtolower(trim($row[0])) == 'name') {
+                continue;
+            }
+
             // Struktur CSV: name, email, password, student_id, major, batch_year
-            // Pastikan ada 6 kolom
             if (count($row) < 6) {
-                $errors[] = "Line $lineNumber: Incomplete data (requires 6 columns)";
+                $errors[] = "Line $lineNumber: Incomplete data";
                 continue;
             }
 
             $email = trim($row[1]);
             $major = trim($row[4]);
             
-            // Cek apakah email sudah ada
             if (User::where('email', $email)->exists()) {
                 $errors[] = "Line $lineNumber: Email '$email' already exists";
                 continue;
             }
 
-            // Validasi major
             if (!in_array($major, ['STI', 'BD', 'KWU'])) {
-                $errors[] = "Line $lineNumber: Invalid major '$major' (must be STI, BD, or KWU)";
+                $errors[] = "Line $lineNumber: Invalid major '$major'";
                 continue;
             }
 
@@ -107,7 +108,7 @@ class UserController extends Controller
                     'role'       => 'student',
                     'student_id' => trim($row[3]),
                     'major'      => $major,
-                    'batch_year' => (int)trim($row[5]),
+                    'year'       => (int)trim($row[5]), // Map ke 'year'
                 ]);
                 $count++;
             } catch (\Exception $e) {
@@ -118,15 +119,9 @@ class UserController extends Controller
 
         fclose($handle);
 
-        $message = "Successfully imported $count student account(s)";
+        $message = "Successfully imported $count student(s).";
         if (count($errors) > 0) {
-            $message .= " with " . count($errors) . " error(s). ";
-            $message .= "Errors: " . implode(', ', array_slice($errors, 0, 5));
-            if (count($errors) > 5) {
-                $message .= " and " . (count($errors) - 5) . " more...";
-            }
-        } else {
-            $message .= "!";
+            $message .= " Errors: " . implode(', ', array_slice($errors, 0, 3)) . (count($errors) > 3 ? "..." : "");
         }
 
         return back()->with('success', $message);
