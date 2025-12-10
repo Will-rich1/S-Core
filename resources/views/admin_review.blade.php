@@ -1199,7 +1199,7 @@
                             </div>
                             <p class="text-sm text-blue-700 mb-2">The CSV file must have the following columns (in order):</p>
                             <code class="text-xs bg-blue-100 px-2 py-1 rounded block mb-2">name,email,password,student_id,major,batch_year</code>
-                            <p class="text-xs text-blue-600">Example: <code class="bg-blue-100 px-1 rounded">John Doe,john@example.com,password123,2021001,STI,2021</code></p>
+                            <p class="text-xs text-blue-600">Example: <code class="bg-blue-100 px-1 rounded">John Doe,john.doe@itbss.ac.id,password123,2021001,STI,2021</code></p>
                             <div class="mt-2 pt-2 border-t border-blue-200">
                                 <p class="text-xs text-blue-600"><strong>Notes:</strong></p>
                                 <ul class="text-xs text-blue-600 list-disc ml-4 mt-1">
