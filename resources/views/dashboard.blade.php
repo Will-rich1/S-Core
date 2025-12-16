@@ -252,25 +252,50 @@
                     <template x-if="selectedActivity">
                         <div class="flex w-full h-full">
                             <!-- Left Column - PDF Viewer -->
-                            <div class="w-1/2 bg-gray-100 border-r overflow-auto p-6">
+                            <div class="w-1/2 bg-gray-100 border-r overflow-hidden p-6">
                                 <div class="bg-white rounded-lg shadow-sm h-full flex flex-col">
                                     <div class="bg-gray-800 text-white px-4 py-3 rounded-t-lg flex items-center justify-between">
                                         <span class="text-sm font-medium">Certificate/Evidence</span>
-                                        <span class="text-xs text-gray-300">certificate.pdf</span>
+                                        <span class="text-xs text-gray-300" x-text="selectedSubmission ? (selectedSubmission.certificate || 'document.pdf') : ''"></span>
                                     </div>
-                                    <div class="flex-1 flex items-center justify-center p-4 bg-gray-50">
-                                        <div class="w-full h-full border-2 border-dashed border-gray-300 rounded flex flex-col items-center justify-center">
-                                            <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                            </svg>
-                                            <p class="text-gray-500 text-sm mb-2">PDF Certificate Preview</p>
-                                            <p class="text-gray-400 text-xs">certificate.pdf</p>
-                                            <p class="text-gray-400 text-xs mt-4">In production, this will display the actual PDF file</p>
-                                        </div>
+
+                                    <div class="flex-1 bg-gray-50 relative h-full overflow-hidden">
+                                        <template x-if="!selectedSubmission">
+                                            <div class="flex items-center justify-center h-full text-gray-400">
+                                                pilih submission...
+                                            </div>
+                                        </template>
+
+                                        <template x-if="selectedSubmission">
+                                            <div class="h-full w-full">
+                                                <template x-if="selectedSubmission.file_url">
+                                                    <div class="h-full flex flex-col bg-gray-200">
+                                                        <iframe 
+                                                            :src="selectedSubmission.file_url" 
+                                                            class="w-full flex-1" 
+                                                            style="border: none;" 
+                                                            type="application/pdf">
+                                                        </iframe>
+                                                        
+                                                        <div class="p-2 bg-white text-center border-t">
+                                                            <a :href="selectedSubmission.file_url" target="_blank" class="text-blue-600 hover:underline text-sm font-semibold">
+                                                                Download / Buka di Tab Baru
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </template>
+
+                                                <template x-if="!selectedSubmission.file_url">
+                                                    <div class="flex items-center justify-center h-full text-red-500 flex-col gap-2">
+                                                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                                        <p>File PDF tidak ditemukan di database.</p>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
                                     </div>
                                 </div>
                             </div>
-
                             <!-- Right Column - Details -->
                             <div class="w-1/2 flex flex-col">
                                 <div class="flex-1 overflow-y-auto p-6">
@@ -735,18 +760,18 @@
                 <div class="bg-white rounded-lg shadow p-4 mb-4">
                     <div class="flex flex-wrap items-center gap-3">
                         <select x-model="statusFilter" class="border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Status</option>
-                            <option value="Approved">Approved</option>
+                            <option value="">All Status</option> <option value="Approved">Approved</option>
                             <option value="Waiting">Waiting</option>
                             <option value="Rejected">Rejected</option>
                         </select>
+
                         <select x-model="categoryFilter" class="border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Categories</option>
-                            <template x-for="cat in uniqueCategories" :key="cat">
+                            <option value="">All Categories</option> <template x-for="cat in uniqueCategories" :key="cat">
                                 <option :value="cat" x-text="cat"></option>
                             </template>
                         </select>
-                        <input type="text" x-model="searchQuery" placeholder="Search title, description, or category..." class="border rounded px-4 py-2 text-sm flex-1 min-w-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500" />
+
+                        <input type="text" x-model="searchQuery" placeholder="Search title..." class="border rounded px-4 py-2 text-sm flex-1 min-w-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     </div>
                 </div>
 
@@ -766,7 +791,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <template x-for="activity in filteredActivities" :key="activity.judul + activity.waktu">
+                            <template x-for="activity in filteredActivities" :key="activity.id">
                                 <tr class="border-b hover:bg-gray-50">
                                     <td class="py-3 px-4 text-sm" x-text="activity.mainCategory"></td>
                                     <td class="py-3 px-4 text-sm" x-text="activity.subcategory"></td>
@@ -1125,87 +1150,58 @@
             </div>
         </div>
     </div>
-
     <script>
     function dashboardData() {
         return {
             activeMenu: 'Dashboard',
             isSidebarOpen: false,
             
-            // --- DATA DINAMIS DARI CONTROLLER ---
-            
-            // 1. Data Aktivitas (Ambil dari $activities controller)
+            // --- DATA DARI CONTROLLER ---
             activities: @json($activities), 
-
-            // 2. Data Kategori untuk Dropdown (Ambil dari $categoryGroups controller)
             categoryGroups: @json($categoryGroups),
-
-            // 3. Statistik (Ambil dari $stats controller)
             stats: @json($stats),
 
-            // --- END DATA DINAMIS ---
-
-            // Variable Form & UI (Biarkan default kosong)
-            showLogoutModal: false,
-            showAddModal: false,
-            showEditModal: false,
-            showViewModal: false,
-            showDeleteModal: false,
-            showComplaintModal: false,
-            appealFormOpen: false,
-            appealSubmissionId: null,
-            appealMessage: '',
-            selectedActivity: null,
-            statusFilter: '',
+            // --- UI VARS ---
+            showLogoutModal: false, showAddModal: false, showEditModal: false,
+            showViewModal: false, showDeleteModal: false, showComplaintModal: false,
+            
+            // --- FILTER VARS (Default Kosong = All) ---
+            statusFilter: '', 
             categoryFilter: '',
             searchQuery: '',
-            dateValidationError: '',
-            formData: {
-                mainCategory: '',
-                subcategory: '',
-                activityTitle: '',
-                description: '',
-                activityDate: '',
-                fileName: '',
-            },
-            availableSubcategories: [],
-            complaintData: { type: '', explanation: '', fileName: '' },
-            passwordData: { currentPassword: '', newPassword: '', confirmPassword: '' },
-            showCurrentPassword: false,
-            showNewPassword: false,
-            showConfirmPassword: false,
-            passwordError: '',
-            passwordSuccess: '',
-            showAlertModal: false,
-            alertType: 'info',
-            alertTitle: '',
-            alertMessage: '',
-            alertHasCancel: false,
-            alertCallback: null,
-
-            // --- COMPUTED PROPERTIES (Filter & Helper) ---
             
+            // --- FORM VARS ---
+            dateValidationError: '',
+            formData: { mainCategory: '', subcategory: '', activityTitle: '', description: '', activityDate: '', fileName: '' },
+            availableSubcategories: [],
+            
+            // --- ACTION VARS ---
+            selectedActivity: null, 
+            appealFormOpen: false, appealSubmissionId: null, appealMessage: '',
+            complaintData: { type: '', explanation: '', fileName: '' },
+            
+            // --- PASSWORD & ALERT VARS ---
+            passwordData: { currentPassword: '', newPassword: '', confirmPassword: '' },
+            showCurrentPassword: false, showNewPassword: false, showConfirmPassword: false,
+            passwordError: '', passwordSuccess: '',
+            showAlertModal: false, alertType: 'info', alertTitle: '', alertMessage: '', alertHasCancel: false, alertCallback: null,
+
+            // --- COMPUTED ---
             get uniqueCategories() {
                 const categorySet = new Set();
-                this.activities.forEach(a => {
-                    if (a.mainCategory) categorySet.add(a.mainCategory);
-                });
+                this.activities.forEach(a => { if (a.mainCategory) categorySet.add(a.mainCategory); });
                 return Array.from(categorySet).sort();
             },
 
-            get maxDate() {
-                const today = new Date();
-                return today.toISOString().split('T')[0]; // Batas hari ini
-            },
+            get maxDate() { return new Date().toISOString().split('T')[0]; },
 
-            // Stats sudah dikirim dari Controller, jadi tidak perlu dihitung ulang di JS
-            // Tapi kalau mau filter frontend tetap jalan, biarkan computed filteredActivities
-
+            // --- FILTER LOGIC (ANTI CRASH & SUPPORT ALL) ---
             get filteredActivities() {
                 return this.activities.filter(activity => {
+                    const searchLower = (this.searchQuery || '').toLowerCase();
                     const matchesSearch = this.searchQuery === '' || 
-                        activity.judul.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                        activity.keterangan.toLowerCase().includes(this.searchQuery.toLowerCase());
+                        (activity.judul && activity.judul.toLowerCase().includes(searchLower)) ||
+                        (activity.keterangan && activity.keterangan.toLowerCase().includes(searchLower));
                     
                     const matchesStatus = this.statusFilter === '' || activity.status === this.statusFilter;
                     const matchesCategory = this.categoryFilter === '' || activity.mainCategory === this.categoryFilter;
@@ -1214,163 +1210,212 @@
                 });
             },
 
-            // --- FUNGSI LOGIC ---
-
-            getCategoryTotal(subcategories, field) {
-                // Fungsi ini menghitung total poin per kategori untuk tabel Mandatory
-                if (field === 'approvedCount') {
-                    return subcategories.reduce((sum, sub) => sum + (sub.approvedCount || 0), 0);
-                } else if (field === 'totalPoints') {
-                    return subcategories.reduce((sum, sub) => sum + ((sub.approvedCount || 0) * sub.points), 0);
-                }
-                return 0;
-            },
-
+            // --- HELPER FUNCTIONS ---
             updateAvailableSubcategories() {
                 if (this.formData.mainCategory !== '') {
-                    // Karena mainCategory sekarang adalah Index Array, ini aman
-                    const categoryIndex = parseInt(this.formData.mainCategory);
-                    if (this.categoryGroups[categoryIndex]) {
-                        this.availableSubcategories = this.categoryGroups[categoryIndex].subcategories;
-                    }
+                    // mainCategory di formData menyimpan INDEX array
+                    const idx = parseInt(this.formData.mainCategory);
+                    if (this.categoryGroups[idx]) this.availableSubcategories = this.categoryGroups[idx].subcategories;
                     this.formData.subcategory = '';
                 } else {
-                    this.availableSubcategories = [];
-                    this.formData.subcategory = '';
+                    this.availableSubcategories = []; this.formData.subcategory = '';
                 }
             },
 
             validateActivityDate(date) {
                 if (!date) return false;
-                
-                // Fix timezone issue by parsing date manually
                 const parts = date.split('-');
-                const activityDate = new Date(parts[0], parts[1] - 1, parts[2]);
-                
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                
-                const oneMonthAgo = new Date(today);
-                oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-                
-                if (activityDate > today) {
-                    this.dateValidationError = 'Activity date cannot be in the future';
-                    return false;
-                }
-                if (activityDate < oneMonthAgo) {
-                    this.dateValidationError = 'Activity date cannot be more than 1 month ago';
-                    return false;
-                }
-                this.dateValidationError = '';
-                return true;
+                const d = new Date(parts[0], parts[1]-1, parts[2]);
+                const today = new Date(); today.setHours(0,0,0,0);
+                const limit = new Date(today); limit.setMonth(limit.getMonth()-1);
+                if (d > today) { this.dateValidationError = 'Future date not allowed'; return false; }
+                if (d < limit) { this.dateValidationError = 'Date > 1 month old'; return false; }
+                this.dateValidationError = ''; return true;
             },
 
-            // FUNGSI SIMPAN (SUBMIT) KE DATABASE
+            handleFileSelect(e) { if(e.target.files[0]) this.formData.fileName = e.target.files[0].name; },
+            handleComplaintFileSelect(e) { if(e.target.files[0]) this.complaintData.fileName = e.target.files[0].name; },
+
+            // --- CRUD ACTIONS ---
+
+            // 1. SAVE NEW (Store)
             saveActivity() {
-                // 1. Validasi Input Kosong
                 if (!this.formData.mainCategory || !this.formData.subcategory || !this.formData.activityTitle || !this.formData.description || !this.formData.activityDate || !this.formData.fileName) {
-                    this.showAlert('warning', 'Missing Information', 'Please fill all required fields and upload a certificate');
-                    return;
+                    this.showAlert('warning', 'Missing Info', 'Fill all fields'); return;
                 }
-    
-                // 2. Validasi Tanggal (PENTING: Pakai fungsi validasi yang baru kita perbaiki tadi)
                 if (!this.validateActivityDate(this.formData.activityDate)) {
-                    this.showAlert('warning', 'Invalid Date', this.dateValidationError);
-                    return;
+                    this.showAlert('warning', 'Invalid Date', this.dateValidationError); return;
                 }
 
-                // 3. Siapkan Data
                 let data = new FormData();
                 data.append('title', this.formData.activityTitle);
                 data.append('description', this.formData.description);
                 data.append('activity_date', this.formData.activityDate);
-    
-                // Ambil Nama Kategori dari index array
-                const catIndex = this.formData.mainCategory;
-                data.append('mainCategory', this.categoryGroups[catIndex].name); 
+                // Ambil nama kategori berdasarkan index
+                data.append('mainCategory', this.categoryGroups[this.formData.mainCategory].name); 
                 data.append('subcategory', this.formData.subcategory);
-    
-                // Ambil file dari input HTML
                 data.append('certificate_file', this.$refs.fileInput.files[0]);
                 data.append('_token', '{{ csrf_token() }}');
 
-                // 4. Kirim ke Server
-                fetch('{{ route("submissions.store") }}', {
-                    method: 'POST',
-                    headers: { 'Accept': 'application/json' },
-                    body: data
-                })
-                .then(async response => {
-                    const json = await response.json();
-                    if (!response.ok) throw new Error(json.message || 'Error submitting');
-                    return json;
-                })
-                .then(result => {
-                    // --- SUKSES ---
-                    this.showAlert('success', 'Submission Successful', 'Activity submitted! Page will reload.');
-        
-                    // 5. RELOAD HALAMAN (Supaya data baru muncul di tabel)
-                    setTimeout(() => {
-                        window.location.reload(); 
-                    }, 1500);
-                    
+                fetch('{{ route("submissions.store") }}', { method: 'POST', headers: {'Accept': 'application/json'}, body: data })
+                .then(async res => { const json = await res.json(); if (!res.ok) throw new Error(json.message); return json; })
+                .then(() => {
+                    this.showAlert('success', 'Saved', 'Reloading...');
+                    setTimeout(() => window.location.reload(), 1500);
                     this.closeModal();
                 })
-                .catch(error => {
-                    console.error(error);
-                    this.showAlert('error', 'Submission Failed', error.message);
-                });
+                .catch(err => this.showAlert('error', 'Failed', err.message));
             },
 
-            // --- FUNGSI LAINNYA (Logout, Modal, dll - TETAP SAMA) ---
-            confirmLogout() {
-                fetch('{{ route("logout") }}', {
+            // 2. OPEN EDIT MODAL (Pre-fill Data)
+            openEditModal(activity) {
+                this.selectedActivity = activity;
+                this.showEditModal = true;
+
+                // Cari index kategori berdasarkan nama yang ada di activity
+                let catIndex = this.categoryGroups.findIndex(c => c.name === activity.mainCategory);
+                if (catIndex === -1) catIndex = '';
+
+                // Masukkan data lama ke form
+                this.formData = {
+                    mainCategory: catIndex,
+                    subcategory: '', // Nanti diisi setelah updateAvailableSubcategories
+                    activityTitle: activity.judul,
+                    description: activity.keterangan,
+                    // Parse tanggal ke format YYYY-MM-DD
+                    activityDate: activity.waktu ? new Date(activity.waktu).toISOString().split('T')[0] : '',
+                    fileName: '' 
+                };
+
+                // Generate dropdown subkategori
+                this.updateAvailableSubcategories();
+
+                // Set subkategori terpilih (tunggu sebentar biar dropdown render)
+                setTimeout(() => {
+                    this.formData.subcategory = activity.subcategory;
+                    // Kalau tanggal di database formatnya beda, sesuaikan logic di atas
+                    // activity.waktu di view controller biasanya format d M Y H:i, 
+                    // sebaiknya controller kirim raw date juga (activityDate)
+                }, 50);
+            },
+
+            // 3. UPDATE EXISTING (Update)
+            updateActivity() {
+                if (this.formData.mainCategory === '' || !this.formData.subcategory || !this.formData.activityTitle || !this.formData.description || !this.formData.activityDate) {
+                    this.showAlert('warning', 'Missing Info', 'Fill all required fields'); return;
+                }
+
+                let data = new FormData();
+                data.append('_method', 'PUT'); // Method Spoofing untuk Laravel
+                data.append('title', this.formData.activityTitle);
+                data.append('description', this.formData.description);
+                data.append('activity_date', this.formData.activityDate);
+                
+                const catIndex = this.formData.mainCategory;
+                data.append('mainCategory', this.categoryGroups[catIndex].name); 
+                data.append('subcategory', this.formData.subcategory);
+                
+                // File opsional saat update
+                if (this.$refs.fileInput && this.$refs.fileInput.files.length > 0) {
+                    data.append('certificate_file', this.$refs.fileInput.files[0]);
+                }
+                
+                data.append('_token', '{{ csrf_token() }}');
+
+                fetch(`/submissions/${this.selectedActivity.id}`, { 
+                    method: 'POST', 
+                    headers: { 'Accept': 'application/json' }, 
+                    body: data 
+                })
+                .then(async res => { const json = await res.json(); if (!res.ok) throw new Error(json.message); return json; })
+                .then(() => {
+                    this.showAlert('success', 'Updated', 'Activity updated successfully!');
+                    setTimeout(() => window.location.reload(), 1500);
+                    this.closeModal();
+                })
+                .catch(err => this.showAlert('error', 'Update Failed', err.message));
+            },
+
+            // 4. DELETE ACTIVITY
+            openDeleteModal(a) { this.selectedActivity = a; this.showDeleteModal = true; },
+            
+            confirmDelete() {
+                if (!this.selectedActivity) return;
+                fetch(`/submissions/${this.selectedActivity.id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(async res => { const json = await res.json(); if (!res.ok) throw new Error(json.message); return json; })
+                .then(() => {
+                    this.showAlert('success', 'Deleted', 'Submission deleted.');
+                    setTimeout(() => window.location.reload(), 1500);
+                    this.showDeleteModal = false;
+                })
+                .catch(err => this.showAlert('error', 'Delete Failed', err.message));
+            },
+
+            // 5. COMPLAINT / APPEAL
+            openComplaintModal(a) { this.selectedActivity = a; this.showComplaintModal = true; },
+            
+            submitComplaint() {
+                if (!this.complaintData.type || !this.complaintData.explanation) {
+                    this.showAlert('warning', 'Missing Info', 'Please fill type and explanation'); return;
+                }
+
+                fetch('{{ route("submissions.complaint") }}', {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        submission_id: this.selectedActivity.id,
+                        type: this.complaintData.type,
+                        explanation: this.complaintData.explanation
+                    })
                 })
-                .then(() => window.location.href = '/login')
-                .catch(() => window.location.href = '/login');
+                .then(async res => { const json = await res.json(); if (!res.ok) throw new Error(json.message); return json; })
+                .then(() => {
+                    this.showAlert('success', 'Submitted', 'Complaint sent to admin.');
+                    this.showComplaintModal = false;
+                })
+                .catch(err => this.showAlert('error', 'Error', err.message));
             },
 
-            handleFileSelect(event) {
-                const file = event.target.files[0];
-                if (file) this.formData.fileName = file.name;
-            },
+            // --- UI HELPERS ---
+            confirmLogout() { fetch('{{ route("logout") }}', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' } }).then(() => window.location.href = '/login'); },
+            openViewModal(a) { this.selectedActivity = a; this.showViewModal = true; },
             
-            // ... Copy sisa fungsi modal (openEditModal, openViewModal, dll) dari kode lamamu ...
-            // Pastikan tutup kurung kurawal fungsi dashboardData() ada di akhir
-            closeModal() {
-                this.showAddModal = false;
-                this.showEditModal = false;
-                this.showViewModal = false;
-                this.showDeleteModal = false;
-                this.showComplaintModal = false;
-                this.selectedActivity = null;
-                this.dateValidationError = '';
+            closeModal() { 
+                this.showAddModal = false; this.showEditModal = false; this.showViewModal = false; 
+                this.showDeleteModal = false; this.showComplaintModal = false; this.selectedActivity = null; 
                 this.formData = { mainCategory: '', subcategory: '', activityTitle: '', description: '', activityDate: '', fileName: '' };
                 this.availableSubcategories = [];
             },
             
-            showAlert(type, title, message, hasCancel = false, callback = null) {
-                this.alertType = type;
-                this.alertTitle = title;
-                this.alertMessage = message;
-                this.alertHasCancel = hasCancel;
-                this.alertCallback = callback;
-                this.showAlertModal = true;
+            showAlert(type, title, msg, cancel=false, cb=null) { 
+                this.alertType=type; this.alertTitle=title; this.alertMessage=msg; 
+                this.alertHasCancel=cancel; this.alertCallback=cb; this.showAlertModal=true; 
             },
             
-            closeAlertModal(confirmed) {
-                this.showAlertModal = false;
-                if (confirmed && this.alertCallback) this.alertCallback();
-                this.alertCallback = null;
+            closeAlertModal(conf) { 
+                this.showAlertModal=false; if(conf && this.alertCallback) this.alertCallback(); 
+            },
+            
+            getCategoryTotal(sub, f) { 
+                if(f==='approvedCount') return sub.reduce((s,i)=>s+(i.approvedCount||0),0);
+                return sub.reduce((s,i)=>s+((i.approvedCount||0)*i.points),0);
             }
         }
     }
 </script>
+    
+
+    
 </body>
 </html>

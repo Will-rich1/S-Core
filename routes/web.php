@@ -27,16 +27,24 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/change-password', [AuthController::class, 'changePassword'])->name('password.change');
 
     // --- AREA MAHASISWA ---
-    // (Pengecekan role dilakukan di dalam DashboardController)
+    
+    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'studentDashboard'])->name('dashboard');
     
+    // Submissions (CRUD Lengkap)
     Route::post('/submissions', [SubmissionController::class, 'store'])->name('submissions.store');
-    Route::post('/submissions/{id}/update', [SubmissionController::class, 'update'])->name('submissions.update');
-    Route::post('/submissions/{id}/delete', [SubmissionController::class, 'destroy'])->name('submissions.delete');
-    Route::post('/complaints', [SubmissionController::class, 'storeComplaint'])->name('complaints.store');
+    
+    // UPDATE: Menggunakan PUT untuk edit sesuai standar RESTful & JS kita
+    Route::put('/submissions/{id}', [SubmissionController::class, 'update'])->name('submissions.update');
+    
+    // DELETE: Menggunakan DELETE untuk hapus sesuai standar RESTful & JS kita
+    Route::delete('/submissions/{id}', [SubmissionController::class, 'destroy'])->name('submissions.destroy');
+    
+    // COMPLAINT: Rute khusus untuk komplain
+    Route::post('/submissions/complaint', [SubmissionController::class, 'storeComplaint'])->name('submissions.complaint');
+
 
     // --- AREA ADMIN ---
-    // (Pengecekan role dilakukan di dalam DashboardController)
     Route::get('/admin', [DashboardController::class, 'adminDashboard'])->name('admin.dashboard');
 
     Route::post('/admin/submissions/{id}/approve', [SubmissionController::class, 'approve'])->name('admin.approve');

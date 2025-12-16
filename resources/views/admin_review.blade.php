@@ -2007,40 +2007,55 @@
             },
 
             // --- ACTION: REJECT SUBMISSION ---
-            handleRejectConfirm() {
-                if (!this.rejectReason.trim()) {
-                    this.showAlert('warning', 'Missing Reason', 'Please provide a reason.');
-                    return;
-                }
+            // --- ACTION: REJECT SUBMISSION (PERBAIKAN) ---
+handleRejectConfirm() {
+    // 1. Validasi Input di Sisi Client
+    if (!this.rejectReason || this.rejectReason.trim() === '') {
+        this.showAlert('warning', 'Missing Reason', 'Please provide a reason for rejection.');
+        return;
+    }
 
-                const url = `/admin/submissions/${this.selectedSubmission.id}/reject`;
+    // 2. Kirim ke Server
+    const url = `/admin/submissions/${this.selectedSubmission.id}/reject`;
 
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        rejectReason: this.rejectReason
-                    })
-                })
-                .then(async response => {
-                    if (response.ok) {
-                        this.showRejectModal = false;
-                        this.showAlert('success', 'Rejected', 'Submission rejected. Page will reload.');
-                        setTimeout(() => window.location.reload(), 1500);
-                        this.closeModal();
-                    } else {
-                        throw new Error('Failed to reject submission');
-                    }
-                })
-                .catch(error => {
-                    console.error(error);
-                    this.showAlert('error', 'Error', error.message);
-                });
-            },
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            rejectReason: this.rejectReason
+        })
+    })
+    .then(async response => {
+        const data = await response.json();
+        
+        // Jika server mengirim status error (misal 422 atau 500)
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to reject submission');
+        }
+        return data;
+    })
+    .then(data => {
+        // --- SUKSES ---
+        this.showRejectModal = false;
+        this.showAlert('success', 'Rejected', 'Submission has been rejected successfully.');
+        
+        // Reload halaman agar tabel terupdate
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
+        
+        this.closeModal();
+    })
+    .catch(error => {
+        console.error('Reject Error:', error);
+        // Tampilkan pesan error asli dari server agar kita tahu salahnya dimana
+        this.showAlert('error', 'Rejection Failed', error.message);
+    });
+},
 
             // --- UI HELPERS ---
 
