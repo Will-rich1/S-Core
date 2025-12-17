@@ -53,15 +53,22 @@
                                         <span class="text-xs text-gray-300" x-text="selectedSubmission.certificate"></span>
                                     </div>
                                     <div class="flex-1 flex items-center justify-center p-4 bg-gray-50">
-                                        <!-- PDF Viewer Placeholder -->
-                                        <div class="w-full h-full border-2 border-dashed border-gray-300 rounded flex flex-col items-center justify-center">
-                                            <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                            </svg>
-                                            <p class="text-gray-500 text-sm mb-2">PDF Certificate Preview</p>
-                                            <p class="text-gray-400 text-xs" x-text="selectedSubmission.certificate"></p>
-                                            <p class="text-gray-400 text-xs mt-4">In production, this will display the actual PDF file</p>
-                                        </div>
+                                        <template x-if="selectedSubmission.certificate">
+                                            <iframe
+                                                :src="'/storage/submissions/' + selectedSubmission.certificate"
+                                                class="w-full h-full border-0 rounded"
+                                                type="application/pdf"
+                                            ></iframe>
+                                        </template>
+                                        <template x-if="!selectedSubmission.certificate">
+                                            <div class="w-full h-full border-2 border-dashed border-gray-300 rounded flex flex-col items-center justify-center">
+                                                <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                                </svg>
+                                                <p class="text-gray-500 text-sm mb-2">No Certificate Available</p>
+                                                <p class="text-gray-400 text-xs">Certificate file not found</p>
+                                            </div>
+                                        </template>
                                     </div>
                                 </div>
                             </div>
@@ -225,6 +232,89 @@
                         </div>
                     </div>
                 </template>
+            </div>
+        </div>
+
+        <!-- view s-core mahasiswa modal -->
+        <div x-show="showStudentDetailModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[80]" style="display: none;">
+            <div class="bg-white rounded-lg max-w-4xl w-full mx-4 shadow-2xl h-[80vh] flex flex-col">
+                <div class="bg-white border-b px-6 py-4 flex justify-between items-center">
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-800" x-text="selectedStudent?.name"></h3>
+                        <p class="text-sm text-gray-500">
+                            ID: <span x-text="selectedStudent?.id"></span> | 
+                            Major: <span x-text="selectedStudent?.major"></span> | 
+                            Year: <span x-text="selectedStudent?.year"></span>
+                        </p>
+                    </div>
+                    <button @click="showStudentDetailModal = false" class="text-gray-500 hover:text-gray-700 text-2xl leading-none">×</button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-6 bg-gray-50">
+                    <div class="grid grid-cols-3 gap-4 mb-6">
+                        <div class="bg-white p-4 rounded border shadow-sm text-center">
+                            <p class="text-xs text-gray-500">Total Points</p>
+                            <p class="text-xl font-bold text-green-600" x-text="selectedStudent?.approvedPoints"></p>
+                        </div>
+                        <div class="bg-white p-4 rounded border shadow-sm text-center">
+                            <p class="text-xs text-gray-500">Status</p>
+                            <span :class="selectedStudent?.approvedPoints >= 20 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="px-2 py-1 rounded-full text-xs font-bold mt-1 inline-block">
+                                <span x-text="selectedStudent?.approvedPoints >= 20 ? 'PASSED' : 'NOT PASSED'"></span>
+                            </span>
+                        </div>
+                        <div class="bg-white p-4 rounded border shadow-sm text-center">
+                            <p class="text-xs text-gray-500">Submissions</p>
+                            <p class="text-xl font-bold text-blue-600" x-text="selectedStudent?.totalSubmissions"></p>
+                        </div>
+                    </div>
+
+                    <h4 class="font-semibold text-gray-700 mb-3">Submission History</h4>
+                    
+                    <div class="bg-white rounded-lg shadow overflow-hidden border">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
+                                <tr>
+                                    <th class="px-4 py-3">Date</th>
+                                    <th class="px-4 py-3">Title</th>
+                                    <th class="px-4 py-3">Category</th>
+                                    <th class="px-4 py-3 text-center">Status</th>
+                                    <th class="px-4 py-3 text-center">Points</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <template x-for="sub in selectedStudent?.submissions_list" :key="sub.id">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 whitespace-nowrap" x-text="sub.date"></td>
+                                        <td class="px-4 py-3 font-medium text-gray-800" x-text="sub.title"></td>
+                                        <td class="px-4 py-3 text-gray-600">
+                                            <div x-text="sub.category" class="font-semibold text-xs"></div>
+                                            <div x-text="sub.subcategory" class="text-xs"></div>
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            <span :class="{
+                                                'bg-green-100 text-green-700': sub.status === 'Approved',
+                                                'bg-yellow-100 text-yellow-700': sub.status === 'Waiting',
+                                                'bg-red-100 text-red-700': sub.status === 'Rejected'
+                                            }" class="px-2 py-1 rounded-full text-xs font-semibold" x-text="sub.status"></span>
+                                        </td>
+                                        <td class="px-4 py-3 text-center font-bold" 
+                                            :class="sub.status === 'Approved' ? 'text-green-600' : 'text-gray-400'" 
+                                            x-text="sub.points || '-'"></td>
+                                    </tr>
+                                </template>
+                                <template x-if="!selectedStudent?.submissions_list?.length">
+                                    <tr>
+                                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">No submissions found for this student.</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white border-t px-6 py-4 flex justify-end">
+                    <button @click="showStudentDetailModal = false" class="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium">Close</button>
+                </div>
             </div>
         </div>
 
@@ -919,8 +1009,8 @@
                         
                         <select x-model="statusPassFilter" class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">All Status</option>
-                            <option value="pass">Passed (≥1000 points)</option>
-                            <option value="fail">Not Passed (<1000 points)</option>
+                            <option value="pass">Passed (>= 20 points)</option>
+                            <option value="fail">Not Passed (< 20 points)</option>
                         </select>
                         
                         <button @click="exportReport" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2">
@@ -1007,106 +1097,112 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <template x-for="student in filteredStudentsList" :key="student.id">
-                                <tr class="border-b hover:bg-blue-50 transition-colors group" x-data="{ showTooltip: false, tooltipX: 0, tooltipY: 0 }">
-                                    <td class="py-3 px-4 text-sm" x-text="student.id"></td>
-                                    <td class="py-3 px-4 text-sm font-medium" x-text="student.name"></td>
-                                    <td class="text-center py-3 px-4">
-                                        <span class="px-2 py-1 rounded-full text-xs font-semibold" 
-                                            :class="{
-                                                'bg-blue-100 text-blue-700': student.major === 'STI',
-                                                'bg-green-100 text-green-700': student.major === 'BD',
-                                                'bg-purple-100 text-purple-700': student.major === 'KWU'
-                                            }"
-                                            x-text="student.major">
-                                        </span>
-                                    </td>
-                                    <td class="text-center py-3 px-4 text-sm" x-text="student.year"></td>
-                                    <td class="text-center py-3 px-4 text-sm">
-                                        <span 
-                                            class="font-bold cursor-help"
-                                            :class="student.approvedPoints >= 1000 ? 'text-green-600' : 'text-red-600'"
-                                            @mouseenter="(e) => { 
-                                                showTooltip = true; 
-                                                const rect = e.target.getBoundingClientRect();
-                                                tooltipX = rect.left + (rect.width / 2);
-                                                tooltipY = rect.top + window.scrollY - 8;
-                                            }"
-                                            @mouseleave="showTooltip = false"
-                                            x-text="student.approvedPoints"
-                                        ></span>
+                        <template x-for="student in filteredStudentsList" :key="student.id">
+                            <tr class="border-b hover:bg-blue-50 transition-colors group" x-data="{ showTooltip: false, tooltipX: 0, tooltipY: 0 }">
+                                <td class="py-3 px-4 text-sm" x-text="student.id"></td>
+                                <td class="py-3 px-4 text-sm font-medium" x-text="student.name"></td>
+                                
+                                <td class="text-center py-3 px-4">
+                                    <span class="px-2 py-1 rounded-full text-xs font-semibold" 
+                                        :class="{
+                                            'bg-blue-100 text-blue-700': student.major === 'STI',
+                                            'bg-green-100 text-green-700': student.major === 'BD',
+                                            'bg-purple-100 text-purple-700': student.major === 'KWU'
+                                        }"
+                                        x-text="student.major">
+                                    </span>
+                                </td>
+                                
+                                <td class="text-center py-3 px-4 text-sm" x-text="student.year"></td>
+                                
+                                <td class="text-center py-3 px-4 text-sm">
+                                    <span 
+                                        class="font-bold cursor-help"
+                                        :class="student.approvedPoints >= 20 ? 'text-green-600' : 'text-red-600'" 
+                                        @mouseenter="(e) => { 
+                                            showTooltip = true; 
+                                            const rect = e.target.getBoundingClientRect();
+                                            tooltipX = rect.left + (rect.width / 2);
+                                            tooltipY = rect.top + window.scrollY - 8;
+                                        }"
+                                        @mouseleave="showTooltip = false"
+                                        x-text="student.approvedPoints"
+                                    ></span>
+                                    
+                                    <div 
+                                        x-show="showTooltip" 
+                                        class="fixed z-[100] bg-white border-2 border-blue-500 rounded-lg shadow-2xl p-4 w-96 pointer-events-none"
+                                        style="display: none;"
+                                        :style="`left: ${tooltipX}px; top: ${tooltipY}px; transform: translate(-50%, -100%);`"
+                                    >
+                                        <div class="mb-3 pb-3 border-b border-gray-200">
+                                            <div class="flex items-center justify-between mb-2">
+                                                <h4 class="font-bold text-gray-800" x-text="student.name"></h4>
+                                                <span :class="student.approvedPoints >= 20 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="px-2 py-1 rounded-full text-xs font-semibold">
+                                                    <span x-text="student.approvedPoints >= 20 ? 'PASSED' : 'NOT PASSED'"></span>
+                                                </span>
+                                            </div>
+                                            <p class="text-xs text-gray-600" x-text="student.id"></p>
+                                        </div>
                                         
-                                        <!-- Hover Tooltip with Detailed Breakdown - Fixed Position (Appears Above) -->
-                                        <div 
-                                            x-show="showTooltip" 
-                                            class="fixed z-[100] bg-white border-2 border-blue-500 rounded-lg shadow-2xl p-4 w-96 pointer-events-none"
-                                            style="display: none;"
-                                            :style="`left: ${tooltipX}px; top: ${tooltipY}px; transform: translate(-50%, -100%);`"
-                                        >
-                                            <div class="mb-3 pb-3 border-b border-gray-200">
-                                                <div class="flex items-center justify-between mb-2">
-                                                    <h4 class="font-bold text-gray-800" x-text="student.name"></h4>
-                                                    <span :class="student.approvedPoints >= 1000 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="px-2 py-1 rounded-full text-xs font-semibold">
-                                                        <span x-text="student.approvedPoints >= 1000 ? 'PASSED' : 'NOT PASSED'"></span>
-                                                    </span>
-                                                </div>
-                                                <p class="text-xs text-gray-600" x-text="student.id"></p>
+                                        <div class="mb-3">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <span class="text-sm font-semibold text-gray-700">Total Points:</span>
+                                                <span class="text-lg font-bold" :class="student.approvedPoints >= 20 ? 'text-green-600' : 'text-red-600'" x-text="student.approvedPoints"></span>
                                             </div>
-                                            
-                                            <div class="mb-3">
-                                                <div class="flex justify-between items-center mb-2">
-                                                    <span class="text-sm font-semibold text-gray-700">Total Points:</span>
-                                                    <span class="text-lg font-bold" :class="student.approvedPoints >= 1000 ? 'text-green-600' : 'text-red-600'" x-text="student.approvedPoints"></span>
-                                                </div>
-                                                <div class="w-full bg-gray-200 rounded-full h-2">
-                                                    <div class="h-2 rounded-full transition-all" :class="student.approvedPoints >= 1000 ? 'bg-green-500' : 'bg-red-500'" :style="`width: ${Math.min((student.approvedPoints / 1000) * 100, 100)}%`"></div>
-                                                </div>
-                                                <p class="text-xs text-gray-500 mt-1" x-text="`${Math.max(1000 - student.approvedPoints, 0)} points needed to pass`"></p>
+                                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                                <div class="h-2 rounded-full transition-all" :class="student.approvedPoints >= 20 ? 'bg-green-500' : 'bg-red-500'" :style="`width: ${Math.min((student.approvedPoints / 20) * 100, 100)}%`"></div>
                                             </div>
-                                            
-                                            <div class="space-y-2">
-                                                <p class="text-xs font-semibold text-gray-700 mb-2">Points by Category:</p>
-                                                <template x-for="(points, category) in student.categoryBreakdown" :key="category">
-                                                    <div class="flex justify-between text-xs">
-                                                        <span class="text-gray-600 truncate pr-2" :title="category" x-text="category.substring(0, 35) + (category.length > 35 ? '...' : '')"></span>
-                                                        <span class="font-semibold text-blue-600" x-text="points + ' pts'"></span>
-                                                    </div>
-                                                </template>
+                                            <p class="text-xs text-gray-500 mt-1" x-text="`${Math.max(20 - student.approvedPoints, 0)} points needed to pass`"></p>
+                                        </div>
+                                        
+                                        <div class="space-y-2">
+                                            <p class="text-xs font-semibold text-gray-700 mb-2">Points by Category:</p>
+                                            <template x-for="(points, category) in student.categoryBreakdown" :key="category">
+                                                <div class="flex justify-between text-xs">
+                                                    <span class="text-gray-600 truncate pr-2" :title="category" x-text="category.substring(0, 35) + (category.length > 35 ? '...' : '')"></span>
+                                                    <span class="font-semibold text-blue-600" x-text="points + ' pts'"></span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                        
+                                        <div class="mt-3 pt-3 border-t border-gray-200 grid grid-cols-3 gap-2 text-center">
+                                            <div>
+                                                <p class="text-xs text-gray-600">Total</p>
+                                                <p class="font-semibold text-sm" x-text="student.totalSubmissions"></p>
                                             </div>
-                                            
-                                            <div class="mt-3 pt-3 border-t border-gray-200 grid grid-cols-3 gap-2 text-center">
-                                                <div>
-                                                    <p class="text-xs text-gray-600">Total</p>
-                                                    <p class="font-semibold text-sm" x-text="student.totalSubmissions"></p>
-                                                </div>
-                                                <div>
-                                                    <p class="text-xs text-gray-600">Approved</p>
-                                                    <p class="font-semibold text-sm text-green-600" x-text="student.approvedCount"></p>
-                                                </div>
-                                                <div>
-                                                    <p class="text-xs text-gray-600">Pending</p>
-                                                    <p class="font-semibold text-sm text-yellow-600" x-text="student.pending"></p>
-                                                </div>
+                                            <div>
+                                                <p class="text-xs text-gray-600">Approved</p>
+                                                <p class="font-semibold text-sm text-green-600" x-text="student.approvedCount"></p>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs text-gray-600">Pending</p>
+                                                <p class="font-semibold text-sm text-yellow-600" x-text="student.pending"></p>
                                             </div>
                                         </div>
-                                    </td>
-                                    <td class="text-center py-3 px-4">
-                                        <span :class="student.approvedPoints >= 1000 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="px-3 py-1 rounded-full text-xs font-semibold">
-                                            <span x-text="student.approvedPoints >= 1000 ? 'PASSED' : 'NOT PASSED'"></span>
-                                        </span>
-                                    </td>
-                                    <td class="text-center py-3 px-4 text-sm text-yellow-600 font-medium" x-text="student.pending"></td>
-                                    <td class="text-center py-3 px-4">
-                                        <button @click="viewStudentDetail(student)" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium">View Details</button>
-                                    </td>
-                                </tr>
-                            </template>
-                            <template x-if="filteredStudentsList.length === 0">
-                                <tr>
-                                    <td colspan="8" class="text-center py-8 text-gray-500">No students found matching your filters</td>
-                                </tr>
-                            </template>
-                        </tbody>
+                                    </div>
+                                </td>
+
+                                <td class="text-center py-3 px-4">
+                                    <span :class="student.approvedPoints >= 20 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="px-3 py-1 rounded-full text-xs font-semibold">
+                                        <span x-text="student.approvedPoints >= 20 ? 'PASSED' : 'NOT PASSED'"></span>
+                                    </span>
+                                </td>
+
+                                <td class="text-center py-3 px-4 text-sm text-yellow-600 font-medium" x-text="student.pending"></td>
+                                
+                                <td class="text-center py-3 px-4">
+                                    <button @click="viewStudentDetail(student)" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium">View Details</button>
+                                </td>
+                            </tr>
+                        </template>
+                        
+                        <template x-if="filteredStudentsList.length === 0">
+                            <tr>
+                                <td colspan="8" class="text-center py-8 text-gray-500">No students found matching your filters</td>
+                            </tr>
+                        </template>
+                    </tbody>
                     </table>
                 </div>
             </div>
@@ -1876,14 +1972,14 @@
             activeMenu: 'Review Submissions',
             isSidebarOpen: false,
             
-            // --- DATA DINAMIS DARI DATABASE ---
-            // Mengambil data yang dikirim dari DashboardController::adminDashboard
+            // --- DATA FROM CONTROLLER ---
             submissions: @json($submissions),
             stats: @json($stats),
-            categoryGroups: @json($categories), // Data kategori untuk dropdown/management
-            // ----------------------------------
-
-            // Variable UI
+            categories: @json($categories), // Previously categoryGroups
+            students: @json($students),     // NEW: Student Data
+            studentStats: @json($studentStats), // NEW: Student Statistics
+            
+            // --- UI VARIABLES ---
             showLogoutModal: false,
             showDetailModal: false,
             showRejectModal: false,
@@ -1917,8 +2013,6 @@
             categoryChangeReason: '',
             categoryChanged: false,
             
-            assignedPoints: '',
-            assignedCategory: '',
             assignedMainCategory: '',
             assignedSubcategory: '',
             assignedAvailableSubcategories: [],
@@ -1926,16 +2020,20 @@
             newMainCategory: '',
             newCategory: { mainCategoryIndex: '', name: '', points: '', description: '' },
             
-            // Filter Variables
-            statusFilter: 'Waiting', // Default filter 'Waiting' biar admin langsung lihat tugas
-            categoryFilter: '',
-            studentFilter: '',
-            searchQuery: '',
+            // --- FILTER VARIABLES ---
+            statusFilter: 'Waiting', // For Review Tab
+            categoryFilter: '',      // For Review Tab
+            studentFilter: '',       // For Review Tab
+            searchQuery: '',         // For Review Tab
+            
+            // Student Management Filters
             studentSearchQuery: '',
             majorFilter: '',
             yearFilter: '',
-            statusPassFilter: '',
-
+            statusPassFilter: '',    // Logic: Pass >= 20, Fail < 20
+            
+            showStudentDetailModal: false, 
+            selectedStudent: null,
             // --- COMPUTED PROPERTIES ---
 
             get uniqueCategories() {
@@ -1947,10 +2045,10 @@
             },
 
             get uniqueStudents() {
-                // Format: "NIM - NAMA"
                 return [...new Set(this.submissions.map(s => `${s.studentId} - ${s.studentName}`))];
             },
 
+            // Filter Logic for "Review Submissions" Tab
             get filteredSubmissions() {
                 return this.submissions.filter(submission => {
                     const matchesSearch = this.searchQuery === '' || 
@@ -1966,14 +2064,85 @@
                 });
             },
 
-            // --- ACTION: APPROVE SUBMISSION ---
-            confirmApprove() {
-                // 1. Ambil data kategori final yang dipilih admin
-                // Note: assignedMainCategory & assignedSubcategory adalah INDEX array di categoryGroups
-                const mainCat = this.categoryGroups[this.assignedMainCategory];
+            // Filter Logic for "Student Management" Tab (NEW)
+            get filteredStudentsList() {
+                return this.students.filter(student => {
+                    // 1. Search Logic (Name or ID)
+                    const searchLower = this.studentSearchQuery.toLowerCase();
+                    const matchesSearch = student.name.toLowerCase().includes(searchLower) || 
+                                          student.id.toString().includes(searchLower);
+
+                    // 2. Filter Major Logic
+                    const matchesMajor = this.majorFilter === '' || student.major === this.majorFilter;
+
+                    // 3. Filter Year Logic (Using loose equality == because DB might return string or int)
+                    const matchesYear = this.yearFilter === '' || student.year == this.yearFilter;
+
+                    // 4. Filter Status Logic (Threshold 20 Points)
+                    let matchesStatus = true;
+                    if (this.statusPassFilter === 'pass') {
+                        matchesStatus = student.approvedPoints >= 20;
+                    } else if (this.statusPassFilter === 'fail') {
+                        matchesStatus = student.approvedPoints < 20;
+                    }
+
+                    // Combine all filters
+                    return matchesSearch && matchesMajor && matchesYear && matchesStatus;
+                });
+            },
+
+            // --- ACTIONS ---
+
+            viewDetail(submission) {
+                this.selectedSubmission = submission;
+                this.assignedMainCategory = '';
+                this.assignedSubcategory = '';
+                this.assignedAvailableSubcategories = [];
+
+                if (submission.mainCategory) {
+                    const mainIndex = this.categories.findIndex(c => c.name === submission.mainCategory);
+                    if (mainIndex !== -1) {
+                        this.assignedMainCategory = mainIndex;
+                        this.assignedAvailableSubcategories = this.categories[mainIndex].subcategories;
+                        
+                        const subIndex = this.assignedAvailableSubcategories.findIndex(s => s.name === submission.subcategory);
+                        if (subIndex !== -1) {
+                            this.assignedSubcategory = subIndex;
+                        }
+                    }
+                }
+                this.showDetailModal = true;
+            },
+
+            updateAssignedSubcategories() {
+                if (this.assignedMainCategory !== '') {
+                    this.assignedAvailableSubcategories = this.categories[this.assignedMainCategory].subcategories;
+                    this.assignedSubcategory = '';
+                } else {
+                    this.assignedAvailableSubcategories = [];
+                    this.assignedSubcategory = '';
+                }
+            },
+
+            handleApprove() {
+                if (this.assignedMainCategory === '' || this.assignedSubcategory === '') {
+                    this.showAlert('warning', 'Incomplete', 'Please verify/select the correct Category and Subcategory.');
+                    return;
+                }
+
+                const mainCat = this.categories[this.assignedMainCategory];
                 const subCat = mainCat.subcategories[this.assignedSubcategory];
+
+                this.approveModalMainCategory = mainCat.name;
+                this.approveModalSubcategory = subCat.name;
+                this.approveModalPoints = subCat.points;
                 
-                // 2. Kirim ke Server
+                this.showApproveModal = true;
+            },
+
+            confirmApprove() {
+                const mainCat = this.categories[this.assignedMainCategory];
+                const subCat = mainCat.subcategories[this.assignedSubcategory];
                 const url = `/admin/submissions/${this.selectedSubmission.id}/approve`;
                 
                 fetch(url, {
@@ -1984,7 +2153,6 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({
-                        // Kirim ID Subkategori agar database tahu poin pastinya
                         assigned_subcategory_id: subCat.id, 
                         points: subCat.points
                     })
@@ -2005,115 +2173,74 @@
                     this.showAlert('error', 'Error', error.message);
                 });
             },
-
-            // --- ACTION: REJECT SUBMISSION ---
-            // --- ACTION: REJECT SUBMISSION (PERBAIKAN) ---
-handleRejectConfirm() {
-    // 1. Validasi Input di Sisi Client
-    if (!this.rejectReason || this.rejectReason.trim() === '') {
-        this.showAlert('warning', 'Missing Reason', 'Please provide a reason for rejection.');
-        return;
-    }
-
-    // 2. Kirim ke Server
-    const url = `/admin/submissions/${this.selectedSubmission.id}/reject`;
-
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({
-            rejectReason: this.rejectReason
-        })
-    })
-    .then(async response => {
-        const data = await response.json();
-        
-        // Jika server mengirim status error (misal 422 atau 500)
-        if (!response.ok) {
-            throw new Error(data.message || 'Failed to reject submission');
-        }
-        return data;
-    })
-    .then(data => {
-        // --- SUKSES ---
-        this.showRejectModal = false;
-        this.showAlert('success', 'Rejected', 'Submission has been rejected successfully.');
-        
-        // Reload halaman agar tabel terupdate
-        setTimeout(() => {
-            window.location.reload();
-        }, 1500);
-        
-        this.closeModal();
-    })
-    .catch(error => {
-        console.error('Reject Error:', error);
-        // Tampilkan pesan error asli dari server agar kita tahu salahnya dimana
-        this.showAlert('error', 'Rejection Failed', error.message);
-    });
-},
-
-            // --- UI HELPERS ---
-
-            viewDetail(submission) {
-                this.selectedSubmission = submission;
-                
-                // Reset form assign category
-                this.assignedMainCategory = '';
-                this.assignedSubcategory = '';
-                this.assignedAvailableSubcategories = [];
-
-                // Coba otomatis isi dropdown berdasarkan data submission
-                // Kita cari index kategori yang namanya sama dengan data submission
-                if (submission.mainCategory) {
-                    const mainIndex = this.categoryGroups.findIndex(c => c.name === submission.mainCategory);
-                    if (mainIndex !== -1) {
-                        this.assignedMainCategory = mainIndex;
-                        this.assignedAvailableSubcategories = this.categoryGroups[mainIndex].subcategories;
-                        
-                        const subIndex = this.assignedAvailableSubcategories.findIndex(s => s.name === submission.subcategory);
-                        if (subIndex !== -1) {
-                            this.assignedSubcategory = subIndex;
-                        }
-                    }
-                }
-
-                this.showDetailModal = true;
+            // Fungsi Baru: View Detail Mahasiswa
+            viewStudentDetail(student) {
+                this.selectedStudent = student;
+                this.showStudentDetailModal = true;
             },
-
-            handleApprove() {
-                // Validasi sebelum buka modal konfirmasi
-                if (this.assignedMainCategory === '' || this.assignedSubcategory === '') {
-                    this.showAlert('warning', 'Incomplete', 'Please verify/select the correct Category and Subcategory.');
+            handleRejectConfirm() {
+                if (!this.rejectReason || this.rejectReason.trim() === '') {
+                    this.showAlert('warning', 'Missing Reason', 'Please provide a reason for rejection.');
                     return;
                 }
 
-                // Siapkan data untuk modal konfirmasi
-                const mainCat = this.categoryGroups[this.assignedMainCategory];
-                const subCat = mainCat.subcategories[this.assignedSubcategory];
+                const url = `/admin/submissions/${this.selectedSubmission.id}/reject`;
 
-                this.approveModalMainCategory = mainCat.name;
-                this.approveModalSubcategory = subCat.name;
-                this.approveModalPoints = subCat.points;
-                
-                this.showApproveModal = true;
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        rejectReason: this.rejectReason
+                    })
+                })
+                .then(async response => {
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.message || 'Failed to reject submission');
+                    return data;
+                })
+                .then(data => {
+                    this.showRejectModal = false;
+                    this.showAlert('success', 'Rejected', 'Submission has been rejected successfully.');
+                    setTimeout(() => window.location.reload(), 1500);
+                    this.closeModal();
+                })
+                .catch(error => {
+                    console.error('Reject Error:', error);
+                    this.showAlert('error', 'Rejection Failed', error.message);
+                });
             },
-            
-            updateAssignedSubcategories() {
-                if (this.assignedMainCategory !== '') {
-                    this.assignedAvailableSubcategories = this.categoryGroups[this.assignedMainCategory].subcategories;
-                    this.assignedSubcategory = '';
-                } else {
-                    this.assignedAvailableSubcategories = [];
-                    this.assignedSubcategory = '';
+
+            // --- EXPORT REPORT FUNCTION ---
+            exportReport() {
+                const data = this.filteredStudentsList;
+                if(data.length === 0) { 
+                    this.showAlert('warning', 'No Data', 'No students found to export with current filters.'); 
+                    return; 
                 }
+                
+                let csvContent = "data:text/csv;charset=utf-8,";
+                csvContent += "Student ID,Name,Major,Year,Total Points,Status,Pending Submissions\n"; // Header
+                
+                data.forEach(row => {
+                    let status = row.approvedPoints >= 20 ? "Passed" : "Not Passed";
+                    // Handle commas in names by wrapping in quotes
+                    csvContent += `${row.id},"${row.name}",${row.major},${row.year},${row.approvedPoints},${status},${row.pending}\n`;
+                });
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "S-Core_Student_Report.csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             },
 
-            // --- LOGOUT FUNCTION (YANG SUDAH DIPERBAIKI) ---
+            // --- UI HELPERS & AUTH ---
             confirmLogout() {
                 fetch('{{ route("logout") }}', {
                     method: 'POST',
@@ -2123,16 +2250,13 @@ handleRejectConfirm() {
                         'Accept': 'application/json'
                     }
                 })
-                .then(() => {
-                    window.location.href = '/login';
-                })
+                .then(() => { window.location.href = '/login'; })
                 .catch(error => {
                     console.error('Logout error:', error);
                     window.location.href = '/login';
                 });
             },
 
-            // --- MODAL & ALERT UTILS ---
             closeModal() {
                 this.showDetailModal = false;
                 this.showRejectModal = false;
@@ -2159,7 +2283,7 @@ handleRejectConfirm() {
                 this.alertCallback = null;
             },
 
-            // ... (Fungsi Category Management & Pin bisa dibiarkan/dicopy dari sebelumnya) ...
+            // --- CATEGORY & PIN PLACEHOLDERS ---
             requestCategoryManagement() { this.showPinModal = true; this.pinInput = ''; this.pinError = false; },
             closePinModal() { this.showPinModal = false; },
             verifyPin() {
@@ -2173,7 +2297,6 @@ handleRejectConfirm() {
             },
             closeCategoryModal() { this.showCategoryModal = false; },
             
-            // Placeholder fungsi kategori (karena belum ada Controller-nya)
             addMainCategory() { this.showAlert('info', 'Demo', 'Category management will be connected to database later.'); },
             saveMainCategory() {},
             deleteMainCategory() {},

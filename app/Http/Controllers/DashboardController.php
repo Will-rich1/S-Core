@@ -94,7 +94,7 @@ class DashboardController extends Controller
             return redirect()->route('dashboard');
         }
 
-        // 1. Statistik Admin
+        // 1. Statistik Umum (Header Dashboard)
         $stats = [
             'total'    => Submission::count(),
             'waiting'  => Submission::where('status', 'Waiting')->count(),
@@ -102,17 +102,21 @@ class DashboardController extends Controller
             'rejected' => Submission::where('status', 'Rejected')->count(),
         ];
 
-        // 2. Ambil SEMUA Submission untuk direview
+        // 2. Ambil SEMUA Submission untuk direview (Tab Review)
         $submissions = Submission::with(['student', 'category', 'subcategory'])
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($item) {
+                // LOGIC NIM KE TAHUN: Ambil 2 digit pertama NIM, tambah '20' di depan
+                $nimStr = (string) ($item->student->student_id ?? '00');
+                $year = '20' . substr($nimStr, 0, 2);
+
                 return [
                     'id'            => $item->id,
                     'studentId'     => $item->student->student_id ?? '-',
                     'studentName'   => $item->student->name ?? 'Unknown',
                     'major'         => $item->student->major ?? '-',
-                    'year'          => $item->student->year ?? '-',
+                    'year'          => $year, // Gunakan logic tahun baru
                     
                     'mainCategory'  => $item->category->name ?? '-',
                     'subcategory'   => $item->subcategory->name ?? '-',
@@ -129,15 +133,72 @@ class DashboardController extends Controller
                     'status'        => $item->status,
                     'certificate'   => $item->certificate_original_name,
                     'file_url'      => asset('storage/' . $item->certificate_path),
-                    
-                    // Tambahkan juga di sini jika Admin butuh logic raw path
                     'certificate_path' => $item->certificate_path,
                 ];
             });
 
+        // 3. AMBIL DATA MAHASISWA & TRACKING POINT (Tab Student Management)
+        $students = User::where('role', 'student')
+            ->with(['submissions' => function($q) {
+                // Kita ambil submissions untuk menghitung poin & detail modal
+                $q->with('category', 'subcategory')->orderBy('created_at', 'desc'); 
+            }])
+            ->get()
+            ->map(function ($student) {
+                // Ambil hanya yang Approved untuk perhitungan poin
+                $approvedSubmissions = $student->submissions->where('status', 'Approved');
+                
+                // LOGIC NIM KE TAHUN: Ambil 2 digit pertama NIM
+                $nimStr = (string) $student->student_id;
+                $year = '20' . substr($nimStr, 0, 2);
+
+                // Hitung Poin per Kategori (untuk Tooltip Hover)
+                $categoryBreakdown = [];
+                foreach ($approvedSubmissions as $sub) {
+                    $catName = $sub->category->name ?? 'Other';
+                    if (!isset($categoryBreakdown[$catName])) {
+                        $categoryBreakdown[$catName] = 0;
+                    }
+                    $categoryBreakdown[$catName] += $sub->points_awarded;
+                }
+
+                return [
+                    'id'               => $student->student_id, 
+                    'name'             => $student->name,
+                    'major'            => $student->major ?? '-', 
+                    'year'             => $year, // Gunakan logic tahun baru
+                    'approvedPoints'   => $approvedSubmissions->sum('points_awarded'), // Total Poin Valid
+                    'approvedCount'    => $approvedSubmissions->count(),
+                    'pending'          => $student->submissions->where('status', 'Waiting')->count(),
+                    'totalSubmissions' => $student->submissions->count(),
+                    'categoryBreakdown'=> $categoryBreakdown, // Array untuk tooltip
+
+                    // DATA UNTUK MODAL DETAIL (VIEW DETAILS)
+                    'submissions_list' => $student->submissions->map(function($sub) {
+                        return [
+                            'id'          => $sub->id, // <--- TAMBAHAN PENTING (UNIK ID)
+                            'title'       => $sub->title,
+                            'category'    => $sub->category->name ?? '-',
+                            'subcategory' => $sub->subcategory->name ?? '-',
+                            'date'        => Carbon::parse($sub->activity_date)->format('d M Y'),
+                            'status'      => $sub->status,
+                            'points'      => $sub->points_awarded ?? 0
+                        ];
+                    })->values()
+                ];
+            });
+
+        // 4. Statistik Khusus Tab Student (Pass/Fail berdasarkan 20 Poin)
+        $studentStats = [
+            'passed'  => $students->where('approvedPoints', '>=', 20)->count(),
+            'failed'  => $students->where('approvedPoints', '<', 20)->count(),
+            'average' => round($students->avg('approvedPoints') ?? 0, 1)
+        ];
+
         // Data Kategori untuk Dropdown di Admin
         $categories = Category::with('subcategories')->where('is_active', true)->get();
 
-        return view('admin_review', compact('submissions', 'stats', 'categories'));
+        // Pastikan variabel 'students' dan 'studentStats' dikirim ke View
+        return view('admin_review', compact('submissions', 'stats', 'categories', 'students', 'studentStats'));
     }
 }
