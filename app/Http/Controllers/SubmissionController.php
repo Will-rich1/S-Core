@@ -73,7 +73,7 @@ class SubmissionController extends Controller
 
     /**
      * 2. Update Pengajuan (Edit Data)
-     * Hanya bisa dilakukan jika status 'Waiting'
+     * UPDATE: Membolehkan edit jika status 'Waiting' ATAU 'Rejected'
      */
     public function update(Request $request, $id)
     {
@@ -81,9 +81,9 @@ class SubmissionController extends Controller
             // Cari data punya user yang sedang login
             $submission = Submission::where('student_id', Auth::id())->where('id', $id)->firstOrFail();
 
-            // Cek status: Hanya boleh edit jika 'Waiting'
-            if ($submission->status !== 'Waiting') {
-                return response()->json(['message' => 'Cannot edit submission that has been processed.'], 403);
+            // Cek status: Boleh edit jika 'Waiting' ATAU 'Rejected'
+            if ($submission->status !== 'Waiting' && $submission->status !== 'Rejected') {
+                return response()->json(['message' => 'Cannot edit submission that has been approved.'], 403);
             }
 
             // Validasi (File bersifat nullable/opsional disini)
@@ -110,6 +110,12 @@ class SubmissionController extends Controller
                 'student_subcategory_id' => $subcategory->id ?? $submission->student_subcategory_id,
             ];
 
+            // LOGIKA TAMBAHAN: Jika status sebelumnya Rejected, kembalikan ke Waiting
+            if ($submission->status === 'Rejected') {
+                $dataToUpdate['status'] = 'Waiting';
+                $dataToUpdate['rejection_reason'] = null; // Hapus alasan penolakan
+            }
+
             // Cek apakah ada file baru diupload
             if ($request->hasFile('certificate_file')) {
                 // Hapus file lama fisik
@@ -120,7 +126,7 @@ class SubmissionController extends Controller
                 // Simpan file baru
                 $file = $request->file('certificate_file');
                 $filename = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
-                $path = $file->storeAs('certificates', $filename, 'public');
+                $path = $file->storeAs('certificates', $filename, 'public'); 
                 
                 $dataToUpdate['certificate_path'] = $path;
                 $dataToUpdate['certificate_original_name'] = $file->getClientOriginalName();
@@ -143,7 +149,8 @@ class SubmissionController extends Controller
         try {
             $submission = Submission::where('student_id', Auth::id())->where('id', $id)->firstOrFail();
             
-            if ($submission->status !== 'Waiting') {
+            // Izinkan hapus jika Waiting atau Rejected
+            if ($submission->status !== 'Waiting' && $submission->status !== 'Rejected') {
                 return response()->json(['message' => 'Cannot delete processed submission'], 403);
             }
 

@@ -358,28 +358,34 @@
 
                                         <!-- Rejection Details Section (Only for Rejected) -->
                                         <template x-if="selectedActivity.status === 'Rejected'">
-                                            <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4 space-y-4">
-                                                <div>
-                                                    <label class="block text-sm font-semibold text-red-700 mb-2">❌ Rejection Reason</label>
-                                                    <div class="bg-white border border-red-200 rounded-lg px-4 py-3 text-sm text-gray-700 whitespace-pre-wrap" x-text="selectedActivity.rejectionReason || 'No reason provided'"></div>
-                                                </div>
-
+                                            <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 animate-pulse-once">
                                                 <div class="flex gap-3">
-                                                    <button @click="closeModal(); openEditModal(selectedActivity)" class="flex-1 px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors">
-                                                        Edit & Resubmit
-                                                    </button>
-                                                    <button @click="openAppealForm(selectedActivity.id)" class="flex-1 px-4 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium transition-colors">
-                                                        File Appeal
-                                                    </button>
-                                                </div>
+                                                    <div class="flex-shrink-0">
+                                                        <svg class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                    </div>
+                                                    <div class="flex-1">
+                                                        <h3 class="text-sm font-bold text-red-800 uppercase tracking-wide mb-1">
+                                                            Submission Rejected
+                                                        </h3>
+                                                        
+                                                        <div class="text-sm text-red-700 bg-white bg-opacity-50 p-3 rounded border border-red-100 mb-3">
+                                                            <span class="font-semibold">Reason:</span>
+                                                            <span x-text="selectedActivity.rejectionReason || 'No specific reason provided.'"></span>
+                                                        </div>
 
-                                                <!-- Inline Appeal Form -->
-                                                <div x-show="appealFormOpen && appealSubmissionId === selectedActivity.id" class="border-t-2 border-red-300 pt-4 mt-4">
-                                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Appeal Message</label>
-                                                    <textarea x-model="appealMessage" rows="4" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Explain why you believe this submission should be reconsidered..."></textarea>
-                                                    <div class="flex gap-2 mt-3">
-                                                        <button @click="submitAppeal(selectedActivity.id)" class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium">Submit Appeal</button>
-                                                        <button @click="closeAppealForm()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg text-sm font-medium">Cancel</button>
+                                                        <button 
+                                                            @click="showViewModal = false; openEditModal(selectedActivity)" 
+                                                            class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold shadow transition-colors flex items-center justify-center gap-2">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                            </svg>
+                                                            Edit & Resubmit
+                                                        </button>
+                                                        <p class="text-xs text-red-500 mt-2 text-center">
+                                                            Click the button above to correct your data and submit again.
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </div>
