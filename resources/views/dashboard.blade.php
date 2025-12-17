@@ -126,7 +126,22 @@
                             <div class="border-t bg-white px-6 py-4">
                                 <div class="flex gap-3 justify-end">
                                     <button @click="closeModal" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition-colors">Cancel</button>
-                                    <button @click="saveActivity" class="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors">Submit for Review</button>
+                                    <button 
+                                        @click="saveActivity" 
+                                        :disabled="isSubmitting"
+                                        :class="isSubmitting ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'"
+                                        class="px-6 py-2.5 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                                        
+                                        <span x-show="!isSubmitting">Submit for Review</span>
+                                        
+                                        <span x-show="isSubmitting" class="flex items-center gap-2">
+                                            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Processing...
+                                        </span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -868,20 +883,59 @@
                     <!-- Settings Sections -->
                     <div class="space-y-6">
                         <!-- Profile Information -->
-                        <div class="bg-white rounded-lg shadow p-6">
-                            <h3 class="text-lg font-semibold mb-4">Profile Information</h3>
-                            <div class="space-y-4">
+                        <div class="bg-white rounded-lg shadow p-6 mb-6">
+                            <h3 class="text-lg font-semibold mb-4 border-b pb-2">Profile Information</h3>
+                            
+                            <div class="grid grid-cols-1 gap-6">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Student ID</label>
-                                    <input type="text" value="2210426" disabled class="w-full border rounded-lg px-4 py-2.5 text-sm bg-gray-50 text-gray-600" />
+                                    <input 
+                                        type="text" 
+                                        x-model="currentUser.student_id" 
+                                        readonly 
+                                        class="w-full border border-gray-200 bg-gray-100 text-gray-600 rounded-lg px-4 py-2 text-sm focus:outline-none cursor-not-allowed"
+                                    >
                                 </div>
+
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                                    <input type="text" value="{{ Auth::user()->name }}" disabled class="w-full border rounded-lg px-4 py-2.5 text-sm bg-gray-50 text-gray-600" />
+                                    <input 
+                                        type="text" 
+                                        x-model="currentUser.name" 
+                                        readonly 
+                                        class="w-full border border-gray-200 bg-gray-100 text-gray-600 rounded-lg px-4 py-2 text-sm focus:outline-none cursor-not-allowed"
+                                    >
                                 </div>
+
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                                    <input type="email" value="calvin.william@student.itbss.ac.id" disabled class="w-full border rounded-lg px-4 py-2.5 text-sm bg-gray-50 text-gray-600" />
+                                    <input 
+                                        type="text" 
+                                        x-model="currentUser.email" 
+                                        readonly 
+                                        class="w-full border border-gray-200 bg-gray-100 text-gray-600 rounded-lg px-4 py-2 text-sm focus:outline-none cursor-not-allowed"
+                                    >
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Major</label>
+                                        <input 
+                                            type="text" 
+                                            x-model="currentUser.major" 
+                                            readonly 
+                                            class="w-full border border-gray-200 bg-gray-100 text-gray-600 rounded-lg px-4 py-2 text-sm focus:outline-none cursor-not-allowed"
+                                        >
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Batch Year</label>
+                                        <input 
+                                            type="text" 
+                                            x-model="currentUser.year" 
+                                            readonly 
+                                            class="w-full border border-gray-200 bg-gray-100 text-gray-600 rounded-lg px-4 py-2 text-sm focus:outline-none cursor-not-allowed"
+                                        >
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -961,8 +1015,21 @@
                                 </div>
 
                                 <div class="flex gap-3 pt-2">
-                                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-colors">Update Password</button>
-                                    <button type="button" @click="resetPasswordForm" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2.5 rounded-lg text-sm font-medium transition-colors">Reset</button>
+                                    <button 
+                                        @click="updatePassword" 
+                                        :disabled="isSubmitting"
+                                        :class="isSubmitting ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'"
+                                        class="px-6 py-2.5 text-white rounded-lg text-sm font-medium transition-colors">
+                                        
+                                        <span x-show="!isSubmitting">Update Password</span>
+                                        <span x-show="isSubmitting">Updating...</span>
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        @click="resetPasswordForm" 
+                                        class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors">
+                                        Reset
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -1155,8 +1222,10 @@
         return {
             activeMenu: 'Dashboard',
             isSidebarOpen: false,
+            isSubmitting: false, 
             
             // --- DATA DARI CONTROLLER ---
+            currentUser: @json($user), // <--- TAMBAHKAN INI (Data Profil Asli)
             activities: @json($activities), 
             categoryGroups: @json($categoryGroups),
             stats: @json($stats),
@@ -1165,7 +1234,7 @@
             showLogoutModal: false, showAddModal: false, showEditModal: false,
             showViewModal: false, showDeleteModal: false, showComplaintModal: false,
             
-            // --- FILTER VARS (Default Kosong = All) ---
+            // --- FILTER VARS ---
             statusFilter: '', 
             categoryFilter: '',
             searchQuery: '',
@@ -1195,7 +1264,7 @@
 
             get maxDate() { return new Date().toISOString().split('T')[0]; },
 
-            // --- FILTER LOGIC (ANTI CRASH & SUPPORT ALL) ---
+            // --- FILTER LOGIC ---
             get filteredActivities() {
                 return this.activities.filter(activity => {
                     const searchLower = (this.searchQuery || '').toLowerCase();
@@ -1213,7 +1282,6 @@
             // --- HELPER FUNCTIONS ---
             updateAvailableSubcategories() {
                 if (this.formData.mainCategory !== '') {
-                    // mainCategory di formData menyimpan INDEX array
                     const idx = parseInt(this.formData.mainCategory);
                     if (this.categoryGroups[idx]) this.availableSubcategories = this.categoryGroups[idx].subcategories;
                     this.formData.subcategory = '';
@@ -1240,6 +1308,8 @@
 
             // 1. SAVE NEW (Store)
             saveActivity() {
+                if (this.isSubmitting) return;
+
                 if (!this.formData.mainCategory || !this.formData.subcategory || !this.formData.activityTitle || !this.formData.description || !this.formData.activityDate || !this.formData.fileName) {
                     this.showAlert('warning', 'Missing Info', 'Fill all fields'); return;
                 }
@@ -1247,11 +1317,12 @@
                     this.showAlert('warning', 'Invalid Date', this.dateValidationError); return;
                 }
 
+                this.isSubmitting = true;
+
                 let data = new FormData();
                 data.append('title', this.formData.activityTitle);
                 data.append('description', this.formData.description);
                 data.append('activity_date', this.formData.activityDate);
-                // Ambil nama kategori berdasarkan index
                 data.append('mainCategory', this.categoryGroups[this.formData.mainCategory].name); 
                 data.append('subcategory', this.formData.subcategory);
                 data.append('certificate_file', this.$refs.fileInput.files[0]);
@@ -1262,51 +1333,47 @@
                 .then(() => {
                     this.showAlert('success', 'Saved', 'Reloading...');
                     setTimeout(() => window.location.reload(), 1500);
-                    this.closeModal();
                 })
-                .catch(err => this.showAlert('error', 'Failed', err.message));
+                .catch(err => {
+                    this.showAlert('error', 'Failed', err.message);
+                    this.isSubmitting = false;
+                });
             },
 
-            // 2. OPEN EDIT MODAL (Pre-fill Data)
+            // 2. OPEN EDIT MODAL
             openEditModal(activity) {
                 this.selectedActivity = activity;
                 this.showEditModal = true;
-
-                // Cari index kategori berdasarkan nama yang ada di activity
                 let catIndex = this.categoryGroups.findIndex(c => c.name === activity.mainCategory);
                 if (catIndex === -1) catIndex = '';
 
-                // Masukkan data lama ke form
                 this.formData = {
                     mainCategory: catIndex,
-                    subcategory: '', // Nanti diisi setelah updateAvailableSubcategories
+                    subcategory: '', 
                     activityTitle: activity.judul,
                     description: activity.keterangan,
-                    // Parse tanggal ke format YYYY-MM-DD
                     activityDate: activity.waktu ? new Date(activity.waktu).toISOString().split('T')[0] : '',
                     fileName: '' 
                 };
 
-                // Generate dropdown subkategori
                 this.updateAvailableSubcategories();
-
-                // Set subkategori terpilih (tunggu sebentar biar dropdown render)
                 setTimeout(() => {
                     this.formData.subcategory = activity.subcategory;
-                    // Kalau tanggal di database formatnya beda, sesuaikan logic di atas
-                    // activity.waktu di view controller biasanya format d M Y H:i, 
-                    // sebaiknya controller kirim raw date juga (activityDate)
                 }, 50);
             },
 
             // 3. UPDATE EXISTING (Update)
             updateActivity() {
+                if (this.isSubmitting) return;
+
                 if (this.formData.mainCategory === '' || !this.formData.subcategory || !this.formData.activityTitle || !this.formData.description || !this.formData.activityDate) {
                     this.showAlert('warning', 'Missing Info', 'Fill all required fields'); return;
                 }
 
+                this.isSubmitting = true;
+
                 let data = new FormData();
-                data.append('_method', 'PUT'); // Method Spoofing untuk Laravel
+                data.append('_method', 'PUT'); 
                 data.append('title', this.formData.activityTitle);
                 data.append('description', this.formData.description);
                 data.append('activity_date', this.formData.activityDate);
@@ -1315,7 +1382,6 @@
                 data.append('mainCategory', this.categoryGroups[catIndex].name); 
                 data.append('subcategory', this.formData.subcategory);
                 
-                // File opsional saat update
                 if (this.$refs.fileInput && this.$refs.fileInput.files.length > 0) {
                     data.append('certificate_file', this.$refs.fileInput.files[0]);
                 }
@@ -1331,9 +1397,11 @@
                 .then(() => {
                     this.showAlert('success', 'Updated', 'Activity updated successfully!');
                     setTimeout(() => window.location.reload(), 1500);
-                    this.closeModal();
                 })
-                .catch(err => this.showAlert('error', 'Update Failed', err.message));
+                .catch(err => {
+                    this.showAlert('error', 'Update Failed', err.message);
+                    this.isSubmitting = false; 
+                });
             },
 
             // 4. DELETE ACTIVITY
@@ -1341,6 +1409,10 @@
             
             confirmDelete() {
                 if (!this.selectedActivity) return;
+                if (this.isSubmitting) return;
+
+                this.isSubmitting = true; 
+
                 fetch(`/submissions/${this.selectedActivity.id}`, {
                     method: 'DELETE',
                     headers: {
@@ -1353,18 +1425,24 @@
                 .then(() => {
                     this.showAlert('success', 'Deleted', 'Submission deleted.');
                     setTimeout(() => window.location.reload(), 1500);
-                    this.showDeleteModal = false;
                 })
-                .catch(err => this.showAlert('error', 'Delete Failed', err.message));
+                .catch(err => {
+                    this.showAlert('error', 'Delete Failed', err.message);
+                    this.isSubmitting = false; 
+                });
             },
 
             // 5. COMPLAINT / APPEAL
             openComplaintModal(a) { this.selectedActivity = a; this.showComplaintModal = true; },
             
             submitComplaint() {
+                if (this.isSubmitting) return;
+
                 if (!this.complaintData.type || !this.complaintData.explanation) {
                     this.showAlert('warning', 'Missing Info', 'Please fill type and explanation'); return;
                 }
+
+                this.isSubmitting = true; 
 
                 fetch('{{ route("submissions.complaint") }}', {
                     method: 'POST',
@@ -1383,10 +1461,91 @@
                 .then(() => {
                     this.showAlert('success', 'Submitted', 'Complaint sent to admin.');
                     this.showComplaintModal = false;
+                    this.isSubmitting = false;
                 })
-                .catch(err => this.showAlert('error', 'Error', err.message));
+                .catch(err => {
+                    this.showAlert('error', 'Error', err.message);
+                    this.isSubmitting = false; 
+                });
             },
 
+            // --- PASSWORD ACTION (NEW) ---
+            updatePassword() {
+                // 1. Cegah Spam
+                if (this.isSubmitting) return;
+
+                // 2. Validasi Frontend
+                if (!this.passwordData.currentPassword || !this.passwordData.newPassword || !this.passwordData.confirmPassword) {
+                    this.showAlert('warning', 'Missing Info', 'Please fill all password fields.');
+                    return;
+                }
+
+                if (this.passwordData.newPassword !== this.passwordData.confirmPassword) {
+                    this.showAlert('warning', 'Mismatch', 'New Password and Confirmation do not match.');
+                    return;
+                }
+
+                if (this.passwordData.newPassword.length < 8) {
+                    this.showAlert('warning', 'Weak Password', 'Password must be at least 8 characters.');
+                    return;
+                }
+
+                // 3. Kunci Tombol
+                this.isSubmitting = true;
+
+                // 4. Kirim ke Backend
+                fetch('{{ route("profile.update-password") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        current_password: this.passwordData.currentPassword,
+                        new_password: this.passwordData.newPassword,
+                        new_password_confirmation: this.passwordData.confirmPassword
+                    })
+                })
+                .then(async res => {
+                    const json = await res.json();
+                    if (!res.ok) throw new Error(json.message || 'Failed to update password');
+                    return json;
+                })
+                .then(() => {
+                    this.showAlert('success', 'Success', 'Password updated successfully!');
+                    
+                    // Reset Form
+                    this.passwordData = { currentPassword: '', newPassword: '', confirmPassword: '' };
+                    this.passwordError = '';
+                    
+                    // Buka kunci (tidak perlu reload halaman untuk ganti password)
+                    this.isSubmitting = false;
+                })
+                .catch(err => {
+                    this.showAlert('error', 'Error', err.message);
+                    this.isSubmitting = false; // Buka kunci jika error
+                });
+            },
+
+            resetPasswordForm() {
+                // 1. Kosongkan Field
+                this.passwordData = {
+                    currentPassword: '',
+                    newPassword: '',
+                    confirmPassword: ''
+                };
+                
+                // 2. Hilangkan Error/Success Message (jika ada)
+                this.passwordError = '';
+                this.passwordSuccess = '';
+                
+                // 3. (Opsional) Reset visibilitas password jadi tersembunyi lagi
+                this.showCurrentPassword = false;
+                this.showNewPassword = false;
+                this.showConfirmPassword = false;
+            },
+            
             // --- UI HELPERS ---
             confirmLogout() { fetch('{{ route("logout") }}', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' } }).then(() => window.location.href = '/login'); },
             openViewModal(a) { this.selectedActivity = a; this.showViewModal = true; },
@@ -1396,6 +1555,8 @@
                 this.showDeleteModal = false; this.showComplaintModal = false; this.selectedActivity = null; 
                 this.formData = { mainCategory: '', subcategory: '', activityTitle: '', description: '', activityDate: '', fileName: '' };
                 this.availableSubcategories = [];
+                // Reset loading state on modal close just in case
+                this.isSubmitting = false;
             },
             
             showAlert(type, title, msg, cancel=false, cb=null) { 
@@ -1414,8 +1575,5 @@
         }
     }
 </script>
-    
-
-    
 </body>
 </html>

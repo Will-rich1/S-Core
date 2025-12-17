@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash; // Penting untuk cek password
+use Illuminate\Validation\Rules\Password; // Penting untuk validasi
 use App\Models\Submission;
 use App\Models\Category;
 use App\Models\User;
@@ -37,7 +39,7 @@ class DashboardController extends Controller
             ->orderBy('created_at', 'desc') // Urutkan dari yang terbaru
             ->get();
 
-        // Mapping Data: Mengubah nama kolom DB menjadi nama variabel yang dicari AlpineJS
+        // Mapping Data untuk View Mahasiswa
         $activities = $rawActivities->map(function($item) {
             return [
                 'id'              => $item->id,
@@ -51,11 +53,8 @@ class DashboardController extends Controller
                 'rejectionReason' => $item->rejection_reason,
                 'file_url'        => asset('storage/' . $item->certificate_path),
                 'category_id'     => $item->student_category_id,
-
-                // --- TAMBAHAN PENTING UNTUK MODAL PDF ---
                 'certificate_path' => $item->certificate_path, 
                 'certificate_original_name' => $item->certificate_original_name,
-                // ----------------------------------------
             ];
         });
 
@@ -107,7 +106,7 @@ class DashboardController extends Controller
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($item) {
-                // LOGIC NIM KE TAHUN: Ambil 2 digit pertama NIM, tambah '20' di depan
+                // LOGIC NIM KE TAHUN: Ambil 2 digit pertama NIM (contoh: 22 -> 2022)
                 $nimStr = (string) ($item->student->student_id ?? '00');
                 $year = '20' . substr($nimStr, 0, 2);
 
@@ -116,7 +115,7 @@ class DashboardController extends Controller
                     'studentId'     => $item->student->student_id ?? '-',
                     'studentName'   => $item->student->name ?? 'Unknown',
                     'major'         => $item->student->major ?? '-',
-                    'year'          => $year, // Gunakan logic tahun baru
+                    'year'          => $year, 
                     
                     'mainCategory'  => $item->category->name ?? '-',
                     'subcategory'   => $item->subcategory->name ?? '-',
@@ -140,19 +139,19 @@ class DashboardController extends Controller
         // 3. AMBIL DATA MAHASISWA & TRACKING POINT (Tab Student Management)
         $students = User::where('role', 'student')
             ->with(['submissions' => function($q) {
-                // Kita ambil submissions untuk menghitung poin & detail modal
+                // Kita ambil submissions lengkap untuk modal detail history
                 $q->with('category', 'subcategory')->orderBy('created_at', 'desc'); 
             }])
             ->get()
             ->map(function ($student) {
-                // Ambil hanya yang Approved untuk perhitungan poin
+                // Ambil hanya yang Approved untuk perhitungan poin total
                 $approvedSubmissions = $student->submissions->where('status', 'Approved');
                 
-                // LOGIC NIM KE TAHUN: Ambil 2 digit pertama NIM
+                // LOGIC NIM KE TAHUN
                 $nimStr = (string) $student->student_id;
                 $year = '20' . substr($nimStr, 0, 2);
 
-                // Hitung Poin per Kategori (untuk Tooltip Hover)
+                // Hitung Breakdown Poin per Kategori (untuk Tooltip Hover)
                 $categoryBreakdown = [];
                 foreach ($approvedSubmissions as $sub) {
                     $catName = $sub->category->name ?? 'Other';
@@ -166,17 +165,17 @@ class DashboardController extends Controller
                     'id'               => $student->student_id, 
                     'name'             => $student->name,
                     'major'            => $student->major ?? '-', 
-                    'year'             => $year, // Gunakan logic tahun baru
-                    'approvedPoints'   => $approvedSubmissions->sum('points_awarded'), // Total Poin Valid
+                    'year'             => $year, 
+                    'approvedPoints'   => $approvedSubmissions->sum('points_awarded'),
                     'approvedCount'    => $approvedSubmissions->count(),
                     'pending'          => $student->submissions->where('status', 'Waiting')->count(),
                     'totalSubmissions' => $student->submissions->count(),
-                    'categoryBreakdown'=> $categoryBreakdown, // Array untuk tooltip
+                    'categoryBreakdown'=> $categoryBreakdown, 
 
-                    // DATA UNTUK MODAL DETAIL (VIEW DETAILS)
+                    // DATA UNTUK MODAL VIEW DETAILS (HISTORY)
                     'submissions_list' => $student->submissions->map(function($sub) {
                         return [
-                            'id'          => $sub->id, // <--- TAMBAHAN PENTING (UNIK ID)
+                            'id'          => $sub->id, // ID Unik untuk Key AlpineJS
                             'title'       => $sub->title,
                             'category'    => $sub->category->name ?? '-',
                             'subcategory' => $sub->subcategory->name ?? '-',
@@ -188,7 +187,7 @@ class DashboardController extends Controller
                 ];
             });
 
-        // 4. Statistik Khusus Tab Student (Pass/Fail berdasarkan 20 Poin)
+        // 4. Statistik Khusus Tab Student (Target Lulus: 20 Poin)
         $studentStats = [
             'passed'  => $students->where('approvedPoints', '>=', 20)->count(),
             'failed'  => $students->where('approvedPoints', '<', 20)->count(),
@@ -198,7 +197,32 @@ class DashboardController extends Controller
         // Data Kategori untuk Dropdown di Admin
         $categories = Category::with('subcategories')->where('is_active', true)->get();
 
-        // Pastikan variabel 'students' dan 'studentStats' dikirim ke View
         return view('admin_review', compact('submissions', 'stats', 'categories', 'students', 'studentStats'));
+    }
+
+    /**
+     * UPDATE PASSWORD USER (MAHASISWA & ADMIN)
+     */
+    public function updatePassword(Request $request)
+    {
+        // 1. Validasi Input
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:8|confirmed', // 'confirmed' otomatis cek new_password_confirmation
+        ]);
+
+        // 2. Cek apakah password lama benar
+        if (!Hash::check($request->current_password, Auth::user()->password)) {
+            return response()->json([
+                'message' => 'Password lama salah (Current password does not match).'
+            ], 422); // 422 Unprocessable Entity (Format error standar Laravel)
+        }
+
+        // 3. Update Password Baru
+        User::where('id', Auth::id())->update([
+            'password' => Hash::make($request->new_password)
+        ]);
+
+        return response()->json(['message' => 'Password successfully updated!']);
     }
 }

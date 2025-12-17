@@ -43,6 +43,9 @@ Route::middleware(['auth'])->group(function () {
     // COMPLAINT: Rute khusus untuk komplain
     Route::post('/submissions/complaint', [SubmissionController::class, 'storeComplaint'])->name('submissions.complaint');
 
+    // updatepassword
+    Route::post('/profile/update-password', [DashboardController::class, 'updatePassword'])->name('profile.update-password');
+
 
     // --- AREA ADMIN ---
     Route::get('/admin', [DashboardController::class, 'adminDashboard'])->name('admin.dashboard');
@@ -54,4 +57,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/students/store', [UserController::class, 'storeStudent'])->name('students.store');
     Route::post('/students/import', [UserController::class, 'importStudents'])->name('students.import');
     Route::post('/admins/store', [UserController::class, 'storeAdmin'])->name('admins.store');
+
+
 });
