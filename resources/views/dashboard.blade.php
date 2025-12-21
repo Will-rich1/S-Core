@@ -271,36 +271,31 @@
                                 <div class="bg-white rounded-lg shadow-sm h-full flex flex-col">
                                     <div class="bg-gray-800 text-white px-4 py-3 rounded-t-lg flex items-center justify-between">
                                         <span class="text-sm font-medium">Certificate/Evidence</span>
-                                        <span class="text-xs text-gray-300" x-text="selectedSubmission ? (selectedSubmission.certificate || 'document.pdf') : ''"></span>
+                                        <span class="text-xs text-gray-300" x-text="selectedActivity ? (selectedActivity.certificate || 'document.pdf') : ''"></span>
                                     </div>
 
                                     <div class="flex-1 bg-gray-50 relative h-full overflow-hidden">
-                                        <template x-if="!selectedSubmission">
+                                        <template x-if="!selectedActivity">
                                             <div class="flex items-center justify-center h-full text-gray-400">
                                                 pilih submission...
                                             </div>
                                         </template>
 
-                                        <template x-if="selectedSubmission">
+                                        <template x-if="selectedActivity">
                                             <div class="h-full w-full">
-                                                <template x-if="selectedSubmission.file_url">
+                                                <template x-if="selectedActivity.file_url">
                                                     <div class="h-full flex flex-col bg-gray-200">
                                                         <iframe 
-                                                            :src="selectedSubmission.file_url" 
+                                                            :src="selectedActivity.file_url" 
                                                             class="w-full flex-1" 
                                                             style="border: none;" 
                                                             type="application/pdf">
                                                         </iframe>
-                                                        
-                                                        <div class="p-2 bg-white text-center border-t">
-                                                            <a :href="selectedSubmission.file_url" target="_blank" class="text-blue-600 hover:underline text-sm font-semibold">
-                                                                Download / Buka di Tab Baru
-                                                            </a>
-                                                        </div>
+                                                    
                                                     </div>
                                                 </template>
 
-                                                <template x-if="!selectedSubmission.file_url">
+                                                <template x-if="!selectedActivity.file_url">
                                                     <div class="flex items-center justify-center h-full text-red-500 flex-col gap-2">
                                                         <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                                                         <p>File PDF tidak ditemukan di database.</p>
@@ -402,7 +397,6 @@
                                 <div class="border-t bg-white px-6 py-4">
                                     <div class="flex gap-3 justify-end">
                                         <button @click="closeModal" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition-colors">Close</button>
-                                        <button x-show="selectedActivity && selectedActivity.status === 'Cancel'" @click="openComplaintModal(selectedActivity)" class="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium transition-colors">File Complaint</button>
                                     </div>
                                 </div>
                             </div>
@@ -430,90 +424,6 @@
                         <div class="flex gap-3 justify-end">
                             <button @click="showDeleteModal = false" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium">Keep</button>
                             <button @click="confirmDelete" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium">Cancel Submission</button>
-                        </div>
-                    </div>
-                </template>
-            </div>
-        </div>
-
-        <!-- Complaint Modal -->
-        <div x-show="showComplaintModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-60" style="display: none;">
-            <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 shadow-2xl">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-semibold text-orange-600">File Complaint / Appeal</h3>
-                    <button @click="showComplaintModal = false" class="text-gray-500 hover:text-gray-700 text-2xl leading-none">×</button>
-                </div>
-                
-                <template x-if="selectedActivity">
-                    <div>
-                        <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
-                            <div class="flex items-start gap-3">
-                                <svg class="w-6 h-6 text-orange-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                </svg>
-                                <div>
-                                    <p class="text-sm font-medium text-orange-800">Submission Details</p>
-                                    <p class="text-sm text-orange-700 mt-1"><strong>Title:</strong> <span x-text="selectedActivity.judul"></span></p>
-                                    <p class="text-sm text-orange-700"><strong>Main Category:</strong> <span x-text="selectedActivity.mainCategory"></span></p>
-                                    <p class="text-sm text-orange-700"><strong>Subcategory:</strong> <span x-text="selectedActivity.subcategory"></span></p>
-                                    <p class="text-sm text-orange-700"><strong>Status:</strong> Rejected</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Complaint Type <span class="text-red-500">*</span></label>
-                                <select x-model="complaintData.type" class="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500">
-                                    <option value="">Select Complaint Type</option>
-                                    <option value="wrong_category">Wrong Category Assessment</option>
-                                    <option value="wrong_points">Incorrect Points Calculation</option>
-                                    <option value="missing_evidence">Evidence Not Reviewed Properly</option>
-                                    <option value="other">Other Reason</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Explanation <span class="text-red-500">*</span></label>
-                                <textarea x-model="complaintData.explanation" rows="6" class="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500" placeholder="Explain why you are filing this complaint and what you believe should be the correct assessment..."></textarea>
-                                <p class="text-xs text-gray-500 mt-1">Please provide detailed explanation to support your complaint</p>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Additional Evidence (Optional)</label>
-                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-orange-400 transition-colors cursor-pointer">
-                                    <div class="flex items-center justify-center gap-3">
-                                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                        </svg>
-                                        <div>
-                                            <label class="cursor-pointer">
-                                                <span class="text-sm text-blue-500 hover:text-blue-600 font-medium">Upload additional evidence</span>
-                                                <input type="file" accept=".pdf,.jpg,.jpeg,.png" class="hidden" @change="handleComplaintFileSelect" />
-                                            </label>
-                                            <p class="text-xs text-gray-500">PDF, JPG, PNG - Max 10MB</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div x-show="complaintData.fileName" class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
-                                        <span class="text-sm text-gray-700" x-text="complaintData.fileName"></span>
-                                    </div>
-                                    <button @click="complaintData.fileName = ''" class="text-red-500 hover:text-red-700">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex gap-3 justify-end mt-6">
-                            <button @click="showComplaintModal = false" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium">Cancel</button>
-                            <button @click="submitComplaint" class="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium">Submit Complaint</button>
                         </div>
                     </div>
                 </template>
@@ -851,19 +761,12 @@
                                             </button>
                                         </template>
                                         <template x-if="activity.status === 'Rejected'">
-                                            <div class="flex justify-center gap-2">
-                                                <button @click="openViewModal(activity)" class="text-blue-500 hover:text-blue-700 p-1" title="View">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                    </svg>
-                                                </button>
-                                                <button @click="openComplaintModal(activity)" class="text-orange-500 hover:text-orange-700 p-1" title="File Complaint">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                    </svg>
-                                                </button>
-                                            </div>
+                                            <button @click="openViewModal(activity)" class="text-blue-500 hover:text-blue-700 p-1" title="View">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                            </button>
                                         </template>
                                     </td>
                                 </tr>
@@ -1100,7 +1003,10 @@
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">1</span>
                                     How do I submit a new activity?
                                 </h3>
-                                <p class="text-sm text-gray-600 ml-7">Click the "Add New Activity" button in the Dashboard, fill in all required fields (category, activity title, description, activity date), upload your certificate, and click Submit. Your submission will be sent for review.</p>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">Click the "Add New Activity" button in the Dashboard, fill in all required fields (category, activity title, description, activity date), upload your certificate/proof, and click Submit. Your submission will be sent for review.</p>
+                                <div class="mt-2 ml-7 bg-green-50 border border-green-200 rounded p-2">
+                                    <p class="text-xs text-green-800"><strong>📁 File Storage:</strong> All uploaded files are automatically stored in Google Drive for secure and permanent storage. You can preview and download your certificates anytime.</p>
+                                </div>
                             </div>
                             
                             <div class="border-b pb-4">
@@ -1108,7 +1014,10 @@
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">2</span>
                                     When will my submission be reviewed?
                                 </h3>
-                                <p class="text-sm text-gray-600 ml-7">Admin reviewers typically process submissions within 3-5 business days. You can check the status of your submission in the Activities Table on the Dashboard. Status will show as "Waiting", "Approved", or "Rejected".</p>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">Admin reviewers typically process submissions within 3-5 business days. You can check the status of your submission in the Activities Table on the Dashboard. Status will show as "Waiting", "Approved", or "Rejected".</p>
+                                <div class="mt-2 ml-7 bg-blue-50 border border-blue-200 rounded p-2">
+                                    <p class="text-xs text-blue-800"><strong>🕐 Timezone:</strong> All timestamps in the system use GMT+7 (Jakarta time). Your submission time will be recorded based on Indonesian time zone.</p>
+                                </div>
                             </div>
                             
                             <div class="border-b pb-4">
@@ -1135,47 +1044,33 @@
                                 <p class="text-sm text-gray-600 ml-7 mb-2">If your submission is rejected, you have several options:</p>
                                 <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
                                     <li><strong>View Reason:</strong> Click the "View" button to see the detailed rejection reason from the admin</li>
-                                    <li><strong>File a Complaint:</strong> If you believe the rejection was incorrect, click the "Complaint" button to submit an appeal with supporting documents</li>
-                                    <li><strong>Resubmit:</strong> After reviewing the rejection reason, you can correct the issues and submit a new activity with the proper documentation</li>
+                                    <li><strong>Edit & Resubmit:</strong> Fix the issues mentioned in the rejection reason and edit your submission. Once edited, it will return to "Waiting" status for re-review</li>
+                                    <li><strong>Submit New:</strong> Alternatively, you can submit a completely new activity with corrected information and proper documentation</li>
                                 </ul>
                                 <div class="mt-2 ml-7 bg-blue-50 border border-blue-200 rounded p-2">
-                                    <p class="text-xs text-blue-800"><strong>💡 Tip:</strong> Always read the rejection reason carefully before filing a complaint or resubmitting to ensure your next submission meets all requirements.</p>
+                                    <p class="text-xs text-blue-800"><strong>💡 Tip:</strong> Always read the rejection reason carefully and address all issues before resubmitting to avoid another rejection.</p>
                                 </div>
                             </div>
                             
                             <div class="border-b pb-4">
                                 <h3 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">6</span>
-                                    How do I file a complaint for a rejected submission?
+                                    Can I edit or delete a submitted activity?
                                 </h3>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">To file a complaint:</p>
-                                <ol class="text-sm text-gray-600 ml-7 space-y-1 list-decimal list-inside">
-                                    <li>Find the rejected submission in your Activities Table</li>
-                                    <li>Click the orange "Complaint" button (📝 icon)</li>
-                                    <li>Select the complaint type (Wrong Category, Incorrect Rejection, etc.)</li>
-                                    <li>Provide a detailed explanation of why you believe the rejection was incorrect</li>
-                                    <li>Optionally attach supporting documents (additional evidence, clarifications, etc.)</li>
-                                    <li>Click "Submit Complaint" to send your appeal to the admin</li>
-                                </ol>
-                                <p class="text-sm text-gray-600 ml-7 mt-2">Your complaint will be reviewed by the admin team, and you'll receive a response via email or through the system notification.</p>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">You can edit or delete activities that are in "Waiting" or "Rejected" status. Once edited, rejected submissions will be changed back to "Waiting" status for re-review.</p>
+                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside mt-2">
+                                    <li><strong>Waiting Status:</strong> Edit or delete anytime before admin reviews</li>
+                                    <li><strong>Rejected Status:</strong> Edit to fix issues and resubmit (status changes back to Waiting)</li>
+                                    <li><strong>Approved Status:</strong> Cannot be edited or deleted - final</li>
+                                </ul>
+                                <div class="mt-2 ml-7 bg-green-50 border border-green-200 rounded p-2">
+                                    <p class="text-xs text-green-800"><strong>💡 Tip:</strong> When editing rejected submissions, make sure to address all issues mentioned in the rejection reason to avoid another rejection.</p>
+                                </div>
                             </div>
                             
                             <div class="border-b pb-4">
                                 <h3 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">7</span>
-                                    Can I edit or delete a submitted activity?
-                                </h3>
-                                <p class="text-sm text-gray-600 ml-7">You can only edit or delete activities that are still in "Waiting" status (pending review). Once a submission has been approved or rejected, it cannot be edited or deleted. However, you can:</p>
-                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside mt-2">
-                                    <li>View the details of approved submissions</li>
-                                    <li>File a complaint for rejected submissions</li>
-                                    <li>Submit a new corrected version for rejected activities</li>
-                                </ul>
-                            </div>
-                            
-                            <div class="border-b pb-4">
-                                <h3 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">8</span>
                                     What date restrictions apply to activity submissions?
                                 </h3>
                                 <p class="text-sm text-gray-600 ml-7">Activity dates must follow these rules:</p>
@@ -1191,7 +1086,7 @@
                             
                             <div class="pb-4">
                                 <h3 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">9</span>
+                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">8</span>
                                     How do I change my password?
                                 </h3>
                                 <p class="text-sm text-gray-600 ml-7">Go to Settings > Change Password section. Enter your current password, then your new password twice to confirm. Your new password must be at least 8 characters long and include uppercase letters, lowercase letters, and numbers for security.</p>
@@ -1238,7 +1133,7 @@
 
             // --- UI VARS ---
             showLogoutModal: false, showAddModal: false, showEditModal: false,
-            showViewModal: false, showDeleteModal: false, showComplaintModal: false,
+            showViewModal: false, showDeleteModal: false,
             
             // --- FILTER VARS ---
             statusFilter: '', 
@@ -1253,7 +1148,6 @@
             // --- ACTION VARS ---
             selectedActivity: null, 
             appealFormOpen: false, appealSubmissionId: null, appealMessage: '',
-            complaintData: { type: '', explanation: '', fileName: '' },
             
             // --- PASSWORD & ALERT VARS ---
             passwordData: { currentPassword: '', newPassword: '', confirmPassword: '' },
@@ -1308,7 +1202,6 @@
             },
 
             handleFileSelect(e) { if(e.target.files[0]) this.formData.fileName = e.target.files[0].name; },
-            handleComplaintFileSelect(e) { if(e.target.files[0]) this.complaintData.fileName = e.target.files[0].name; },
 
             // --- CRUD ACTIONS ---
 
@@ -1438,43 +1331,6 @@
                 });
             },
 
-            // 5. COMPLAINT / APPEAL
-            openComplaintModal(a) { this.selectedActivity = a; this.showComplaintModal = true; },
-            
-            submitComplaint() {
-                if (this.isSubmitting) return;
-
-                if (!this.complaintData.type || !this.complaintData.explanation) {
-                    this.showAlert('warning', 'Missing Info', 'Please fill type and explanation'); return;
-                }
-
-                this.isSubmitting = true; 
-
-                fetch('{{ route("submissions.complaint") }}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        submission_id: this.selectedActivity.id,
-                        type: this.complaintData.type,
-                        explanation: this.complaintData.explanation
-                    })
-                })
-                .then(async res => { const json = await res.json(); if (!res.ok) throw new Error(json.message); return json; })
-                .then(() => {
-                    this.showAlert('success', 'Submitted', 'Complaint sent to admin.');
-                    this.showComplaintModal = false;
-                    this.isSubmitting = false;
-                })
-                .catch(err => {
-                    this.showAlert('error', 'Error', err.message);
-                    this.isSubmitting = false; 
-                });
-            },
-
             // --- PASSWORD ACTION (NEW) ---
             updatePassword() {
                 // 1. Cegah Spam
@@ -1554,11 +1410,16 @@
             
             // --- UI HELPERS ---
             confirmLogout() { fetch('{{ route("logout") }}', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' } }).then(() => window.location.href = '/login'); },
-            openViewModal(a) { this.selectedActivity = a; this.showViewModal = true; },
+            openViewModal(a) { 
+                console.log('Opening view modal with activity:', a); 
+                console.log('File URL:', a.file_url); 
+                this.selectedActivity = a; 
+                this.showViewModal = true; 
+            },
             
             closeModal() { 
                 this.showAddModal = false; this.showEditModal = false; this.showViewModal = false; 
-                this.showDeleteModal = false; this.showComplaintModal = false; this.selectedActivity = null; 
+                this.showDeleteModal = false; this.selectedActivity = null; 
                 this.formData = { mainCategory: '', subcategory: '', activityTitle: '', description: '', activityDate: '', fileName: '' };
                 this.availableSubcategories = [];
                 // Reset loading state on modal close just in case

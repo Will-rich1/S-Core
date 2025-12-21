@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Review - S-Core ITBSS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Admin Review - S-Core ITBSS (v2.0)</title>
+    <script src="https://cdn.tailwindcss.com?v=<?php echo time(); ?>"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -16,7 +19,7 @@
             }
         }
     </script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js?v=<?php echo time(); ?>"></script>
 </head>
 <body>
     <div class="flex h-screen bg-gray-100" x-data="adminReviewData()">
@@ -46,27 +49,41 @@
                     <template x-if="selectedSubmission">
                         <div class="flex w-full h-full">
                             <!-- Left Column - PDF Viewer -->
-                            <div class="w-1/2 bg-gray-100 border-r overflow-auto p-6">
+                            <div class="w-1/2 bg-gray-100 border-r overflow-hidden p-6">
                                 <div class="bg-white rounded-lg shadow-sm h-full flex flex-col">
                                     <div class="bg-gray-800 text-white px-4 py-3 rounded-t-lg flex items-center justify-between">
                                         <span class="text-sm font-medium">Certificate/Evidence</span>
                                         <span class="text-xs text-gray-300" x-text="selectedSubmission.certificate"></span>
                                     </div>
-                                    <div class="flex-1 flex items-center justify-center p-4 bg-gray-50">
-                                        <template x-if="selectedSubmission.certificate">
-                                            <iframe
-                                                :src="'/storage/submissions/' + selectedSubmission.certificate"
-                                                class="w-full h-full border-0 rounded"
-                                                type="application/pdf"
-                                            ></iframe>
+                                    <div class="flex-1 bg-gray-50 relative h-full overflow-hidden" x-data="{ loading: true }">
+                                        <template x-if="selectedSubmission.file_url">
+                                            <div class="relative w-full h-full">
+                                                <!-- Loading spinner -->
+                                                <div x-show="loading" class="absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
+                                                    <div class="text-center">
+                                                        <svg class="animate-spin h-12 w-12 text-blue-600 mx-auto mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                        </svg>
+                                                        <p class="text-sm text-gray-600">Loading PDF...</p>
+                                                    </div>
+                                                </div>
+                                                <!-- PDF iframe -->
+                                                <iframe
+                                                    :src="selectedSubmission.file_url"
+                                                    @load="loading = false"
+                                                    class="w-full h-full"
+                                                    style="border: none;"
+                                                    type="application/pdf"
+                                                ></iframe>
+                                            </div>
                                         </template>
-                                        <template x-if="!selectedSubmission.certificate">
-                                            <div class="w-full h-full border-2 border-dashed border-gray-300 rounded flex flex-col items-center justify-center">
-                                                <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        <template x-if="!selectedSubmission.file_url">
+                                            <div class="flex items-center justify-center h-full text-red-500 flex-col gap-2">
+                                                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                                 </svg>
-                                                <p class="text-gray-500 text-sm mb-2">No Certificate Available</p>
-                                                <p class="text-gray-400 text-xs">Certificate file not found</p>
+                                                <p>File PDF tidak ditemukan di database.</p>
                                             </div>
                                         </template>
                                     </div>
@@ -736,6 +753,15 @@
                     </svg>
                     <span x-show="isSidebarOpen" class="text-sm" :class="activeMenu === 'Students' ? 'text-blue-700 font-medium' : 'text-gray-700'">Students</span>
                 </button>
+                <button @click="activeMenu = 'Bulk Score'" class="w-full flex items-center py-3 text-left hover:bg-gray-100 transition-colors" :class="[
+                    isSidebarOpen ? 'gap-3 px-4' : 'justify-center',
+                    activeMenu === 'Bulk Score' ? 'bg-blue-50 border-l-4 border-blue-500' : ''
+                ]">
+                    <svg class="w-6 h-6" :class="activeMenu === 'Bulk Score' ? 'text-blue-500' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                    <span x-show="isSidebarOpen" class="text-sm" :class="activeMenu === 'Bulk Score' ? 'text-blue-700 font-medium' : 'text-gray-700'">Bulk Score</span>
+                </button>
                 <button @click="activeMenu = 'Settings'" class="w-full flex items-center py-3 text-left hover:bg-gray-100 transition-colors" :class="[
                     isSidebarOpen ? 'gap-3 px-4' : 'justify-center',
                     activeMenu === 'Settings' ? 'bg-blue-50 border-l-4 border-blue-500' : ''
@@ -1207,6 +1233,170 @@
                 </div>
             </div>
 
+            <!-- Bulk Score Page -->
+            <div x-show="activeMenu === 'Bulk Score'">
+                <div class="mb-6">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Bulk S-Core Assignment</h1>
+                    <p class="text-gray-600">Create S-Core submissions for multiple students at once based on filters</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <form @submit.prevent="applyBulkScore()" class="space-y-6">
+                        <!-- Filter Type Selection -->
+                        <div class="border-b pb-4">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3">1. Select Target Students</h3>
+                            <p class="text-sm text-gray-600 mb-3">You can select multiple filters to target specific students. Leave all filters empty to target all students.</p>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <!-- Major Filter -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Major</label>
+                                    <select x-model="bulkScore.selectedMajor" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">All Majors</option>
+                                        <option value="STI">STI</option>
+                                        <option value="BD">BD</option>
+                                        <option value="KWU">KWU</option>
+                                    </select>
+                                </div>
+
+                                <!-- Year Filter -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Batch Year</label>
+                                    <select x-model="bulkScore.selectedYear" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">All Years</option>
+                                        <option value="2021">2021</option>
+                                        <option value="2022">2022</option>
+                                        <option value="2023">2023</option>
+                                        <option value="2024">2024</option>
+                                        <option value="2025">2025</option>
+                                    </select>
+                                </div>
+
+                                <!-- Shift Filter -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Shift</label>
+                                    <select x-model="bulkScore.selectedShift" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">All Shifts</option>
+                                        <option value="pagi">Pagi</option>
+                                        <option value="sore">Sore</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Activity Details Section -->
+                        <div class="border-b pb-4">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-3">2. Activity Details</h3>
+                            
+                            <!-- Main Category -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Main Category <span class="text-red-500">*</span></label>
+                                <select x-model="bulkScore.mainCategory" @change="bulkScore.subcategory = ''" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                    <option value="">Choose main category...</option>
+                                    <template x-for="(catGroup, idx) in categoryGroups" :key="idx">
+                                        <option :value="catGroup.id" x-text="(idx + 1) + '. ' + catGroup.name"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <!-- Subcategory -->
+                            <div class="mb-4" x-show="bulkScore.mainCategory !== ''">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Subcategory <span class="text-red-500">*</span></label>
+                                <select x-model="bulkScore.subcategory" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                    <option value="">Choose subcategory...</option>
+                                    <template x-for="(catGroup, idx) in categoryGroups" :key="idx">
+                                        <template x-if="catGroup.id == bulkScore.mainCategory">
+                                            <template x-for="sub in catGroup.subcategories" :key="sub.id">
+                                                <option :value="sub.id" x-text="sub.name + ' (' + sub.points + ' pts)'"></option>
+                                            </template>
+                                        </template>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <!-- Activity Title -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Activity Title <span class="text-red-500">*</span></label>
+                                <input type="text" x-model="bulkScore.activityTitle" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter activity title" required>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Description <span class="text-red-500">*</span></label>
+                                <textarea x-model="bulkScore.description" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter description" required></textarea>
+                            </div>
+
+                            <!-- Activity Date -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Activity Date <span class="text-red-500">*</span></label>
+                                <input type="date" x-model="bulkScore.activityDate" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+
+                            <!-- Certificate Upload -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Certificate/Proof <span class="text-gray-500">(Optional)</span></label>
+                                <input type="file" x-ref="bulkCertificate" accept=".pdf,.jpg,.jpeg,.png" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <p class="text-xs text-gray-500 mt-1">Upload PDF, JPG, or PNG if available (max 10MB)</p>
+                            </div>
+                        </div>
+
+                        <!-- Auto Points Display -->
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <p class="text-sm text-gray-700 mb-1"><strong>Points to be awarded:</strong></p>
+                            <template x-for="(catGroup, idx) in categoryGroups" :key="idx">
+                                <template x-if="catGroup.id == bulkScore.mainCategory">
+                                    <template x-for="sub in catGroup.subcategories" :key="sub.id">
+                                        <template x-if="sub.id == bulkScore.subcategory">
+                                            <div>
+                                                <p class="text-2xl font-bold text-green-600" x-text="sub.points"></p>
+                                                <p class="text-xs text-gray-500 mt-1">Points will be automatically assigned and approved</p>
+                                            </div>
+                                        </template>
+                                    </template>
+                                </template>
+                            </template>
+                            <template x-if="!bulkScore.subcategory">
+                                <div>
+                                    <p class="text-2xl font-bold text-gray-400">0</p>
+                                    <p class="text-xs text-gray-500 mt-1">Select a subcategory to see points</p>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Preview --> 
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h3 class="font-semibold text-blue-900 mb-2">Preview</h3>
+                            <div class="text-sm text-blue-800 space-y-1">
+                                <p><strong>Target Students:</strong></p>
+                                <ul class="list-disc ml-5">
+                                    <li x-show="bulkScore.selectedMajor">Major: <span class="font-bold" x-text="bulkScore.selectedMajor"></span></li>
+                                    <li x-show="bulkScore.selectedYear">Year: <span class="font-bold" x-text="bulkScore.selectedYear"></span></li>
+                                    <li x-show="bulkScore.selectedShift">Shift: <span class="font-bold" x-text="bulkScore.selectedShift === 'pagi' ? 'Pagi' : 'Sore'"></span></li>
+                                    <li x-show="!bulkScore.selectedMajor && !bulkScore.selectedYear && !bulkScore.selectedShift" class="text-gray-600">All students (no filter applied)</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-3 pt-4">
+                            <button 
+                                type="submit"
+                                :disabled="bulkScore.isSubmitting"
+                                class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition">
+                                <span x-show="!bulkScore.isSubmitting">Create Bulk Submissions</span>
+                                <span x-show="bulkScore.isSubmitting">Processing...</span>
+                            </button>
+                            <button 
+                                type="button"
+                                @click="resetBulkScoreForm()"
+                                class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition">
+                                Reset
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <!-- Settings Page -->
             <div x-show="activeMenu === 'Settings'" x-data="{ settingsTab: 'students' }">
                 <div class="mb-6">
@@ -1530,6 +1720,7 @@
 
                 <!-- System Info Tab -->
                 <div x-show="settingsTab === 'system'" class="space-y-6">
+                    <!-- System Information -->
                     <div class="bg-white rounded-lg shadow p-6">
                         <h3 class="text-lg font-semibold mb-4">System Information</h3>
                         <div class="space-y-2 text-sm">
@@ -1539,7 +1730,7 @@
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Last Updated:</span>
-                                <span class="font-medium">December 2, 2025</span>
+                                <span class="font-medium">December 21, 2025</span>
                             </div>
                         </div>
                     </div>
@@ -1856,7 +2047,10 @@
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">1</span>
                                     How do I review a submission?
                                 </h4>
-                                <p class="text-sm text-gray-600 ml-7">Click on the "Review" button in the Review Submissions page to view submission details. You can assign the correct category, view the certificate/evidence, and either approve or reject the submission. When approving, make sure to select the appropriate category and verify the suggested points.</p>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">Click on the "Review" button in the Review Submissions page to view submission details. You can assign the correct category, preview the certificate/proof directly from Google Drive, and either approve or reject the submission. When approving, make sure to select the appropriate category and verify the suggested points.</p>
+                                <div class="mt-2 ml-7 bg-green-50 border border-green-200 rounded p-2">
+                                    <p class="text-xs text-green-800"><strong>📁 Google Drive Integration:</strong> All certificates are stored in Google Drive. You can preview PDFs directly in the browser without downloading.</p>
+                                </div>
                             </div>
 
                             <div class="border-b pb-4">
@@ -1939,6 +2133,47 @@
                                 </h4>
                                 <p class="text-sm text-gray-600 ml-7">Go to User Management and fill out the Add New User form. Enter the required information (name, email, password, role) and optional student details. The user will be automatically added to the database when you click "Add User". Passwords are securely hashed before storage.</p>
                             </div>
+
+                            <div class="pb-4">
+                                <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">9</span>
+                                    How do I use the Bulk Score feature?
+                                </h4>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">The Bulk Score feature allows you to assign S-Core points to multiple students at once for group activities. To use it:</p>
+                                <ol class="text-sm text-gray-600 ml-7 space-y-1 list-decimal list-inside">
+                                    <li>Go to the <strong>Bulk Score</strong> menu in the sidebar</li>
+                                    <li>Select target students using filters:
+                                        <ul class="ml-5 mt-1 space-y-1 list-disc list-inside">
+                                            <li><strong>Major:</strong> Choose the program (Informatika, Sistem Informasi, etc.)</li>
+                                            <li><strong>Year (Angkatan):</strong> Select graduation year</li>
+                                            <li><strong>Shift:</strong> Morning (Pagi) or Afternoon (Sore) classes</li>
+                                        </ul>
+                                    </li>
+                                    <li>Select the <strong>Main Category</strong> and <strong>Subcategory</strong> for the activity</li>
+                                    <li>Fill in:
+                                        <ul class="ml-5 mt-1 space-y-1 list-disc list-inside">
+                                            <li><strong>Activity Title:</strong> Name of the group activity</li>
+                                            <li><strong>Description:</strong> Details about the activity</li>
+                                            <li><strong>Activity Date:</strong> When the activity took place</li>
+                                            <li><strong>Certificate/Proof (Optional):</strong> Upload shared certificate if available</li>
+                                        </ul>
+                                    </li>
+                                    <li>Click <strong>Submit Bulk Score</strong></li>
+                                </ol>
+                                <div class="mt-2 ml-7 bg-blue-50 border border-blue-200 rounded p-2">
+                                    <p class="text-xs text-blue-800 mb-2"><strong>🎯 Key Features:</strong></p>
+                                    <ul class="text-xs text-blue-800 space-y-1 list-disc list-inside">
+                                        <li>Submissions are <strong>auto-approved</strong> and immediately visible to students</li>
+                                        <li>All students receive the same points based on the selected category</li>
+                                        <li>Perfect for group events, seminars, workshops, or competitions</li>
+                                        <li>If certificate is uploaded, all students share the same certificate file</li>
+                                        <li>System will show preview of how many students will receive the score before submitting</li>
+                                    </ul>
+                                </div>
+                                <div class="mt-2 ml-7 bg-yellow-50 border border-yellow-200 rounded p-2">
+                                    <p class="text-xs text-yellow-800"><strong>⚠️ Important:</strong> Double-check your filters before submitting, as bulk scores are immediately approved and cannot be easily undone. Make sure the selected students actually participated in the activity.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -1975,9 +2210,23 @@
             // --- DATA FROM CONTROLLER ---
             submissions: @json($submissions),
             stats: @json($stats),
-            categories: @json($categories), // Previously categoryGroups
-            students: @json($students),     // NEW: Student Data
-            studentStats: @json($studentStats), // NEW: Student Statistics
+            categories: @json($categories), 
+            categoryGroups: @json($categories), // Alias for categories
+            students: @json($students),     
+            studentStats: @json($studentStats), 
+            
+            // Bulk Score Data
+            bulkScore: {
+                selectedMajor: '',
+                selectedYear: '',
+                selectedShift: '',
+                mainCategory: '',
+                subcategory: '',
+                activityTitle: '',
+                description: '',
+                activityDate: '',
+                isSubmitting: false
+            },
             
             // --- UI VARIABLES ---
             showLogoutModal: false,
@@ -2034,6 +2283,13 @@
             
             showStudentDetailModal: false, 
             selectedStudent: null,
+            
+            // User Management Tab
+            userTab: 'students',
+            
+            // Settings Tab
+            settingsTab: 'students',
+            
             // --- COMPUTED PROPERTIES ---
 
             get uniqueCategories() {
@@ -2304,7 +2560,79 @@
             editSubcategory() {},
             saveSubcategory() {},
             deleteSubcategory() {},
-            cancelEditSubcategory() {}
+            cancelEditSubcategory() {},
+            
+            // Bulk Score Management
+            async applyBulkScore() {
+                // Validasi
+                if (!this.bulkScore.mainCategory || !this.bulkScore.subcategory) {
+                    this.showAlert('error', 'Error', 'Please select category and subcategory');
+                    return;
+                }
+                
+                if (!this.bulkScore.activityTitle || !this.bulkScore.description || !this.bulkScore.activityDate) {
+                    this.showAlert('error', 'Error', 'Please fill all required fields');
+                    return;
+                }
+                
+                this.bulkScore.isSubmitting = true;
+                
+                try {
+                    // Buat FormData untuk upload file
+                    const formData = new FormData();
+                    formData.append('selectedMajor', this.bulkScore.selectedMajor);
+                    formData.append('selectedYear', this.bulkScore.selectedYear);
+                    formData.append('selectedShift', this.bulkScore.selectedShift);
+                    formData.append('mainCategory', this.bulkScore.mainCategory);
+                    formData.append('subcategory', this.bulkScore.subcategory);
+                    formData.append('activityTitle', this.bulkScore.activityTitle);
+                    formData.append('description', this.bulkScore.description);
+                    formData.append('activityDate', this.bulkScore.activityDate);
+                    
+                    // Certificate is optional
+                    if (this.$refs.bulkCertificate && this.$refs.bulkCertificate.files.length > 0) {
+                        formData.append('certificate', this.$refs.bulkCertificate.files[0]);
+                    }
+                    
+                    const response = await fetch('/admin/bulk-score', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.showAlert('success', 'Success', result.message);
+                        this.resetBulkScoreForm();
+                        // Reload page to update submissions
+                        setTimeout(() => window.location.reload(), 2000);
+                    } else {
+                        this.showAlert('error', 'Error', result.message || 'Failed to create submissions');
+                    }
+                } catch (error) {
+                    console.error('Bulk score error:', error);
+                    this.showAlert('error', 'Error', 'Failed to connect to server');
+                } finally {
+                    this.bulkScore.isSubmitting = false;
+                }
+            },
+            
+            resetBulkScoreForm() {
+                this.bulkScore.selectedMajor = '';
+                this.bulkScore.selectedYear = '';
+                this.bulkScore.selectedShift = '';
+                this.bulkScore.mainCategory = '';
+                this.bulkScore.subcategory = '';
+                this.bulkScore.activityTitle = '';
+                this.bulkScore.description = '';
+                this.bulkScore.activityDate = '';
+                if (this.$refs.bulkCertificate) {
+                    this.$refs.bulkCertificate.value = '';
+                }
+            }
         }
     }
 </script>

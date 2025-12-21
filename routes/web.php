@@ -58,5 +58,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/students/import', [UserController::class, 'importStudents'])->name('students.import');
     Route::post('/admins/store', [UserController::class, 'storeAdmin'])->name('admins.store');
 
+    // Bulk Score
+    Route::post('/admin/bulk-score', [DashboardController::class, 'bulkScore'])->name('admin.bulk-score');
 
 });

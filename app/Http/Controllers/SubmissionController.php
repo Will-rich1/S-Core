@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Submission;
 use App\Models\Category;
 use App\Models\Subcategory;
+use App\Services\GoogleDriveService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -46,10 +47,12 @@ class SubmissionController extends Controller
                 }
             }
 
-            // 3. Proses Upload File
-            $file = $request->file('certificate_file');
-            $filename = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
-            $path = $file->storeAs('certificates', $filename, 'public'); 
+            // 3. Upload File ke Google Drive
+            $googleDriveService = app(GoogleDriveService::class);
+            $uploadResult = $googleDriveService->uploadFile(
+                $request->file('certificate_file'),
+                'certificates'
+            );
 
             // 4. Simpan Data ke Database
             Submission::create([
@@ -59,8 +62,10 @@ class SubmissionController extends Controller
                 'title'                  => $request->title,
                 'description'            => $request->description,
                 'activity_date'          => $request->activity_date,
-                'certificate_path'       => $path,
-                'certificate_original_name' => $file->getClientOriginalName(),
+                'certificate_path'       => $uploadResult['path'],
+                'certificate_url'        => $uploadResult['url'] ?? null,
+                'certificate_original_name' => $request->file('certificate_file')->getClientOriginalName(),
+                'storage_type'           => $uploadResult['storage'] ?? 'google',
                 'status'                 => 'Waiting',
             ]);
 
@@ -118,18 +123,27 @@ class SubmissionController extends Controller
 
             // Cek apakah ada file baru diupload
             if ($request->hasFile('certificate_file')) {
-                // Hapus file lama fisik
-                if ($submission->certificate_path && Storage::disk('public')->exists($submission->certificate_path)) {
-                    Storage::disk('public')->delete($submission->certificate_path);
+                $googleDriveService = app(GoogleDriveService::class);
+                
+                // Hapus file lama dari Google Drive jika ada
+                if ($submission->certificate_path && $submission->storage_type === 'google') {
+                    try {
+                        $googleDriveService->deleteFile($submission->certificate_path, 'google');
+                    } catch (\Exception $e) {
+                        \Log::warning('Failed to delete old file from Google Drive: ' . $e->getMessage());
+                    }
                 }
 
-                // Simpan file baru
-                $file = $request->file('certificate_file');
-                $filename = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
-                $path = $file->storeAs('certificates', $filename, 'public'); 
+                // Upload file baru ke Google Drive
+                $uploadResult = $googleDriveService->uploadFile(
+                    $request->file('certificate_file'),
+                    'certificates'
+                );
                 
-                $dataToUpdate['certificate_path'] = $path;
-                $dataToUpdate['certificate_original_name'] = $file->getClientOriginalName();
+                $dataToUpdate['certificate_path'] = $uploadResult['path'];
+                $dataToUpdate['certificate_url'] = $uploadResult['url'] ?? null;
+                $dataToUpdate['certificate_original_name'] = $request->file('certificate_file')->getClientOriginalName();
+                $dataToUpdate['storage_type'] = $uploadResult['storage'] ?? 'google';
             }
 
             $submission->update($dataToUpdate);
@@ -154,9 +168,14 @@ class SubmissionController extends Controller
                 return response()->json(['message' => 'Cannot delete processed submission'], 403);
             }
 
-            // Hapus file fisik
-            if ($submission->certificate_path && Storage::disk('public')->exists($submission->certificate_path)) {
-                Storage::disk('public')->delete($submission->certificate_path);
+            // Hapus file dari storage jika ada
+            if ($submission->certificate_path) {
+                try {
+                    $googleDriveService = app(GoogleDriveService::class);
+                    $googleDriveService->deleteFile($submission->certificate_path, $submission->storage_type);
+                } catch (\Exception $e) {
+                    \Log::warning('Failed to delete file from storage: ' . $e->getMessage());
+                }
             }
 
             $submission->delete();

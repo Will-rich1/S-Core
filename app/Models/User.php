@@ -18,6 +18,7 @@ class User extends Authenticatable
         'student_id',
         'major',
         'year',
+        'shift',
     ];
 
     protected $hidden = [
