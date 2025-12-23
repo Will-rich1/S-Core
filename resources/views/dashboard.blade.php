@@ -208,7 +208,7 @@
                                             <label class="block text-sm font-medium text-gray-700 mb-2">Main Category <span class="text-red-500">*</span></label>
                                             <select x-model="formData.mainCategory" @change="updateAvailableSubcategories()" class="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                                 <option value="">Select Main Category</option>
-                                                <template x-for="(catGroup, idx) in categoryGroups" :key="idx">
+                                                <template x-for="(catGroup, idx) in categoryGroups" :key="catGroup.id">
                                                     <option :value="idx" x-text="(idx + 1) + '. ' + catGroup.name"></option>
                                                 </template>
                                             </select>
@@ -697,8 +697,9 @@
                         </select>
 
                         <select x-model="categoryFilter" class="border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Categories</option> <template x-for="cat in uniqueCategories" :key="cat">
-                                <option :value="cat" x-text="cat"></option>
+                            <option value="">All Categories</option>
+                            <template x-for="cat in categoryGroups" :key="cat.id">
+                                <option :value="cat.name" x-text="cat.name"></option>
                             </template>
                         </select>
 

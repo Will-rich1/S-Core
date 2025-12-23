@@ -82,13 +82,13 @@
 
                     <div class="flex flex-col gap-2">
                         <div class="flex justify-between items-center text-sm">
-                            <a href="#" class="text-primary hover:underline">
+                            {{-- <a href="#" class="text-primary hover:underline">
                                 Forgot your password?
-                            </a>
-                            <label class="flex items-center">
+                            </a> --}}
+                            {{-- <label class="flex items-center">
                                 <input type="checkbox" class="mr-1">
                                 Remember me
-                            </label>
+                            </label> --}}
                         </div>
                     </div>
 

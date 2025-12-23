@@ -15,4 +15,11 @@ class Subcategory extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    // --- TAMBAHKAN INI AGAR BISA HAPUS ---
+    public function submissions()
+    {
+        // Pastikan 'student_subcategory_id' sesuai dengan nama kolom di database Anda
+        return $this->hasMany(Submission::class, 'student_subcategory_id');
+    }
 }

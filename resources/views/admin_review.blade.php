@@ -589,7 +589,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                             <select x-model="newCategory.mainCategoryIndex" class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">Select Main Category</option>
-                                <template x-for="(cat, idx) in categoryGroups" :key="idx">
+                                <template x-for="(cat, idx) in categories" :key="cat.id">
                                     <option :value="idx" x-text="(idx + 1) + '. ' + cat.name"></option>
                                 </template>
                             </select>
@@ -605,78 +605,54 @@
                     <!-- Categories List -->
                     <div class="space-y-4">
                         <h4 class="font-semibold text-gray-800 mb-3">Existing Categories & Subcategories</h4>
-                        <template x-for="(catGroup, catIndex) in categoryGroups" :key="catIndex">
-                            <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-4">
-                                <!-- Main Category Header with Edit/Delete -->
+                        
+                        <template x-for="(cat, catIndex) in categories" :key="cat.id">
+                            <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-4 mb-4">
+                                
                                 <div class="flex items-center justify-between mb-3">
-                                    <template x-if="!catGroup.isEditing">
-                                        <h5 class="font-bold text-lg text-gray-800" x-text="(catIndex + 1) + '. ' + catGroup.name"></h5>
+                                    <template x-if="!cat.isEditing">
+                                        <h5 class="font-bold text-lg text-gray-800" x-text="(catIndex + 1) + '. ' + cat.name"></h5>
                                     </template>
-                                    <template x-if="catGroup.isEditing">
-                                        <input type="text" x-model="catGroup.name" class="flex-1 border-2 border-blue-500 rounded-lg px-3 py-1.5 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                    
+                                    <template x-if="cat.isEditing">
+                                        <input type="text" x-model="cat.name" class="flex-1 border-2 border-blue-500 rounded-lg px-3 py-1.5 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 mr-3" />
                                     </template>
+
                                     <div class="flex gap-2">
-                                        <template x-if="!catGroup.isEditing">
-                                            <button @click="catGroup.isEditing = true" class="text-blue-500 hover:text-blue-700 p-1" title="Edit Main Category">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                </svg>
+                                        <template x-if="!cat.isEditing">
+                                            <button @click="cat.isEditing = true" class="text-blue-500 hover:text-blue-700 p-1" title="Edit Main Category">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                             </button>
                                         </template>
-                                        <template x-if="catGroup.isEditing">
-                                            <button @click="saveMainCategory(catIndex)" class="text-green-500 hover:text-green-700 p-1" title="Save">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                                </svg>
-                                            </button>
+                                        
+                                        <template x-if="cat.isEditing">
+                                            <div class="flex gap-1">
+                                                <button @click="saveMainCategory(catIndex)" class="text-green-500 hover:text-green-700 p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></button>
+                                                <button @click="cat.isEditing = false" class="text-gray-500 hover:text-gray-700 p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                                            </div>
                                         </template>
-                                        <template x-if="catGroup.isEditing">
-                                            <button @click="catGroup.isEditing = false" class="text-gray-500 hover:text-gray-700 p-1" title="Cancel">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
-                                            </button>
-                                        </template>
+                                        
                                         <button @click="deleteMainCategory(catIndex)" class="text-red-500 hover:text-red-700 p-1" title="Delete Main Category">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                         </button>
                                     </div>
                                 </div>
                                 
                                 <div class="space-y-2 ml-4">
-                                    <template x-for="(subcat, subIndex) in catGroup.subcategories" :key="subIndex">
+                                    <template x-for="(subcat, subIndex) in cat.subcategories" :key="subIndex">
                                         <div class="bg-white border border-gray-200 rounded-lg p-3 hover:border-blue-300 transition-colors">
                                             <div class="flex items-center gap-3">
-                                                <!-- Edit Mode -->
+                                                
                                                 <template x-if="subcat.isEditing">
-                                                    <div class="flex-1 flex items-center gap-3">
-                                                        <input 
-                                                            type="text" 
-                                                            x-model="subcat.name" 
-                                                            class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                        />
-                                                        <input 
-                                                            type="number" 
-                                                            x-model="subcat.points" 
-                                                            class="w-20 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                        />
-                                                        <input 
-                                                            type="text" 
-                                                            x-model="subcat.description" 
-                                                            class="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                        />
-                                                        <button @click="saveSubcategory(catIndex, subIndex)" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium">
-                                                            Save
-                                                        </button>
-                                                        <button @click="cancelEditSubcategory(catIndex, subIndex)" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium">
-                                                            Cancel
-                                                        </button>
+                                                    <div class="flex-1 flex items-center gap-2">
+                                                        <input type="text" x-model="subcat.name" placeholder="Name" class="flex-1 border rounded px-2 py-1 text-sm">
+                                                        <input type="number" x-model="subcat.points" placeholder="Pts" class="w-16 border rounded px-2 py-1 text-sm">
+                                                        <input type="text" x-model="subcat.description" placeholder="Desc" class="flex-1 border rounded px-2 py-1 text-sm">
+                                                        <button @click="saveSubcategory(catIndex, subIndex)" class="text-green-600 hover:text-green-800"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></button>
+                                                        <button @click="cancelEditSubcategory(catIndex, subIndex)" class="text-gray-500 hover:text-gray-700"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
                                                     </div>
                                                 </template>
                                                 
-                                                <!-- View Mode -->
                                                 <template x-if="!subcat.isEditing">
                                                     <div class="flex-1 flex items-center justify-between">
                                                         <div class="flex-1">
@@ -687,19 +663,16 @@
                                                             </p>
                                                         </div>
                                                         <div class="flex items-center gap-2">
-                                                            <button @click="editSubcategory(catIndex, subIndex)" class="text-blue-500 hover:text-blue-700 p-1" title="Edit">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                                </svg>
+                                                            <button @click="editSubcategory(catIndex, subIndex)" class="text-blue-500 hover:text-blue-700 p-1">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                                             </button>
-                                                            <button @click="deleteSubcategory(catIndex, subIndex)" class="text-red-500 hover:text-red-700 p-1" title="Delete">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                </svg>
+                                                            <button @click="deleteSubcategory(catIndex, subIndex)" class="text-red-500 hover:text-red-700 p-1">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                                             </button>
                                                         </div>
                                                     </div>
                                                 </template>
+
                                             </div>
                                         </div>
                                     </template>
@@ -831,8 +804,8 @@
 
                             <select x-model="categoryFilter" class="border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">All Categories</option>
-                                <template x-for="cat in uniqueCategories" :key="cat">
-                                    <option :value="cat" x-text="cat.substring(0, 30) + '...'"></option>
+                                <template x-for="cat in categories" :key="cat.id">
+                                    <option :value="cat.name" x-text="cat.name.length > 30 ? cat.name.substring(0, 30) + '...' : cat.name"></option>
                                 </template>
                             </select>
 
@@ -2201,440 +2174,592 @@
     </div>
 </div>
 
-    <script>
+<script>
     function adminReviewData() {
-        return {
-            activeMenu: 'Review Submissions',
-            isSidebarOpen: false,
-            
-            // --- DATA FROM CONTROLLER ---
-            submissions: @json($submissions),
-            stats: @json($stats),
-            categories: @json($categories), 
-            categoryGroups: @json($categories), // Alias for categories
-            students: @json($students),     
-            studentStats: @json($studentStats), 
-            
-            // Bulk Score Data
-            bulkScore: {
-                selectedMajor: '',
-                selectedYear: '',
-                selectedShift: '',
-                mainCategory: '',
-                subcategory: '',
-                activityTitle: '',
-                description: '',
-                activityDate: '',
-                isSubmitting: false
-            },
-            
-            // --- UI VARIABLES ---
-            showLogoutModal: false,
-            showDetailModal: false,
-            showRejectModal: false,
-            showCategoryModal: false,
-            showPinModal: false,
-            showEditConfirmModal: false,
-            showDeleteConfirmModal: false,
-            showApproveModal: false,
-            showAlertModal: false,
-            
-            alertType: 'info',
-            alertTitle: '',
-            alertMessage: '',
-            alertHasCancel: false,
-            alertCallback: null,
-            
-            approveModalMainCategory: '',
-            approveModalSubcategory: '',
-            approveModalPoints: 0,
-            
-            pinInput: '',
-            pinError: false,
-            isPinVerified: false,
-            
-            editingCategory: null,
-            deletingCategory: null,
-            selectedSubmission: null,
-            
-            rejectReason: '',
-            rejectReasonType: '',
-            categoryChangeReason: '',
-            categoryChanged: false,
-            
-            assignedMainCategory: '',
-            assignedSubcategory: '',
-            assignedAvailableSubcategories: [],
-            
-            newMainCategory: '',
-            newCategory: { mainCategoryIndex: '', name: '', points: '', description: '' },
-            
-            // --- FILTER VARIABLES ---
-            statusFilter: 'Waiting', // For Review Tab
-            categoryFilter: '',      // For Review Tab
-            studentFilter: '',       // For Review Tab
-            searchQuery: '',         // For Review Tab
-            
-            // Student Management Filters
-            studentSearchQuery: '',
-            majorFilter: '',
-            yearFilter: '',
-            statusPassFilter: '',    // Logic: Pass >= 20, Fail < 20
-            
-            showStudentDetailModal: false, 
-            selectedStudent: null,
-            
-            // User Management Tab
-            userTab: 'students',
-            
-            // Settings Tab
-            settingsTab: 'students',
-            
-            // --- COMPUTED PROPERTIES ---
+    return {
+        activeMenu: 'Review Submissions',
+        isSidebarOpen: false,
+        
+        // --- DATA DARI CONTROLLER ---
+        submissions: @json($submissions),
+        stats: @json($stats),
+        
+        // DATA KATEGORI (Data Mentah)
+        categories: @json($categories), 
+        
+        // DATA GROUP (Kita kosongkan dulu, nanti diisi otomatis oleh init())
+        categoryGroups: [], 
+        
+        students: @json($students),     
+        studentStats: @json($studentStats), 
+        
+        // Bulk Score Data
+        bulkScore: {
+            selectedMajor: '',
+            selectedYear: '',
+            selectedShift: '',
+            mainCategory: '',
+            subcategory: '',
+            activityTitle: '',
+            description: '',
+            activityDate: '',
+            isSubmitting: false
+        },
+        
+        // --- VARIABLE UI ---
+        showLogoutModal: false,
+        showDetailModal: false,
+        showRejectModal: false,
+        showCategoryModal: false,
+        showPinModal: false,
+        showEditConfirmModal: false,
+        showDeleteConfirmModal: false,
+        showApproveModal: false,
+        showAlertModal: false,
+        
+        alertType: 'info',
+        alertTitle: '',
+        alertMessage: '',
+        alertHasCancel: false,
+        alertCallback: null,
+        
+        approveModalMainCategory: '',
+        approveModalSubcategory: '',
+        approveModalPoints: 0,
+        
+        pinInput: '',
+        pinError: false,
+        isPinVerified: false,
+        
+        editingCategory: null,
+        deletingCategory: null,
+        selectedSubmission: null,
+        
+        rejectReason: '',
+        rejectReasonType: '',
+        categoryChangeReason: '',
+        categoryChanged: false,
+        
+        assignedMainCategory: '',
+        assignedSubcategory: '',
+        assignedAvailableSubcategories: [],
+        
+        newMainCategory: '',
+        newCategory: { mainCategoryIndex: '', name: '', points: '', description: '' },
+        
+        // --- VARIABLE FILTER ---
+        statusFilter: 'Waiting', 
+        categoryFilter: '',      
+        studentFilter: '',       
+        searchQuery: '',         
+        
+        // Filter Student Management
+        studentSearchQuery: '',
+        majorFilter: '',
+        yearFilter: '',
+        statusPassFilter: '',    
+        
+        showStudentDetailModal: false, 
+        selectedStudent: null,
+        
+        // Tabs
+        userTab: 'students',
+        settingsTab: 'students',
 
-            get uniqueCategories() {
-                const categorySet = new Set();
-                this.submissions.forEach(s => {
-                    if (s.mainCategory) categorySet.add(s.mainCategory);
-                });
-                return Array.from(categorySet).sort();
-            },
+        // ============================================================
+        //  FUNGSI INIT (PENTING: JANGAN DIHAPUS)
+        //  Fungsi ini berjalan otomatis saat halaman dimuat
+        // ============================================================
+        init() {
+            // 1. Loop semua kategori & subkategori, tambahkan status 'isEditing: false'
+            // Ini agar tombol Edit/Save bisa muncul bergantian
+            this.categories = this.categories.map(cat => ({
+                ...cat,
+                isEditing: false, // Default tidak sedang diedit
+                subcategories: (cat.subcategories || []).map(sub => ({
+                    ...sub,
+                    isEditing: false // Default sub tidak sedang diedit
+                }))
+            }));
 
-            get uniqueStudents() {
-                return [...new Set(this.submissions.map(s => `${s.studentId} - ${s.studentName}`))];
-            },
+            // 2. Sinkronkan categoryGroups agar isinya sama persis dengan categories
+            // Supaya filter dan tampilan list menggunakan data yang sama
+            this.categoryGroups = this.categories;
+        },
+        // ============================================================
+        
+        // --- COMPUTED PROPERTIES ---
 
-            // Filter Logic for "Review Submissions" Tab
-            get filteredSubmissions() {
-                return this.submissions.filter(submission => {
-                    const matchesSearch = this.searchQuery === '' || 
-                        submission.judul.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                        submission.studentName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                        submission.studentId.includes(this.searchQuery);
+        get uniqueCategories() {
+            // Mengambil semua nama kategori untuk dropdown filter
+            return this.categories.map(c => c.name).sort();
+        },
+
+        get uniqueStudents() {
+            return [...new Set(this.submissions.map(s => `${s.studentId} - ${s.studentName}`))];
+        },
+
+        // Filter Logic Review Tab
+        get filteredSubmissions() {
+            return this.submissions.filter(submission => {
+                const matchesSearch = this.searchQuery === '' || 
+                    (submission.judul && submission.judul.toLowerCase().includes(this.searchQuery.toLowerCase())) ||
+                    (submission.studentName && submission.studentName.toLowerCase().includes(this.searchQuery.toLowerCase())) ||
+                    (submission.studentId && submission.studentId.includes(this.searchQuery));
+                
+                const matchesStatus = this.statusFilter === '' || submission.status === this.statusFilter;
+                const matchesCategory = this.categoryFilter === '' || submission.mainCategory === this.categoryFilter;
+                const matchesStudent = this.studentFilter === '' || `${submission.studentId} - ${submission.studentName}` === this.studentFilter;
+                
+                return matchesSearch && matchesStatus && matchesCategory && matchesStudent;
+            });
+        },
+
+        // Filter Logic Student Tab
+        get filteredStudentsList() {
+            return this.students.filter(student => {
+                const searchLower = this.studentSearchQuery.toLowerCase();
+                const matchesSearch = student.name.toLowerCase().includes(searchLower) || 
+                                      student.id.toString().includes(searchLower);
+
+                const matchesMajor = this.majorFilter === '' || student.major === this.majorFilter;
+                const matchesYear = this.yearFilter === '' || student.year == this.yearFilter;
+
+                let matchesStatus = true;
+                if (this.statusPassFilter === 'pass') {
+                    matchesStatus = student.approvedPoints >= 20;
+                } else if (this.statusPassFilter === 'fail') {
+                    matchesStatus = student.approvedPoints < 20;
+                }
+
+                return matchesSearch && matchesMajor && matchesYear && matchesStatus;
+            });
+        },
+
+        // --- FUNGSI UTAMA (Review, Approve, Reject) ---
+
+        viewDetail(submission) {
+            this.selectedSubmission = submission;
+            this.assignedMainCategory = '';
+            this.assignedSubcategory = '';
+            this.assignedAvailableSubcategories = [];
+
+            // Auto-fill jika kategori sudah ada
+            if (submission.mainCategory) {
+                const mainIndex = this.categories.findIndex(c => c.name === submission.mainCategory);
+                if (mainIndex !== -1) {
+                    this.assignedMainCategory = mainIndex;
+                    this.assignedAvailableSubcategories = this.categories[mainIndex].subcategories;
                     
-                    const matchesStatus = this.statusFilter === '' || submission.status === this.statusFilter;
-                    const matchesCategory = this.categoryFilter === '' || submission.mainCategory === this.categoryFilter;
-                    const matchesStudent = this.studentFilter === '' || `${submission.studentId} - ${submission.studentName}` === this.studentFilter;
-                    
-                    return matchesSearch && matchesStatus && matchesCategory && matchesStudent;
-                });
-            },
-
-            // Filter Logic for "Student Management" Tab (NEW)
-            get filteredStudentsList() {
-                return this.students.filter(student => {
-                    // 1. Search Logic (Name or ID)
-                    const searchLower = this.studentSearchQuery.toLowerCase();
-                    const matchesSearch = student.name.toLowerCase().includes(searchLower) || 
-                                          student.id.toString().includes(searchLower);
-
-                    // 2. Filter Major Logic
-                    const matchesMajor = this.majorFilter === '' || student.major === this.majorFilter;
-
-                    // 3. Filter Year Logic (Using loose equality == because DB might return string or int)
-                    const matchesYear = this.yearFilter === '' || student.year == this.yearFilter;
-
-                    // 4. Filter Status Logic (Threshold 20 Points)
-                    let matchesStatus = true;
-                    if (this.statusPassFilter === 'pass') {
-                        matchesStatus = student.approvedPoints >= 20;
-                    } else if (this.statusPassFilter === 'fail') {
-                        matchesStatus = student.approvedPoints < 20;
+                    const subIndex = this.assignedAvailableSubcategories.findIndex(s => s.name === submission.subcategory);
+                    if (subIndex !== -1) {
+                        this.assignedSubcategory = subIndex;
                     }
+                }
+            }
+            this.showDetailModal = true;
+        },
 
-                    // Combine all filters
-                    return matchesSearch && matchesMajor && matchesYear && matchesStatus;
-                });
-            },
-
-            // --- ACTIONS ---
-
-            viewDetail(submission) {
-                this.selectedSubmission = submission;
-                this.assignedMainCategory = '';
+        updateAssignedSubcategories() {
+            if (this.assignedMainCategory !== '') {
+                this.assignedAvailableSubcategories = this.categories[this.assignedMainCategory].subcategories;
                 this.assignedSubcategory = '';
+            } else {
                 this.assignedAvailableSubcategories = [];
+                this.assignedSubcategory = '';
+            }
+        },
 
-                if (submission.mainCategory) {
-                    const mainIndex = this.categories.findIndex(c => c.name === submission.mainCategory);
-                    if (mainIndex !== -1) {
-                        this.assignedMainCategory = mainIndex;
-                        this.assignedAvailableSubcategories = this.categories[mainIndex].subcategories;
-                        
-                        const subIndex = this.assignedAvailableSubcategories.findIndex(s => s.name === submission.subcategory);
-                        if (subIndex !== -1) {
-                            this.assignedSubcategory = subIndex;
-                        }
-                    }
-                }
-                this.showDetailModal = true;
-            },
+        handleApprove() {
+            if (this.assignedMainCategory === '' || this.assignedSubcategory === '') {
+                this.showAlert('warning', 'Incomplete', 'Please verify/select the correct Category and Subcategory.');
+                return;
+            }
 
-            updateAssignedSubcategories() {
-                if (this.assignedMainCategory !== '') {
-                    this.assignedAvailableSubcategories = this.categories[this.assignedMainCategory].subcategories;
-                    this.assignedSubcategory = '';
-                } else {
-                    this.assignedAvailableSubcategories = [];
-                    this.assignedSubcategory = '';
-                }
-            },
+            const mainCat = this.categories[this.assignedMainCategory];
+            const subCat = mainCat.subcategories[this.assignedSubcategory];
 
-            handleApprove() {
-                if (this.assignedMainCategory === '' || this.assignedSubcategory === '') {
-                    this.showAlert('warning', 'Incomplete', 'Please verify/select the correct Category and Subcategory.');
-                    return;
-                }
+            this.approveModalMainCategory = mainCat.name;
+            this.approveModalSubcategory = subCat.name;
+            this.approveModalPoints = subCat.points;
+            
+            this.showApproveModal = true;
+        },
 
-                const mainCat = this.categories[this.assignedMainCategory];
-                const subCat = mainCat.subcategories[this.assignedSubcategory];
-
-                this.approveModalMainCategory = mainCat.name;
-                this.approveModalSubcategory = subCat.name;
-                this.approveModalPoints = subCat.points;
-                
-                this.showApproveModal = true;
-            },
-
-            confirmApprove() {
-                const mainCat = this.categories[this.assignedMainCategory];
-                const subCat = mainCat.subcategories[this.assignedSubcategory];
-                const url = `/admin/submissions/${this.selectedSubmission.id}/approve`;
-                
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        assigned_subcategory_id: subCat.id, 
-                        points: subCat.points
-                    })
+        confirmApprove() {
+            const mainCat = this.categories[this.assignedMainCategory];
+            const subCat = mainCat.subcategories[this.assignedSubcategory];
+            const url = `/admin/submissions/${this.selectedSubmission.id}/approve`;
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    assigned_subcategory_id: subCat.id, 
+                    points: subCat.points
                 })
-                .then(async response => {
-                    if (response.ok) {
-                        this.showApproveModal = false;
-                        this.showAlert('success', 'Approved', 'Submission successfully approved! Page will reload.');
-                        setTimeout(() => window.location.reload(), 1500);
-                        this.closeModal();
-                    } else {
-                        const data = await response.json();
-                        throw new Error(data.message || 'Failed to approve');
-                    }
-                })
-                .catch(error => {
-                    console.error(error);
-                    this.showAlert('error', 'Error', error.message);
-                });
-            },
-            // Fungsi Baru: View Detail Mahasiswa
-            viewStudentDetail(student) {
-                this.selectedStudent = student;
-                this.showStudentDetailModal = true;
-            },
-            handleRejectConfirm() {
-                if (!this.rejectReason || this.rejectReason.trim() === '') {
-                    this.showAlert('warning', 'Missing Reason', 'Please provide a reason for rejection.');
-                    return;
-                }
-
-                const url = `/admin/submissions/${this.selectedSubmission.id}/reject`;
-
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        rejectReason: this.rejectReason
-                    })
-                })
-                .then(async response => {
-                    const data = await response.json();
-                    if (!response.ok) throw new Error(data.message || 'Failed to reject submission');
-                    return data;
-                })
-                .then(data => {
-                    this.showRejectModal = false;
-                    this.showAlert('success', 'Rejected', 'Submission has been rejected successfully.');
+            })
+            .then(async response => {
+                if (response.ok) {
+                    this.showApproveModal = false;
+                    this.showAlert('success', 'Approved', 'Submission successfully approved! Page will reload.');
                     setTimeout(() => window.location.reload(), 1500);
                     this.closeModal();
-                })
-                .catch(error => {
-                    console.error('Reject Error:', error);
-                    this.showAlert('error', 'Rejection Failed', error.message);
-                });
-            },
+                } else {
+                    const data = await response.json();
+                    throw new Error(data.message || 'Failed to approve');
+                }
+            })
+            .catch(error => {
+                console.error(error);
+                this.showAlert('error', 'Error', error.message);
+            });
+        },
 
-            // --- EXPORT REPORT FUNCTION ---
-            exportReport() {
-                const data = this.filteredStudentsList;
-                if(data.length === 0) { 
-                    this.showAlert('warning', 'No Data', 'No students found to export with current filters.'); 
-                    return; 
+        viewStudentDetail(student) {
+            this.selectedStudent = student;
+            this.showStudentDetailModal = true;
+        },
+
+        handleRejectConfirm() {
+            if (!this.rejectReason || this.rejectReason.trim() === '') {
+                this.showAlert('warning', 'Missing Reason', 'Please provide a reason for rejection.');
+                return;
+            }
+
+            const url = `/admin/submissions/${this.selectedSubmission.id}/reject`;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    rejectReason: this.rejectReason
+                })
+            })
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Failed to reject submission');
+                return data;
+            })
+            .then(data => {
+                this.showRejectModal = false;
+                this.showAlert('success', 'Rejected', 'Submission has been rejected successfully.');
+                setTimeout(() => window.location.reload(), 1500);
+                this.closeModal();
+            })
+            .catch(error => {
+                console.error('Reject Error:', error);
+                this.showAlert('error', 'Rejection Failed', error.message);
+            });
+        },
+
+        exportReport() {
+            const data = this.filteredStudentsList;
+            if(data.length === 0) { 
+                this.showAlert('warning', 'No Data', 'No students found to export with current filters.'); 
+                return; 
+            }
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Student ID,Name,Major,Year,Total Points,Status,Pending Submissions\n"; 
+            
+            data.forEach(row => {
+                let status = row.approvedPoints >= 20 ? "Passed" : "Not Passed";
+                csvContent += `${row.id},"${row.name}",${row.major},${row.year},${row.approvedPoints},${status},${row.pending}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "S-Core_Student_Report.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        },
+
+        confirmLogout() {
+            fetch('{{ route("logout") }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(() => { window.location.href = '/login'; })
+            .catch(error => {
+                console.error('Logout error:', error);
+                window.location.href = '/login';
+            });
+        },
+
+        closeModal() {
+            this.showDetailModal = false;
+            this.showRejectModal = false;
+            this.showApproveModal = false;
+            this.selectedSubmission = null;
+            this.rejectReason = '';
+            this.rejectReasonType = '';
+        },
+        
+        showAlert(type, title, message, hasCancel = false, callback = null) {
+            this.alertType = type;
+            this.alertTitle = title;
+            this.alertMessage = message;
+            this.alertHasCancel = hasCancel;
+            this.alertCallback = callback;
+            this.showAlertModal = true;
+        },
+        
+        closeAlertModal(confirmed) {
+            this.showAlertModal = false;
+            if (confirmed && this.alertCallback) {
+                this.alertCallback();
+            }
+            this.alertCallback = null;
+        },
+
+        // --- MANAJEMEN KATEGORI (CATEGORY MANAGEMENT) ---
+        requestCategoryManagement() { this.showPinModal = true; this.pinInput = ''; this.pinError = false; },
+        closePinModal() { this.showPinModal = false; },
+        
+        verifyPin() {
+            if (this.pinInput === '123456') {
+                this.isPinVerified = true;
+                this.showPinModal = false;
+                this.showCategoryModal = true;
+            } else {
+                this.pinError = true;
+            }
+        },
+        closeCategoryModal() { this.showCategoryModal = false; },
+
+        // 1. ADD MAIN CATEGORY
+        addMainCategory() {
+            if (!this.newMainCategory.trim()) return;
+
+            fetch('{{ route("categories.store") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: JSON.stringify({ name: this.newMainCategory })
+            })
+            .then(async res => {
+                const json = await res.json();
+                if (!res.ok) throw new Error(json.message);
+                return json;
+            })
+            .then(json => {
+                // Tambahkan kategori baru ke list secara REAL-TIME
+                this.categories.push({
+                    ...json.category,
+                    isEditing: false,
+                    subcategories: []
+                });
+                
+                this.newMainCategory = '';
+                this.showAlert('success', 'Saved', 'Category added! You can now add subcategories.');
+            })
+            .catch(err => {
+                this.showAlert('error', 'Error', err.message || 'Failed to add category');
+            });
+        },
+
+        // 2. EDIT/SAVE MAIN CATEGORY
+        saveMainCategory(index) {
+            const cat = this.categories[index];
+            fetch(`/admin/categories/${cat.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: JSON.stringify({ name: cat.name })
+            })
+            .then(res => res.ok ? res.json() : Promise.reject(res))
+            .then(() => {
+                cat.isEditing = false;
+                this.showAlert('success', 'Updated', 'Category updated!');
+            })
+            .catch(() => this.showAlert('error', 'Error', 'Failed to update category'));
+        },
+
+        // 3. DELETE MAIN CATEGORY
+        deleteMainCategory(index) {
+            const cat = this.categories[index];
+            if (!confirm(`Delete category "${cat.name}" and all its subcategories?`)) return;
+
+            fetch(`/admin/categories/${cat.id}`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+            })
+            .then(async res => {
+                if (!res.ok) {
+                    const json = await res.json();
+                    throw new Error(json.message);
+                }
+                return res.json();
+            })
+            .then(() => {
+                this.showAlert('success', 'Deleted', 'Category deleted.');
+                this.categories.splice(index, 1);
+            })
+            .catch(err => this.showAlert('error', 'Failed', err.message));
+        },
+
+        // 4. ADD SUBCATEGORY
+        addSubcategory() {
+            if (this.newCategory.mainCategoryIndex === '' || !this.newCategory.name) {
+                this.showAlert('warning', 'Missing Info', 'Select category and enter name'); return;
+            }
+
+            const catIndex = this.newCategory.mainCategoryIndex;
+            const catId = this.categories[catIndex].id;
+
+            fetch('{{ route("subcategories.store") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: JSON.stringify({
+                    category_id: catId,
+                    name: this.newCategory.name,
+                    points: this.newCategory.points || 0,
+                    description: this.newCategory.description
+                })
+            })
+            .then(res => res.ok ? res.json() : Promise.reject(res))
+            .then(() => {
+                this.showAlert('success', 'Saved', 'Subcategory added. Reloading...');
+                setTimeout(() => window.location.reload(), 1000);
+            })
+            .catch(() => this.showAlert('error', 'Error', 'Failed to add subcategory'));
+        },
+
+        // 5. EDIT SUBCATEGORY
+        editSubcategory(catIndex, subIndex) {
+            this.categories[catIndex].subcategories[subIndex].isEditing = true;
+        },
+        
+        cancelEditSubcategory(catIndex, subIndex) {
+            this.categories[catIndex].subcategories[subIndex].isEditing = false;
+        },
+
+        // 6. SAVE SUBCATEGORY
+        saveSubcategory(catIndex, subIndex) {
+            const sub = this.categories[catIndex].subcategories[subIndex];
+            
+            fetch(`/admin/subcategories/${sub.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: JSON.stringify({
+                    name: sub.name,
+                    points: sub.points,
+                    description: sub.description
+                })
+            })
+            .then(res => res.ok ? res.json() : Promise.reject(res))
+            .then(() => {
+                sub.isEditing = false;
+                this.showAlert('success', 'Updated', 'Subcategory updated!');
+            })
+            .catch(() => this.showAlert('error', 'Error', 'Failed to update subcategory'));
+        },
+
+        // 7. DELETE SUBCATEGORY
+        deleteSubcategory(catIndex, subIndex) {
+            const sub = this.categories[catIndex].subcategories[subIndex];
+            if (!confirm(`Delete subcategory "${sub.name}"?`)) return;
+
+            fetch(`/admin/subcategories/${sub.id}`, {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+            })
+            .then(async res => {
+                if (!res.ok) {
+                    const json = await res.json();
+                    throw new Error(json.message);
+                }
+                return res.json();
+            })
+            .then(() => {
+                this.showAlert('success', 'Deleted', 'Subcategory deleted.');
+                this.categories[catIndex].subcategories.splice(subIndex, 1);
+            })
+            .catch(err => this.showAlert('error', 'Failed', err.message));
+        },
+
+        // Bulk Score Management
+        async applyBulkScore() {
+            if (!this.bulkScore.mainCategory || !this.bulkScore.subcategory) {
+                this.showAlert('error', 'Error', 'Please select category and subcategory');
+                return;
+            }
+            
+            if (!this.bulkScore.activityTitle || !this.bulkScore.description || !this.bulkScore.activityDate) {
+                this.showAlert('error', 'Error', 'Please fill all required fields');
+                return;
+            }
+            
+            this.bulkScore.isSubmitting = true;
+            
+            try {
+                const formData = new FormData();
+                formData.append('selectedMajor', this.bulkScore.selectedMajor);
+                formData.append('selectedYear', this.bulkScore.selectedYear);
+                formData.append('selectedShift', this.bulkScore.selectedShift);
+                formData.append('mainCategory', this.bulkScore.mainCategory);
+                formData.append('subcategory', this.bulkScore.subcategory);
+                formData.append('activityTitle', this.bulkScore.activityTitle);
+                formData.append('description', this.bulkScore.description);
+                formData.append('activityDate', this.bulkScore.activityDate);
+                
+                if (this.$refs.bulkCertificate && this.$refs.bulkCertificate.files.length > 0) {
+                    formData.append('certificate', this.$refs.bulkCertificate.files[0]);
                 }
                 
-                let csvContent = "data:text/csv;charset=utf-8,";
-                csvContent += "Student ID,Name,Major,Year,Total Points,Status,Pending Submissions\n"; // Header
-                
-                data.forEach(row => {
-                    let status = row.approvedPoints >= 20 ? "Passed" : "Not Passed";
-                    // Handle commas in names by wrapping in quotes
-                    csvContent += `${row.id},"${row.name}",${row.major},${row.year},${row.approvedPoints},${status},${row.pending}\n`;
-                });
-
-                const encodedUri = encodeURI(csvContent);
-                const link = document.createElement("a");
-                link.setAttribute("href", encodedUri);
-                link.setAttribute("download", "S-Core_Student_Report.csv");
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            },
-
-            // --- UI HELPERS & AUTH ---
-            confirmLogout() {
-                fetch('{{ route("logout") }}', {
+                const response = await fetch('/admin/bulk-score', {
                     method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(() => { window.location.href = '/login'; })
-                .catch(error => {
-                    console.error('Logout error:', error);
-                    window.location.href = '/login';
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: formData
                 });
-            },
-
-            closeModal() {
-                this.showDetailModal = false;
-                this.showRejectModal = false;
-                this.showApproveModal = false;
-                this.selectedSubmission = null;
-                this.rejectReason = '';
-                this.rejectReasonType = '';
-            },
-            
-            showAlert(type, title, message, hasCancel = false, callback = null) {
-                this.alertType = type;
-                this.alertTitle = title;
-                this.alertMessage = message;
-                this.alertHasCancel = hasCancel;
-                this.alertCallback = callback;
-                this.showAlertModal = true;
-            },
-            
-            closeAlertModal(confirmed) {
-                this.showAlertModal = false;
-                if (confirmed && this.alertCallback) {
-                    this.alertCallback();
-                }
-                this.alertCallback = null;
-            },
-
-            // --- CATEGORY & PIN PLACEHOLDERS ---
-            requestCategoryManagement() { this.showPinModal = true; this.pinInput = ''; this.pinError = false; },
-            closePinModal() { this.showPinModal = false; },
-            verifyPin() {
-                if (this.pinInput === '123456') {
-                    this.isPinVerified = true;
-                    this.showPinModal = false;
-                    this.showCategoryModal = true;
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    this.showAlert('success', 'Success', result.message);
+                    this.resetBulkScoreForm();
+                    setTimeout(() => window.location.reload(), 2000);
                 } else {
-                    this.pinError = true;
+                    this.showAlert('error', 'Error', result.message || 'Failed to create submissions');
                 }
-            },
-            closeCategoryModal() { this.showCategoryModal = false; },
-            
-            addMainCategory() { this.showAlert('info', 'Demo', 'Category management will be connected to database later.'); },
-            saveMainCategory() {},
-            deleteMainCategory() {},
-            addSubcategory() {},
-            editSubcategory() {},
-            saveSubcategory() {},
-            deleteSubcategory() {},
-            cancelEditSubcategory() {},
-            
-            // Bulk Score Management
-            async applyBulkScore() {
-                // Validasi
-                if (!this.bulkScore.mainCategory || !this.bulkScore.subcategory) {
-                    this.showAlert('error', 'Error', 'Please select category and subcategory');
-                    return;
-                }
-                
-                if (!this.bulkScore.activityTitle || !this.bulkScore.description || !this.bulkScore.activityDate) {
-                    this.showAlert('error', 'Error', 'Please fill all required fields');
-                    return;
-                }
-                
-                this.bulkScore.isSubmitting = true;
-                
-                try {
-                    // Buat FormData untuk upload file
-                    const formData = new FormData();
-                    formData.append('selectedMajor', this.bulkScore.selectedMajor);
-                    formData.append('selectedYear', this.bulkScore.selectedYear);
-                    formData.append('selectedShift', this.bulkScore.selectedShift);
-                    formData.append('mainCategory', this.bulkScore.mainCategory);
-                    formData.append('subcategory', this.bulkScore.subcategory);
-                    formData.append('activityTitle', this.bulkScore.activityTitle);
-                    formData.append('description', this.bulkScore.description);
-                    formData.append('activityDate', this.bulkScore.activityDate);
-                    
-                    // Certificate is optional
-                    if (this.$refs.bulkCertificate && this.$refs.bulkCertificate.files.length > 0) {
-                        formData.append('certificate', this.$refs.bulkCertificate.files[0]);
-                    }
-                    
-                    const response = await fetch('/admin/bulk-score', {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: formData
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (result.success) {
-                        this.showAlert('success', 'Success', result.message);
-                        this.resetBulkScoreForm();
-                        // Reload page to update submissions
-                        setTimeout(() => window.location.reload(), 2000);
-                    } else {
-                        this.showAlert('error', 'Error', result.message || 'Failed to create submissions');
-                    }
-                } catch (error) {
-                    console.error('Bulk score error:', error);
-                    this.showAlert('error', 'Error', 'Failed to connect to server');
-                } finally {
-                    this.bulkScore.isSubmitting = false;
-                }
-            },
-            
-            resetBulkScoreForm() {
-                this.bulkScore.selectedMajor = '';
-                this.bulkScore.selectedYear = '';
-                this.bulkScore.selectedShift = '';
-                this.bulkScore.mainCategory = '';
-                this.bulkScore.subcategory = '';
-                this.bulkScore.activityTitle = '';
-                this.bulkScore.description = '';
-                this.bulkScore.activityDate = '';
-                if (this.$refs.bulkCertificate) {
-                    this.$refs.bulkCertificate.value = '';
-                }
+            } catch (error) {
+                console.error('Bulk score error:', error);
+                this.showAlert('error', 'Error', 'Failed to connect to server');
+            } finally {
+                this.bulkScore.isSubmitting = false;
+            }
+        },
+        
+        resetBulkScoreForm() {
+            this.bulkScore.selectedMajor = '';
+            this.bulkScore.selectedYear = '';
+            this.bulkScore.selectedShift = '';
+            this.bulkScore.mainCategory = '';
+            this.bulkScore.subcategory = '';
+            this.bulkScore.activityTitle = '';
+            this.bulkScore.description = '';
+            this.bulkScore.activityDate = '';
+            if (this.$refs.bulkCertificate) {
+                this.$refs.bulkCertificate.value = '';
             }
         }
     }
+}
 </script>
 </body>
 </html>

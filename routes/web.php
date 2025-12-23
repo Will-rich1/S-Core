@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CategoryController; // <-- TAMBAHAN PENTING
 
 /*
 |--------------------------------------------------------------------------
@@ -43,13 +44,14 @@ Route::middleware(['auth'])->group(function () {
     // COMPLAINT: Rute khusus untuk komplain
     Route::post('/submissions/complaint', [SubmissionController::class, 'storeComplaint'])->name('submissions.complaint');
 
-    // updatepassword
+    // Update Password Profile
     Route::post('/profile/update-password', [DashboardController::class, 'updatePassword'])->name('profile.update-password');
 
 
     // --- AREA ADMIN ---
     Route::get('/admin', [DashboardController::class, 'adminDashboard'])->name('admin.dashboard');
 
+    // Approval / Rejection
     Route::post('/admin/submissions/{id}/approve', [SubmissionController::class, 'approve'])->name('admin.approve');
     Route::post('/admin/submissions/{id}/reject', [SubmissionController::class, 'reject'])->name('admin.reject');
 
@@ -60,5 +62,17 @@ Route::middleware(['auth'])->group(function () {
 
     // Bulk Score
     Route::post('/admin/bulk-score', [DashboardController::class, 'bulkScore'])->name('admin.bulk-score');
+
+    // --- CATEGORY MANAGEMENT (BARU) ---
+    // Main Categories
+    Route::post('/admin/categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::put('/admin/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/admin/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
+
+    // SUBCATEGORY ROUTES
+    Route::post('/admin/subcategories', [CategoryController::class, 'storeSubcategory'])->name('subcategories.store');
+    Route::put('/admin/subcategories/{id}', [CategoryController::class, 'updateSubcategory'])->name('subcategories.update'); // <-- Pastikan ini ada
+    Route::delete('/admin/subcategories/{id}', [CategoryController::class, 'destroySubcategory'])->name('subcategories.destroy'); // <-- Pastikan ini ada
 
 });
