@@ -13,7 +13,7 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
+            'email' => ['required','email','unique:users','regex:/^[^@]+@itbss\.ac\.id$/'],
             'password' => 'required|min:6',
             'student_id' => 'required|string|unique:users', // Tambahkan unique
             'major' => 'required|in:STI,BD,KWU',
@@ -38,7 +38,7 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
+            'email' => ['required','email','unique:users','regex:/^[^@]+@itbss\.ac\.id$/'],
             'password' => 'required|min:6|confirmed', // Pastikan input confirm password ada
         ]);
 
@@ -92,6 +92,11 @@ class UserController extends Controller
             
             if (User::where('email', $email)->exists()) {
                 $errors[] = "Line $lineNumber: Email '$email' already exists";
+                continue;
+            }
+
+            if (!preg_match('/^[^@]+@itbss\.ac\.id$/', $email)) {
+                $errors[] = "Line $lineNumber: Email '$email' must be an @itbss.ac.id address";
                 continue;
             }
 
