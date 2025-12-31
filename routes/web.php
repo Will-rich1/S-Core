@@ -59,12 +59,20 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/students/store', [UserController::class, 'storeStudent'])->name('students.store');
     Route::post('/students/import', [UserController::class, 'importStudents'])->name('students.import');
     Route::post('/admins/store', [UserController::class, 'storeAdmin'])->name('admins.store');
+    // Admin: reset user password
+    Route::post('/admin/users/{id}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
 
     // Bulk Score
     Route::post('/admin/bulk-score', [DashboardController::class, 'bulkScore'])->name('admin.bulk-score');
 
     // --- CATEGORY MANAGEMENT (BARU) ---
-    // Main Categories
+    // API ENDPOINTS - Get Categories (READ ONLY)
+    Route::get('/api/categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::get('/api/categories/student', [CategoryController::class, 'studentCategories'])->name('categories.student');
+    Route::post('/admin/categories/{id}/reactivate', [CategoryController::class, 'reactivate'])->name('categories.reactivate');
+    Route::post('/admin/subcategories/{id}/reactivate', [CategoryController::class, 'reactivateSubcategory'])->name('subcategories.reactivate');
+    
+    // Main Categories - POST/PUT/DELETE
     Route::post('/admin/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::put('/admin/categories/{id}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/admin/categories/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');

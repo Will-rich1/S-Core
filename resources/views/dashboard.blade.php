@@ -19,7 +19,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body>
-    <div class="flex h-screen bg-gray-100" x-data="dashboardData()">
+    <div class="flex h-screen bg-gray-100" x-data="dashboardData()" x-init="loadCategories()">
         <!-- Logout Confirmation Modal -->
         <div x-show="showLogoutModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
             <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
@@ -1188,6 +1188,19 @@
                     this.formData.subcategory = '';
                 } else {
                     this.availableSubcategories = []; this.formData.subcategory = '';
+                }
+            },
+
+            // Load categories dari API (Real-time sync)
+            async loadCategories() {
+                try {
+                    const response = await fetch('/api/categories/student');
+                    if (!response.ok) throw new Error('Failed to fetch categories');
+                    
+                    this.categoryGroups = await response.json();
+                } catch (error) {
+                    console.error('Error loading categories:', error);
+                    // Fallback: categoryGroups tetap menggunakan data awal dari server
                 }
             },
 

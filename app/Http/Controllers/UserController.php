@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class UserController extends Controller
 {
@@ -31,6 +35,87 @@ class UserController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Student account created successfully!');
+    }
+
+    // Admin can reset/overwrite a user's password (returns new password when generated)
+    public function resetPassword(Request $request, $id)
+    {
+        // Only allow admin users to perform this action
+        if (!Auth::user() || Auth::user()->role !== 'admin') {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        Log::info('resetPassword called', ['admin_id' => Auth::id(), 'target_user' => $id, 'ip' => request()->ip()]);
+
+        $request->validate([
+            'password' => 'nullable|string|min:6'
+        ]);
+
+        // Support both internal primary-key id and student_id passed from UI
+        $user = User::find($id);
+        if (!$user) {
+            // try lookup by student_id (students use student_id as external identifier)
+            $user = User::where('student_id', $id)->firstOrFail();
+        }
+
+        // If password provided, use it; otherwise generate a random one
+        $provided = $request->input('password');
+        if ($provided && strlen(trim($provided)) >= 6) {
+            $newPassword = $provided;
+            $generated = false;
+        } else {
+            $newPassword = substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'), 0, 10);
+            $generated = true;
+        }
+
+        $user->password = Hash::make($newPassword);
+        $user->save();
+
+        Log::info('resetPassword saved', ['admin_id' => Auth::id(), 'target_user' => $user->id, 'generated' => $generated]);
+
+        // Log activity (best-effort)
+        try {
+            $now = now();
+            if (Schema::hasColumn('activity_logs', 'entity_type')) {
+                DB::table('activity_logs')->insert([
+                    'user_id' => Auth::id(),
+                    'action' => 'admin_reset_password',
+                    'entity_type' => 'user',
+                    'entity_id' => $user->id,
+                    'details' => json_encode(['generated' => $generated ? true : false]),
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'created_at' => $now,
+                    'updated_at' => $now
+                ]);
+            } elseif (Schema::hasColumn('activity_logs', 'target_type')) {
+                DB::table('activity_logs')->insert([
+                    'user_id' => Auth::id(),
+                    'action' => 'admin_reset_password',
+                    'target_type' => 'user',
+                    'target_id' => $user->id,
+                    'message' => json_encode(['generated' => $generated ? true : false]),
+                    'created_at' => $now,
+                    'updated_at' => $now
+                ]);
+            } else {
+                DB::table('activity_logs')->insert([
+                    'user_id' => Auth::id(),
+                    'action' => 'admin_reset_password',
+                    'details' => json_encode(['generated' => $generated ? true : false]),
+                    'created_at' => $now,
+                    'updated_at' => $now
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to insert activity_log for resetPassword: '.$e->getMessage());
+        }
+
+        return response()->json([
+            'message' => 'Password reset successfully',
+            'generated' => $generated,
+            'password' => $generated ? $newPassword : null
+        ]);
     }
 
     // 2. Simpan Admin Manual

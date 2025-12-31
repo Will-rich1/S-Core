@@ -22,7 +22,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js?v=<?php echo time(); ?>"></script>
 </head>
 <body>
-    <div class="flex h-screen bg-gray-100" x-data="adminReviewData()">
+    <div class="flex h-screen bg-gray-100" x-data="adminReviewData()" x-init="init()">
         <!-- Logout Confirmation Modal -->
         <div x-show="showLogoutModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
             <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
@@ -329,7 +329,8 @@
                     </div>
                 </div>
 
-                <div class="bg-white border-t px-6 py-4 flex justify-end">
+                <div class="bg-white border-t px-6 py-4 flex justify-end gap-3 items-center">
+                    <button @click="resetStudentPassword()" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded text-sm font-medium">Reset Password</button>
                     <button @click="showStudentDetailModal = false" class="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium">Close</button>
                 </div>
             </div>
@@ -610,9 +611,12 @@
                             <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-4 mb-4">
                                 
                                 <div class="flex items-center justify-between mb-3">
-                                    <template x-if="!cat.isEditing">
-                                        <h5 class="font-bold text-lg text-gray-800" x-text="(catIndex + 1) + '. ' + cat.name"></h5>
-                                    </template>
+                                        <template x-if="!cat.isEditing">
+                                            <h5 class="font-bold text-lg text-gray-800">
+                                                <span x-text="(catIndex + 1) + '. ' + cat.name"></span>
+                                                <span x-show="cat.is_active == 0 || cat.is_active === false" class="ml-2 inline-block text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">Inactive</span>
+                                            </h5>
+                                        </template>
                                     
                                     <template x-if="cat.isEditing">
                                         <input type="text" x-model="cat.name" class="flex-1 border-2 border-blue-500 rounded-lg px-3 py-1.5 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 mr-3" />
@@ -632,9 +636,16 @@
                                             </div>
                                         </template>
                                         
-                                        <button @click="deleteMainCategory(catIndex)" class="text-red-500 hover:text-red-700 p-1" title="Delete Main Category">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                        </button>
+                                        <template x-if="cat.is_active == 1 || typeof(cat.is_active) === 'undefined'">
+                                            <button @click="deleteMainCategory(catIndex)" class="text-red-500 hover:text-red-700 p-1" title="Delete Main Category">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                            </button>
+                                        </template>
+                                        <template x-if="cat.is_active == 0 || cat.is_active === false">
+                                            <button @click="reactivateCategory(catIndex)" class="text-green-600 hover:text-green-800 p-1" title="Restore Category">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                                            </button>
+                                        </template>
                                     </div>
                                 </div>
                                 
@@ -663,12 +674,21 @@
                                                             </p>
                                                         </div>
                                                         <div class="flex items-center gap-2">
-                                                            <button @click="editSubcategory(catIndex, subIndex)" class="text-blue-500 hover:text-blue-700 p-1">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                                            </button>
-                                                            <button @click="deleteSubcategory(catIndex, subIndex)" class="text-red-500 hover:text-red-700 p-1">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                                            </button>
+                                                            <div class="flex items-center gap-2">
+                                                                <button @click="editSubcategory(catIndex, subIndex)" class="text-blue-500 hover:text-blue-700 p-1" title="Edit Subcategory">
+                                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                                                </button>
+                                                                <!-- show delete only when active (1) or when property missing; hide for 0/'0'/false -->
+                                                                <button x-show="subcat.is_active == 1 || typeof(subcat.is_active) === 'undefined'" @click="deleteSubcategory(catIndex, subIndex)" class="flex items-center gap-1 text-red-500 hover:text-red-700 px-3 py-1 rounded-md text-sm bg-red-50 hover:bg-red-100" title="Delete Subcategory" aria-label="Delete Subcategory">
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                                    <span class="hidden sm:inline">Hapus</span>
+                                                                </button>
+                                                            </div>
+                                                            <template x-if="subcat.is_active == 0 || subcat.is_active === false">
+                                                                <button @click="reactivateSubcategory(catIndex, subIndex)" class="text-green-600 hover:text-green-800 p-1" title="Restore Subcategory">
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-6-6 6-6" /></svg>
+                                                                </button>
+                                                            </template>
                                                         </div>
                                                     </div>
                                                 </template>
@@ -683,8 +703,14 @@
                 </div>
 
                 <div class="border-t p-6">
-                    <div class="flex gap-3 justify-end">
-                        <button @click="closeCategoryModal" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium">Close</button>
+                    <div class="flex gap-3 justify-between items-center">
+                        <label class="flex items-center gap-2 text-sm">
+                            <input type="checkbox" class="mr-2" x-model="showInactiveCategories" @change="loadCategories()">
+                            <span class="text-xs text-gray-600">Show inactive</span>
+                        </label>
+                        <div class="flex gap-3 justify-end">
+                            <button @click="closeCategoryModal" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium">Close</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2246,6 +2272,7 @@
         
         newMainCategory: '',
         newCategory: { mainCategoryIndex: '', name: '', points: '', description: '' },
+        showInactiveCategories: false,
         
         // --- VARIABLE FILTER ---
         statusFilter: 'Waiting', 
@@ -2270,21 +2297,117 @@
         //  FUNGSI INIT (PENTING: JANGAN DIHAPUS)
         //  Fungsi ini berjalan otomatis saat halaman dimuat
         // ============================================================
-        init() {
-            // 1. Loop semua kategori & subkategori, tambahkan status 'isEditing: false'
-            // Ini agar tombol Edit/Save bisa muncul bergantian
-            this.categories = this.categories.map(cat => ({
-                ...cat,
-                isEditing: false, // Default tidak sedang diedit
-                subcategories: (cat.subcategories || []).map(sub => ({
-                    ...sub,
-                    isEditing: false // Default sub tidak sedang diedit
-                }))
-            }));
+        async init() {
+            // LOAD CATEGORIES dari API (Real-time)
+            await this.loadCategories();
+        },
 
-            // 2. Sinkronkan categoryGroups agar isinya sama persis dengan categories
-            // Supaya filter dan tampilan list menggunakan data yang sama
-            this.categoryGroups = this.categories;
+        async loadCategories() {
+            try {
+                const url = '/api/categories' + (this.showInactiveCategories ? '?include_inactive=1' : '');
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to fetch categories');
+                
+                let fetchedCategories = await response.json();
+                
+                // Transform dan tambahkan isEditing flag
+                fetchedCategories = fetchedCategories.map(cat => ({
+                    ...cat,
+                    isEditing: false,
+                    subcategories: (cat.subcategories || []).map(sub => ({
+                        ...sub,
+                        isEditing: false
+                    }))
+                }));
+                
+                // Update categories dan categoryGroups
+                this.categories = fetchedCategories;
+                this.categoryGroups = fetchedCategories;
+                
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                // Fallback: gunakan data awal jika API gagal
+                this.categories = this.categories.map(cat => ({
+                    ...cat,
+                    isEditing: false,
+                    subcategories: (cat.subcategories || []).map(sub => ({
+                        ...sub,
+                        isEditing: false
+                    }))
+                }));
+                this.categoryGroups = this.categories;
+            }
+        },
+
+        // Reactivate main category
+        reactivateCategory(catIndex) {
+            const cat = this.categories[catIndex];
+            if (!confirm(`Restore category "${cat.name}"?`)) return;
+
+            fetch(`/admin/categories/${cat.id}/reactivate`, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+            })
+            .then(async res => {
+                const ct = res.headers.get('content-type') || '';
+                let data;
+                if (ct.includes('application/json')) {
+                    data = await res.json();
+                } else {
+                    const text = await res.text();
+                    data = { __raw: text };
+                }
+                if (!res.ok) {
+                    const msg = data && data.message ? data.message : (data.__raw || 'Server error');
+                    // If server returned HTML (stack trace), log it and show concise message
+                    if (data && data.__raw && /<\/?html|<!doctype/i.test(data.__raw)) {
+                        console.error('Server returned HTML error on reactivateCategory:', data.__raw);
+                        throw new Error('Server error (see console)');
+                    }
+                    throw new Error(msg);
+                }
+                return data;
+            })
+            .then(json => {
+                this.showAlert('success', 'Success', json.message || 'Category restored');
+                this.loadCategories();
+            })
+            .catch(err => this.showAlert('error', 'Failed', err.message));
+        },
+
+        // Reactivate subcategory
+        reactivateSubcategory(catIndex, subIndex) {
+            const sub = this.categories[catIndex].subcategories[subIndex];
+            if (!confirm(`Restore subcategory "${sub.name}"?`)) return;
+
+            fetch(`/admin/subcategories/${sub.id}/reactivate`, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+            })
+            .then(async res => {
+                const ct = res.headers.get('content-type') || '';
+                let data;
+                if (ct.includes('application/json')) {
+                    data = await res.json();
+                } else {
+                    const text = await res.text();
+                    data = { __raw: text };
+                }
+                if (!res.ok) {
+                    const msg = data && data.message ? data.message : (data.__raw || 'Server error');
+                    if (data && data.__raw && /<\/?html|<!doctype/i.test(data.__raw)) {
+                        console.error('Server returned HTML error on reactivateSubcategory:', data.__raw);
+                        throw new Error('Server error (see console)');
+                    }
+                    throw new Error(msg);
+                }
+                return data;
+            })
+            .then(json => {
+                this.showAlert('success', 'Success', json.message || 'Subcategory restored');
+                this.loadCategories();
+            })
+            .catch(err => this.showAlert('error', 'Failed', err.message));
         },
         // ============================================================
         
@@ -2425,6 +2548,58 @@
             this.showStudentDetailModal = true;
         },
 
+        // Admin: reset selected student's password
+        async resetStudentPassword() {
+            if (!this.selectedStudent || !this.selectedStudent.id) return;
+            const id = this.selectedStudent.id;
+            let pw = prompt('Enter new password for user (leave empty to generate a random one):');
+            if (pw !== null && pw !== '') {
+                if (pw.length < 6) { alert('Password must be at least 6 characters'); return; }
+            }
+
+            if (!confirm('Proceed to reset password for ' + this.selectedStudent.name + '?')) return;
+
+            try {
+                const url = `/admin/users/${id}/reset-password`;
+                console.log('resetPassword URL:', url);
+                const response = await fetch(url, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    body: JSON.stringify({ password: pw })
+                });
+
+                const ct = response.headers.get('content-type') || '';
+                let data;
+                if (ct.includes('application/json')) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    data = { __raw: text };
+                }
+
+                if (!response.ok) {
+                    const msg = data && data.message ? data.message : (data.__raw || 'Server error');
+                    if (data && data.__raw && /<\/?html|<!doctype/i.test(data.__raw)) {
+                        console.error('Server returned HTML on resetStudentPassword:', data.__raw);
+                        throw new Error('Server error (see console)');
+                    }
+                    throw new Error(msg);
+                }
+
+                const message = data.message || 'Password reset successfully';
+                if (data.generated && data.password) {
+                    this.showAlert('success', 'Password Reset', message + '\nGenerated password: ' + data.password);
+                } else {
+                    this.showAlert('success', 'Password Reset', message);
+                }
+                this.showStudentDetailModal = false;
+            } catch (err) {
+                console.error(err);
+                this.showAlert('error', 'Failed', err.message || 'Failed to reset password');
+            }
+        },
+
         handleRejectConfirm() {
             if (!this.rejectReason || this.rejectReason.trim() === '') {
                 this.showAlert('warning', 'Missing Reason', 'Please provide a reason for rejection.');
@@ -2557,15 +2732,10 @@
                 return json;
             })
             .then(json => {
-                // Tambahkan kategori baru ke list secara REAL-TIME
-                this.categories.push({
-                    ...json.category,
-                    isEditing: false,
-                    subcategories: []
-                });
-                
+                // Reload categories dari API untuk ensure sinkronisasi
                 this.newMainCategory = '';
-                this.showAlert('success', 'Saved', 'Category added! You can now add subcategories.');
+                this.showAlert('success', 'Saved', 'Category added! Reloading...');
+                this.loadCategories();
             })
             .catch(err => {
                 this.showAlert('error', 'Error', err.message || 'Failed to add category');
@@ -2584,6 +2754,8 @@
             .then(() => {
                 cat.isEditing = false;
                 this.showAlert('success', 'Updated', 'Category updated!');
+                // Reload categories dari API untuk ensure sinkronisasi
+                this.loadCategories();
             })
             .catch(() => this.showAlert('error', 'Error', 'Failed to update category'));
         },
@@ -2598,15 +2770,31 @@
                 headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
             })
             .then(async res => {
-                if (!res.ok) {
-                    const json = await res.json();
-                    throw new Error(json.message);
+                const ct = res.headers.get('content-type') || '';
+                let data;
+                if (ct.includes('application/json')) {
+                    data = await res.json();
+                } else {
+                    const text = await res.text();
+                    data = { __raw: text };
                 }
-                return res.json();
+
+                if (!res.ok) {
+                    const msg = data && data.message ? data.message : (data.__raw || 'Server error');
+                    if (data && data.__raw && /<\/?html|<!doctype/i.test(data.__raw)) {
+                        console.error('Server returned HTML error on deleteMainCategory:', data.__raw);
+                        throw new Error('Server error (see console)');
+                    }
+                    throw new Error(msg);
+                }
+
+                return data;
             })
-            .then(() => {
-                this.showAlert('success', 'Deleted', 'Category deleted.');
-                this.categories.splice(index, 1);
+            .then(json => {
+                const msg = (json && json.message) ? json.message : 'Category deleted or deactivated. Reloading categories...';
+                this.showAlert('success', 'Success', msg);
+                // Reload categories dari API untuk sinkronisasi dengan server
+                this.loadCategories();
             })
             .catch(err => this.showAlert('error', 'Failed', err.message));
         },
@@ -2632,8 +2820,11 @@
             })
             .then(res => res.ok ? res.json() : Promise.reject(res))
             .then(() => {
+                // Reset form
+                this.newCategory = { mainCategoryIndex: '', name: '', points: '', description: '' };
                 this.showAlert('success', 'Saved', 'Subcategory added. Reloading...');
-                setTimeout(() => window.location.reload(), 1000);
+                // Reload categories dari API untuk sinkronisasi
+                this.loadCategories();
             })
             .catch(() => this.showAlert('error', 'Error', 'Failed to add subcategory'));
         },
@@ -2664,6 +2855,8 @@
             .then(() => {
                 sub.isEditing = false;
                 this.showAlert('success', 'Updated', 'Subcategory updated!');
+                // Reload categories dari API untuk sinkronisasi
+                this.loadCategories();
             })
             .catch(() => this.showAlert('error', 'Error', 'Failed to update subcategory'));
         },
@@ -2678,17 +2871,29 @@
                 headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
             })
             .then(async res => {
-                if (!res.ok) {
-                    const json = await res.json();
-                    throw new Error(json.message);
+                const contentType = (res.headers.get('content-type') || '').toLowerCase();
+                const bodyText = await res.text();
+
+                // If response is JSON, parse it; otherwise keep raw text
+                let parsed = null;
+                if (contentType.includes('application/json')) {
+                    try { parsed = JSON.parse(bodyText); } catch (e) { parsed = null; }
                 }
-                return res.json();
+
+                if (!res.ok) {
+                    const msg = parsed && parsed.message ? parsed.message : (bodyText || 'Server error');
+                    throw new Error(msg);
+                }
+
+                return parsed || { message: bodyText };
             })
-            .then(() => {
-                this.showAlert('success', 'Deleted', 'Subcategory deleted.');
-                this.categories[catIndex].subcategories.splice(subIndex, 1);
+            .then(json => {
+                const msg = (json && json.message) ? json.message : 'Subcategory deleted or deactivated. Reloading...';
+                this.showAlert('success', 'Success', msg);
+                // Reload categories dari API untuk sinkronisasi
+                this.loadCategories();
             })
-            .catch(err => this.showAlert('error', 'Failed', err.message));
+            .catch(err => this.showAlert('error', 'Failed', err.message || 'Unknown error'));
         },
 
         // Bulk Score Management
