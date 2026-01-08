@@ -217,7 +217,7 @@ class DashboardController extends Controller
         // 2. Cek apakah password lama benar
         if (!Hash::check($request->current_password, Auth::user()->password)) {
             return response()->json([
-                'message' => 'Password lama salah (Current password does not match).'
+                'message' => 'Current password does not match.'
             ], 422); // 422 Unprocessable Entity (Format error standar Laravel)
         }
 
