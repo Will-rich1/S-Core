@@ -502,9 +502,7 @@
 
                 <div class="bg-white border-t px-6 py-4 flex justify-between items-center gap-3">
                     <button @click="downloadStudentReport()" 
-                            :disabled="!(selectedStudent?.approvedPoints > 20 && Object.keys(selectedStudent?.categoryBreakdown || {}).length >= 5)"
-                            :class="!(selectedStudent?.approvedPoints > 20 && Object.keys(selectedStudent?.categoryBreakdown || {}).length >= 5) ? 'bg-gray-300 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'"
-                            class="px-4 py-2 text-white rounded text-sm font-medium flex items-center gap-2">
+                            class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded text-sm font-medium flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
@@ -2755,19 +2753,9 @@
             if (!this.selectedStudent || !this.selectedStudent.id) return;
             
             const studentId = this.selectedStudent.id;
-            const pointsMet = this.selectedStudent.approvedPoints > 20;
-            const categoriesMet = Object.keys(this.selectedStudent.categoryBreakdown || {}).length >= 5;
             
-            if (!pointsMet || !categoriesMet) {
-                let reasons = [];
-                if (!pointsMet) reasons.push('Total Points <= 20 (Current: ' + this.selectedStudent.approvedPoints + ')');
-                if (!categoriesMet) reasons.push('Categories completed < 5 (Current: ' + Object.keys(this.selectedStudent.categoryBreakdown || {}).length + ')');
-                
-                this.showAlert('warning', 'Not Eligible', 'Student is not eligible for report:\n\n' + reasons.join('\n'));
-                return;
-            }
-
-            // Download the report PDF
+            // Admin can download report regardless of eligibility
+            // Backend will handle the authorization and validation
             const url = `/student/${studentId}/report`;
             window.location.href = url;
         },

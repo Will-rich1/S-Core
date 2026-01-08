@@ -26,7 +26,8 @@ class SCoreReportController extends Controller
         // Check eligibility
         $eligibility = SCoreHelper::checkSCoreEligibility($student->id);
         
-        if (!$eligibility['isEligible']) {
+        // Allow admin to bypass eligibility check, but reject for students who don't meet requirements
+        if (!$eligibility['isEligible'] && Auth::user()->role !== 'admin') {
             return response()->json([
                 'message' => 'Student does not meet S-Core requirements',
                 'details' => [
