@@ -189,12 +189,26 @@
                                         <button @click="closeModal" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition-colors">
                                             Cancel
                                         </button>
-                                        <button @click="showRejectModal = true" class="px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors">
-                                            Reject
-                                        </button>
-                                        <button @click="handleApprove" class="px-6 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors">
-                                            Approve
-                                        </button>
+                                        <!-- Edit Button - Only show for Approved/Rejected -->
+                                        <template x-if="selectedSubmission && (selectedSubmission.status === 'Approved' || selectedSubmission.status === 'Rejected')">
+                                            <button @click="openEditModal" class="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                                Edit
+                                            </button>
+                                        </template>
+
+                                        <!-- Reject: hide if already Rejected -->
+                                        <template x-if="selectedSubmission && selectedSubmission.status !== 'Rejected'">
+                                            <button @click="showRejectModal = true" class="px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                                Reject
+                                            </button>
+                                        </template>
+
+                                        <!-- Approve: hide if already Approved -->
+                                        <template x-if="selectedSubmission && selectedSubmission.status !== 'Approved'">
+                                            <button @click="handleApprove" class="px-6 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                                Approve
+                                            </button>
+                                        </template>
                                     </div>
                                 </div>
                             </div>
@@ -252,6 +266,114 @@
             </div>
         </div>
 
+        <!-- Admin Edit Modal -->
+        <div x-show="showEditModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[60]" style="display: none;">
+            <div class="bg-white rounded-lg max-w-3xl w-full mx-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-6 sticky top-0 bg-white border-b px-6 py-4 z-10">
+                    <h3 class="text-xl font-semibold text-blue-600">Edit Submission</h3>
+                    <button @click="closeEditModal" class="text-gray-500 hover:text-gray-700 text-2xl leading-none">×</button>
+                </div>
+
+                <template x-if="selectedSubmission">
+                    <div class="px-6 pb-6">
+                        <!-- Student Info -->
+                        
+                        <div class="mb-6 pb-4 border-b">
+                            <p class="text-sm text-gray-600">
+                                Editing submission from <strong x-text="selectedSubmission.studentName"></strong> 
+                                (<span x-text="selectedSubmission.studentId"></span>)
+                            </p>
+                            <p class="text-sm text-gray-600 mt-1">
+                                Current Status: 
+                                <span :class="{
+                                    'bg-green-100 text-green-700': editFormData.status === 'Approved',
+                                    'bg-red-100 text-red-700': editFormData.status === 'Rejected',
+                                    'bg-yellow-100 text-yellow-700': editFormData.status === 'Waiting'
+                                }" class="px-2 py-1 rounded text-xs font-semibold inline-block" x-text="editFormData.status"></span>
+                            </p>
+                        </div>
+
+                        <!-- Form Fields -->
+                        <div class="space-y-4">
+                            <!-- Activity Title -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Activity Title</label>
+                                <input type="text" x-model="editFormData.title" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter activity title">
+                            </div>
+
+                            <!-- Description -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                                <textarea x-model="editFormData.description" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter description"></textarea>
+                            </div>
+
+                            <!-- Activity Date -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Activity Date</label>
+                                <input type="date" x-model="editFormData.activity_date" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <!-- Main Category -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Main Category</label>
+                                <select x-model="editFormData.mainCategory" @change="updateEditSubcategories" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Select Main Category</option>
+                                    <template x-for="(catGroup, idx) in categoryGroups" :key="idx">
+                                        <option :value="catGroup.name" x-text="catGroup.name"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <!-- Subcategory -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Subcategory</label>
+                                <select x-model="editFormData.subcategory" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" :disabled="editFormData.mainCategory === ''">
+                                    <option value="">Select Subcategory</option>
+                                    <template x-for="subcat in editAvailableSubcategories" :key="subcat.name">
+                                        <option :value="subcat.name" x-text="subcat.name + ' (' + subcat.points + ' points)'"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <!-- Certificate File -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Certificate/Evidence File (Optional)</label>
+                                <input type="file" @change="editFormData.certificate_file = $event.target.files[0]" accept=".pdf,.jpg,.jpeg,.png" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <p class="text-xs text-gray-500 mt-1">Supported: PDF, JPG, PNG (Max 10MB)</p>
+                            </div>
+
+                            <!-- Status -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Update Status (Optional)</label>
+                                <select x-model="editFormData.status" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Keep Current Status</option>
+                                    <option value="Waiting">Waiting</option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
+                            </div>
+
+                            <!-- Rejection Reason (if needed) -->
+                            <div x-show="editFormData.status === 'Rejected'">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Rejection Reason</label>
+                                <textarea x-model="editFormData.rejection_reason" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter reason for rejection"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex gap-3 justify-end mt-6 pt-6 border-t">
+                            <button @click="closeEditModal" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition-colors">
+                                Cancel
+                            </button>
+                            <button @click="handleAdminEdit" class="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
         <!-- view s-core mahasiswa modal -->
         <div x-show="showStudentDetailModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[80]" style="display: none;">
             <div class="bg-white rounded-lg max-w-4xl w-full mx-4 shadow-2xl h-[80vh] flex flex-col">
@@ -275,13 +397,62 @@
                         </div>
                         <div class="bg-white p-4 rounded border shadow-sm text-center">
                             <p class="text-xs text-gray-500">Status</p>
-                            <span :class="selectedStudent?.approvedPoints >= 20 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="px-2 py-1 rounded-full text-xs font-bold mt-1 inline-block">
-                                <span x-text="selectedStudent?.approvedPoints >= 20 ? 'PASSED' : 'NOT PASSED'"></span>
+                            <span :class="isStudentPassed(selectedStudent) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="px-2 py-1 rounded-full text-xs font-bold mt-1 inline-block">
+                                <span x-text="isStudentPassed(selectedStudent) ? 'PASSED' : 'NOT PASSED'"></span>
                             </span>
                         </div>
                         <div class="bg-white p-4 rounded border shadow-sm text-center">
                             <p class="text-xs text-gray-500">Submissions</p>
                             <p class="text-xl font-bold text-blue-600" x-text="selectedStudent?.totalSubmissions"></p>
+                        </div>
+                    </div>
+
+                    <!-- Category Completion Status -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                        <h4 class="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Category Completion Status
+                        </h4>
+                        <template x-if="selectedStudent?.categoryBreakdown && Object.keys(selectedStudent.categoryBreakdown).length > 0">
+                            <div class="space-y-2">
+                                <template x-for="(breakdown, catId) in selectedStudent.categoryBreakdown" :key="catId">
+                                    <div class="flex items-center justify-between p-2 bg-white rounded">
+                                        <div>
+                                            <p class="font-medium text-sm text-gray-800" x-text="breakdown.categoryName"></p>
+                                            <p class="text-xs text-gray-500" x-text="breakdown.count + ' aktivitas'"></p>
+                                        </div>
+                                        <p class="font-bold text-blue-600" x-text="breakdown.points + ' poin'"></p>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        <template x-if="!selectedStudent?.categoryBreakdown || Object.keys(selectedStudent.categoryBreakdown).length === 0">
+                            <p class="text-sm text-blue-700">Tidak ada kategori yang diselesaikan</p>
+                        </template>
+                    </div>
+
+                    <!-- S-Core Eligibility Status -->
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                        <h4 class="font-semibold text-yellow-900 mb-3">📋 S-Core Eligibility</h4>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <p class="text-gray-600">Minimum Points (20):</p>
+                                <p class="font-bold" :class="isStudentPassed(selectedStudent) ? 'text-green-600' : 'text-red-600'">
+                                    <span x-text="selectedStudent?.approvedPoints"></span>/20
+                                                    <span x-show="isStudentPassed(selectedStudent)" class="text-green-600">✓</span>
+                                    <span x-show="selectedStudent?.approvedPoints < 20" class="text-red-600">✗</span>
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-gray-600">Min Categories (5/6):</p>
+                                <p class="font-bold" :class="Object.keys(selectedStudent?.categoryBreakdown || {}).length >= 5 ? 'text-green-600' : 'text-red-600'">
+                                    <span x-text="Object.keys(selectedStudent?.categoryBreakdown || {}).length"></span>/6
+                                    <span x-show="Object.keys(selectedStudent?.categoryBreakdown || {}).length >= 5" class="text-green-600">✓</span>
+                                    <span x-show="Object.keys(selectedStudent?.categoryBreakdown || {}).length < 5" class="text-red-600">✗</span>
+                                </p>
+                            </div>
                         </div>
                     </div>
 
@@ -329,9 +500,20 @@
                     </div>
                 </div>
 
-                <div class="bg-white border-t px-6 py-4 flex justify-end gap-3 items-center">
-                    <button @click="resetStudentPassword()" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded text-sm font-medium">Reset Password</button>
-                    <button @click="showStudentDetailModal = false" class="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium">Close</button>
+                <div class="bg-white border-t px-6 py-4 flex justify-between items-center gap-3">
+                    <button @click="downloadStudentReport()" 
+                            :disabled="!(selectedStudent?.approvedPoints > 20 && Object.keys(selectedStudent?.categoryBreakdown || {}).length >= 5)"
+                            :class="!(selectedStudent?.approvedPoints > 20 && Object.keys(selectedStudent?.categoryBreakdown || {}).length >= 5) ? 'bg-gray-300 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'"
+                            class="px-4 py-2 text-white rounded text-sm font-medium flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Download Report
+                    </button>
+                    <div class="flex gap-3">
+                        <button @click="resetStudentPassword()" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded text-sm font-medium">Reset Password</button>
+                        <button @click="showStudentDetailModal = false" class="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium">Close</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1034,8 +1216,8 @@
                         
                         <select x-model="statusPassFilter" class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">All Status</option>
-                            <option value="pass">Passed (>= 20 points)</option>
-                            <option value="fail">Not Passed (< 20 points)</option>
+                            <option value="pass">Passed (&gt; 20 points &amp; ≥ 5 categories)</option>
+                            <option value="fail">Not Passed (doesn't meet both criteria)</option>
                         </select>
                         
                         <button @click="exportReport" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2">
@@ -1143,7 +1325,7 @@
                                 <td class="text-center py-3 px-4 text-sm">
                                     <span 
                                         class="font-bold cursor-help"
-                                        :class="student.approvedPoints >= 20 ? 'text-green-600' : 'text-red-600'" 
+                                        :class="isStudentPassed(student) ? 'text-green-600' : 'text-red-600'" 
                                         @mouseenter="(e) => { 
                                             showTooltip = true; 
                                             const rect = e.target.getBoundingClientRect();
@@ -1163,8 +1345,8 @@
                                         <div class="mb-3 pb-3 border-b border-gray-200">
                                             <div class="flex items-center justify-between mb-2">
                                                 <h4 class="font-bold text-gray-800" x-text="student.name"></h4>
-                                                <span :class="student.approvedPoints >= 20 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="px-2 py-1 rounded-full text-xs font-semibold">
-                                                    <span x-text="student.approvedPoints >= 20 ? 'PASSED' : 'NOT PASSED'"></span>
+                                                <span :class="isStudentPassed(student) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="px-2 py-1 rounded-full text-xs font-semibold">
+                                                    <span x-text="isStudentPassed(student) ? 'PASSED' : 'NOT PASSED'"></span>
                                                 </span>
                                             </div>
                                             <p class="text-xs text-gray-600" x-text="student.id"></p>
@@ -1173,12 +1355,12 @@
                                         <div class="mb-3">
                                             <div class="flex justify-between items-center mb-2">
                                                 <span class="text-sm font-semibold text-gray-700">Total Points:</span>
-                                                <span class="text-lg font-bold" :class="student.approvedPoints >= 20 ? 'text-green-600' : 'text-red-600'" x-text="student.approvedPoints"></span>
+                                                <span class="text-lg font-bold" :class="isStudentPassed(student) ? 'text-green-600' : 'text-red-600'" x-text="student.approvedPoints"></span>
                                             </div>
                                             <div class="w-full bg-gray-200 rounded-full h-2">
-                                                <div class="h-2 rounded-full transition-all" :class="student.approvedPoints >= 20 ? 'bg-green-500' : 'bg-red-500'" :style="`width: ${Math.min((student.approvedPoints / 20) * 100, 100)}%`"></div>
+                                                <div class="h-2 rounded-full transition-all" :class="isStudentPassed(student) ? 'bg-green-500' : 'bg-red-500'" :style="`width: ${Math.min((student.approvedPoints / 20) * 100, 100)}%`"></div>
                                             </div>
-                                            <p class="text-xs text-gray-500 mt-1" x-text="`${Math.max(20 - student.approvedPoints, 0)} points needed to pass`"></p>
+                                            <p class="text-xs text-gray-500 mt-1" x-text="`${Math.max(21 - student.approvedPoints, 0)} points needed to pass`"></p>
                                         </div>
                                         
                                         <div class="space-y-2">
@@ -1209,8 +1391,8 @@
                                 </td>
 
                                 <td class="text-center py-3 px-4">
-                                    <span :class="student.approvedPoints >= 20 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="px-3 py-1 rounded-full text-xs font-semibold">
-                                        <span x-text="student.approvedPoints >= 20 ? 'PASSED' : 'NOT PASSED'"></span>
+                                    <span :class="isStudentPassed(student) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="px-3 py-1 rounded-full text-xs font-semibold">
+                                        <span x-text="isStudentPassed(student) ? 'PASSED' : 'NOT PASSED'"></span>
                                     </span>
                                 </td>
 
@@ -2241,6 +2423,7 @@
         showEditConfirmModal: false,
         showDeleteConfirmModal: false,
         showApproveModal: false,
+        showEditModal: false,
         showAlertModal: false,
         
         alertType: 'info',
@@ -2252,6 +2435,20 @@
         approveModalMainCategory: '',
         approveModalSubcategory: '',
         approveModalPoints: 0,
+        
+        // Edit Modal Data
+        editFormData: {
+            id: null,
+            title: '',
+            description: '',
+            activity_date: '',
+            mainCategory: '',
+            subcategory: '',
+            status: '',
+            rejection_reason: '',
+            certificate_file: null
+        },
+        editAvailableSubcategories: [],
         
         pinInput: '',
         pinError: false,
@@ -2412,7 +2609,13 @@
         // ============================================================
         
         // --- COMPUTED PROPERTIES ---
+        // --- COMPUTED PROPERTIES ---
 
+        isStudentPassed(student) {
+            if (!student) return false;
+            const completed = student.categoryBreakdown ? Object.keys(student.categoryBreakdown).length : 0;
+            return (student.approvedPoints > 20) && (completed >= 5);
+        },
         get uniqueCategories() {
             // Mengambil semua nama kategori untuk dropdown filter
             return this.categories.map(c => c.name).sort();
@@ -2450,9 +2653,9 @@
 
                 let matchesStatus = true;
                 if (this.statusPassFilter === 'pass') {
-                    matchesStatus = student.approvedPoints >= 20;
+                    matchesStatus = this.isStudentPassed(student);
                 } else if (this.statusPassFilter === 'fail') {
-                    matchesStatus = student.approvedPoints < 20;
+                    matchesStatus = !this.isStudentPassed(student);
                 }
 
                 return matchesSearch && matchesMajor && matchesYear && matchesStatus;
@@ -2548,6 +2751,27 @@
             this.showStudentDetailModal = true;
         },
 
+        downloadStudentReport() {
+            if (!this.selectedStudent || !this.selectedStudent.id) return;
+            
+            const studentId = this.selectedStudent.id;
+            const pointsMet = this.selectedStudent.approvedPoints > 20;
+            const categoriesMet = Object.keys(this.selectedStudent.categoryBreakdown || {}).length >= 5;
+            
+            if (!pointsMet || !categoriesMet) {
+                let reasons = [];
+                if (!pointsMet) reasons.push('Total Points <= 20 (Current: ' + this.selectedStudent.approvedPoints + ')');
+                if (!categoriesMet) reasons.push('Categories completed < 5 (Current: ' + Object.keys(this.selectedStudent.categoryBreakdown || {}).length + ')');
+                
+                this.showAlert('warning', 'Not Eligible', 'Student is not eligible for report:\n\n' + reasons.join('\n'));
+                return;
+            }
+
+            // Download the report PDF
+            const url = `/student/${studentId}/report`;
+            window.location.href = url;
+        },
+
         // Admin: reset selected student's password
         async resetStudentPassword() {
             if (!this.selectedStudent || !this.selectedStudent.id) return;
@@ -2636,6 +2860,107 @@
             });
         },
 
+        // --- EDIT SUBMISSION BY ADMIN ---
+        openEditModal() {
+            if (!this.selectedSubmission) return;
+            
+            // Initialize edit form with current submission data
+            this.editFormData = {
+                id: this.selectedSubmission.id,
+                title: this.selectedSubmission.judul || '',
+                description: this.selectedSubmission.keterangan || '',
+                activity_date: this.selectedSubmission.activityDate || '',
+                mainCategory: this.selectedSubmission.mainCategory || '',
+                subcategory: this.selectedSubmission.subcategory || '',
+                status: this.selectedSubmission.status || '',
+                rejection_reason: this.selectedSubmission.rejection_reason || '',
+                certificate_file: null
+            };
+            
+            // Set available subcategories based on current main category
+            if (this.selectedSubmission.mainCategory) {
+                const mainIndex = this.categories.findIndex(c => c.name === this.selectedSubmission.mainCategory);
+                if (mainIndex !== -1) {
+                    this.editAvailableSubcategories = this.categories[mainIndex].subcategories;
+                }
+            }
+            
+            this.showEditModal = true;
+        },
+
+        closeEditModal() {
+            this.showEditModal = false;
+            this.editFormData = {
+                id: null,
+                title: '',
+                description: '',
+                activity_date: '',
+                mainCategory: '',
+                subcategory: '',
+                status: '',
+                rejection_reason: '',
+                certificate_file: null
+            };
+            this.editAvailableSubcategories = [];
+        },
+
+        updateEditSubcategories() {
+            if (this.editFormData.mainCategory !== '') {
+                const mainIndex = this.categories.findIndex(c => c.name === this.editFormData.mainCategory);
+                if (mainIndex !== -1) {
+                    this.editAvailableSubcategories = this.categories[mainIndex].subcategories;
+                    this.editFormData.subcategory = ''; // Reset subcategory when main category changes
+                } else {
+                    this.editAvailableSubcategories = [];
+                }
+            } else {
+                this.editAvailableSubcategories = [];
+                this.editFormData.subcategory = '';
+            }
+        },
+
+        handleAdminEdit() {
+            // Validation
+            if (!this.editFormData.title || !this.editFormData.description) {
+                this.showAlert('warning', 'Incomplete', 'Please fill in Title and Description.');
+                return;
+            }
+
+            const url = `/admin/submissions/${this.editFormData.id}/admin-edit`;
+            
+            const formData = new FormData();
+            formData.append('title', this.editFormData.title);
+            formData.append('description', this.editFormData.description);
+            formData.append('activity_date', this.editFormData.activity_date);
+            formData.append('mainCategory', this.editFormData.mainCategory);
+            formData.append('subcategory', this.editFormData.subcategory);
+            formData.append('status', this.editFormData.status);
+            formData.append('rejection_reason', this.editFormData.rejection_reason);
+            if (this.editFormData.certificate_file) {
+                formData.append('certificate_file', this.editFormData.certificate_file);
+            }
+            formData.append('_token', '{{ csrf_token() }}');
+
+            fetch(url, {
+                method: 'POST',
+                body: formData
+            })
+            .then(async response => {
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Failed to update submission');
+                return data;
+            })
+            .then(data => {
+                this.closeEditModal();
+                this.showAlert('success', 'Updated', 'Submission has been updated successfully.');
+                setTimeout(() => window.location.reload(), 1500);
+            })
+            .catch(error => {
+                console.error('Edit Error:', error);
+                this.showAlert('error', 'Update Failed', error.message);
+            });
+        },
+
         exportReport() {
             const data = this.filteredStudentsList;
             if(data.length === 0) { 
@@ -2647,7 +2972,7 @@
             csvContent += "Student ID,Name,Major,Year,Total Points,Status,Pending Submissions\n"; 
             
             data.forEach(row => {
-                let status = row.approvedPoints >= 20 ? "Passed" : "Not Passed";
+                let status = this.isStudentPassed(row) ? "Passed" : "Not Passed";
                 csvContent += `${row.id},"${row.name}",${row.major},${row.year},${row.approvedPoints},${status},${row.pending}\n`;
             });
 

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S-Core Report - {{ $student->name }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: white;
+        }
+
+        .container {
+            max-width: 210mm;
+            height: 297mm;
+            margin: 0 auto;
+            padding: 20mm;
+            background: white;
+            position: relative;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #1e40af;
+        }
+
+        .header-logo {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #1e40af;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .header p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Student Info */
+        .student-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f3f4f6;
+            border-radius: 5px;
+        }
+
+        .student-info-item {
+            font-size: 12px;
+        }
+
+        .student-info-item label {
+            font-weight: bold;
+            color: #1e40af;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .student-info-item value {
+            color: #333;
+        }
+
+        /* Status Section */
+        .status-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #ecfdf5;
+            border-left: 4px solid #10b981;
+            border-radius: 5px;
+        }
+
+        .status-section h2 {
+            font-size: 14px;
+            color: #10b981;
+            margin-bottom: 10px;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .status-item {
+            font-size: 12px;
+        }
+
+        .status-item-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #10b981;
+        }
+
+        .status-item-label {
+            font-size: 11px;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        /* Category Breakdown */
+        .breakdown-section {
+            margin-bottom: 20px;
+        }
+
+        .breakdown-section h3 {
+            font-size: 13px;
+            color: #1e40af;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .category-item {
+            margin-bottom: 12px;
+            padding: 10px;
+            background: #f9fafb;
+            border-left: 3px solid #3b82f6;
+            border-radius: 3px;
+        }
+
+        .category-name {
+            font-weight: bold;
+            color: #1e40af;
+            font-size: 12px;
+        }
+
+        .category-details {
+            font-size: 11px;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .activity-list {
+            font-size: 10px;
+            color: #555;
+            margin-top: 5px;
+            margin-left: 10px;
+            line-height: 1.4;
+        }
+
+        .activity-item {
+            margin-bottom: 3px;
+        }
+
+        /* Footer */
+        .footer {
+            position: absolute;
+            bottom: 20mm;
+            left: 20mm;
+            right: 20mm;
+            font-size: 10px;
+            color: #999;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 10px;
+            text-align: center;
+        }
+
+        /* Signature Section */
+        .signature-section {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            padding-top: 20px;
+        }
+
+        .signature-box {
+            text-align: center;
+            font-size: 11px;
+        }
+
+        .signature-line {
+            border-top: 1px solid #333;
+            margin-top: 40px;
+            padding-top: 3px;
+        }
+
+        /* Status Badge */
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* Table for detailed list */
+        .submissions-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+            margin-top: 10px;
+        }
+
+        .submissions-table th {
+            background: #e5e7eb;
+            padding: 6px;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 1px solid #d1d5db;
+        }
+
+        .submissions-table td {
+            padding: 6px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .submissions-table tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                margin: 0;
+                padding: 20mm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-logo">SISTEM CORE ITBSS</div>
+            <h1>S-CORE REPORT</h1>
+            <p>Laporan Pengakuan S-Core untuk Persyaratan Skripsi</p>
+        </div>
+
+        <!-- Student Information -->
+        <div class="student-info">
+            <div class="student-info-item">
+                <label>Nama Mahasiswa:</label>
+                <value>{{ $student->name }}</value>
+            </div>
+            <div class="student-info-item">
+                <label>NIM:</label>
+                <value>{{ $student->student_id }}</value>
+            </div>
+            <div class="student-info-item">
+                <label>Program Studi:</label>
+                <value>{{ $student->major ?? 'N/A' }}</value>
+            </div>
+            <div class="student-info-item">
+                <label>Angkatan:</label>
+                <value>{{ $student->year ?? 'N/A' }}</value>
+            </div>
+        </div>
+
+        <!-- Status Section -->
+        <div class="status-section">
+            <h2>✓ STATUS PENGAKUAN S-CORE</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="status-item-value">{{ $totalPoints }}</div>
+                    <div class="status-item-label">Total Poin S-Core</div>
+                    <div class="status-item-label" style="color: #10b981; font-weight: bold;">Minimum: 20 ✓</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-item-value">{{ $completedCategories }}/{{ $totalCategories }}</div>
+                    <div class="status-item-label">Kategori Selesai</div>
+                    <div class="status-item-label" style="color: #10b981; font-weight: bold;">Minimum: 5 ✓</div>
+                </div>
+            </div>
+            <div style="margin-top:12px;">
+                <?php $isPassed = ($totalPoints > 20) && ($completedCategories >= 5); ?>
+                <span class="badge <?php echo $isPassed ? 'badge-success' : 'badge-warning'; ?>">
+                    <?php echo $isPassed ? 'PASSED' : 'NOT PASSED'; ?>
+                </span>
+            </div>
+        </div>
+
+        <!-- Category Breakdown -->
+        <div class="breakdown-section">
+            <h3>📋 RINCIAN KATEGORI YANG DISELESAIKAN</h3>
+            
+            @if($categoryBreakdown && count($categoryBreakdown) > 0)
+                @foreach($categoryBreakdown as $category)
+                <div class="category-item">
+                    <div class="category-name">{{ $category['categoryName'] }}</div>
+                    <div class="category-details">
+                        {{ $category['count'] }} aktivitas | 
+                        <strong>{{ $category['points'] }} poin</strong>
+                    </div>
+                    
+                    @if(isset($category['submissions']) && count($category['submissions']) > 0)
+                    <table class="submissions-table">
+                        <thead>
+                            <tr>
+                                <th>Aktivitas</th>
+                                <th>Tanggal</th>
+                                <th>Poin</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($category['submissions'] as $submission)
+                            <tr>
+                                <td>{{ $submission['title'] }}</td>
+                                <td>{{ \Carbon\Carbon::parse($submission['date'])->format('d/m/Y') }}</td>
+                                <td>{{ $submission['points'] }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    @endif
+                </div>
+                @endforeach
+            @else
+                <p style="color: #666; font-size: 12px;">Tidak ada kategori yang diselesaikan.</p>
+            @endif
+        </div>
+
+        <!-- Footer & Signature -->
+        <div class="footer">
+            <p>Laporan ini digenerate pada {{ $generatedDate }} pukul {{ $generatedTime }}</p>
+            <p>Sistem Core ITBSS v2.0 - Pengesahan Otomatis</p>
+        </div>
+    </div>
+</body>
+</html>

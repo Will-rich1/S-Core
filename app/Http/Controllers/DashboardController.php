@@ -11,6 +11,7 @@ use App\Models\Category;
 use App\Models\User;
 use App\Services\GoogleDriveService;
 use Carbon\Carbon;
+use App\Helpers\SCoreHelper;
 
 class DashboardController extends Controller
 {
@@ -158,10 +159,16 @@ class DashboardController extends Controller
                 $categoryBreakdown = [];
                 foreach ($approvedSubmissions as $sub) {
                     $catName = $sub->category->name ?? 'Other';
-                    if (!isset($categoryBreakdown[$catName])) {
-                        $categoryBreakdown[$catName] = 0;
+                    $catId = $sub->category->id ?? null;
+                    if (!isset($categoryBreakdown[$catId])) {
+                        $categoryBreakdown[$catId] = [
+                            'categoryName' => $catName,
+                            'count' => 0,
+                            'points' => 0
+                        ];
                     }
-                    $categoryBreakdown[$catName] += $sub->points_awarded;
+                    $categoryBreakdown[$catId]['count']++;
+                    $categoryBreakdown[$catId]['points'] += $sub->points_awarded;
                 }
 
                 return [
@@ -192,8 +199,12 @@ class DashboardController extends Controller
 
         // 4. Statistik Khusus Tab Student (Target Lulus: 20 Poin)
         $studentStats = [
-            'passed'  => $students->where('approvedPoints', '>=', 20)->count(),
-            'failed'  => $students->where('approvedPoints', '<', 20)->count(),
+            'passed'  => $students->filter(function($s) {
+                return ($s['approvedPoints'] > SCoreHelper::MIN_POINTS_REQUIRED) && (count($s['categoryBreakdown']) >= SCoreHelper::MIN_CATEGORIES_REQUIRED);
+            })->count(),
+            'failed'  => $students->filter(function($s) {
+                return !(($s['approvedPoints'] > SCoreHelper::MIN_POINTS_REQUIRED) && (count($s['categoryBreakdown']) >= SCoreHelper::MIN_CATEGORIES_REQUIRED));
+            })->count(),
             'average' => round($students->avg('approvedPoints') ?? 0, 1)
         ];
 

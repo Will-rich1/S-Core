@@ -193,12 +193,23 @@ class SubmissionController extends Controller
     {
         $submission = Submission::findOrFail($id);
         
-        $submission->update([
+        // Persiapkan data untuk update
+        $dataToUpdate = [
             'status' => 'Approved',
             'points_awarded' => $request->points ?? 0,
             'reviewed_by' => Auth::id(),
             'reviewed_at' => now(),
-        ]);
+        ];
+
+        // Update category jika dikirim dari frontend
+        if ($request->has('assigned_subcategory_id') && $request->assigned_subcategory_id) {
+            $subcategory = Subcategory::findOrFail($request->assigned_subcategory_id);
+            $dataToUpdate['student_subcategory_id'] = $subcategory->id;
+            $dataToUpdate['student_category_id'] = $subcategory->category_id;
+            $dataToUpdate['points_awarded'] = $subcategory->points;
+        }
+
+        $submission->update($dataToUpdate);
 
         if ($request->wantsJson()) {
             return response()->json(['message' => 'Submission approved!']);
@@ -252,5 +263,103 @@ class SubmissionController extends Controller
         // $submission->save();
 
         return response()->json(['message' => 'Complaint submitted successfully. Admin will review it.']);
+    }
+
+    /**
+     * 7. Edit Submission oleh Admin (untuk approved/rejected yang perlu koreksi)
+     */
+    public function adminEdit(Request $request, $id)
+    {
+        try {
+            $submission = Submission::findOrFail($id);
+            
+            // Cek status: Boleh edit jika 'Approved' ATAU 'Rejected'
+            if ($submission->status !== 'Approved' && $submission->status !== 'Rejected') {
+                return response()->json(['message' => 'Only Approved or Rejected submissions can be edited by admin.'], 403);
+            }
+
+            // Validasi
+            $request->validate([
+                'title'             => 'nullable|string|max:255',
+                'description'       => 'nullable|string',
+                'activity_date'     => 'nullable|date',
+                'mainCategory'      => 'nullable|string',
+                'subcategory'       => 'nullable|string',
+                'certificate_file'  => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'status'            => 'nullable|in:Waiting,Approved,Rejected',
+                'rejection_reason'  => 'nullable|string',
+            ]);
+
+            $dataToUpdate = [];
+
+            // Update fields if provided
+            if ($request->has('title')) {
+                $dataToUpdate['title'] = $request->title;
+            }
+            if ($request->has('description')) {
+                $dataToUpdate['description'] = $request->description;
+            }
+            if ($request->has('activity_date')) {
+                $dataToUpdate['activity_date'] = $request->activity_date;
+            }
+            if ($request->has('status')) {
+                $dataToUpdate['status'] = $request->status;
+            }
+            if ($request->has('rejection_reason')) {
+                $dataToUpdate['rejection_reason'] = $request->rejection_reason;
+            }
+
+            // Update category if provided
+            if ($request->has('mainCategory')) {
+                $category = Category::where('name', $request->mainCategory)->first();
+                if ($category) {
+                    $dataToUpdate['student_category_id'] = $category->id;
+                }
+            }
+
+            // Update subcategory if provided
+            if ($request->has('subcategory')) {
+                $subcategory = Subcategory::where('name', $request->subcategory)->first();
+                if ($subcategory) {
+                    $dataToUpdate['student_subcategory_id'] = $subcategory->id;
+                }
+            }
+
+            // Handle file upload if provided
+            if ($request->hasFile('certificate_file')) {
+                $googleDriveService = app(GoogleDriveService::class);
+                
+                // Delete old file if exists
+                if ($submission->certificate_path && $submission->storage_type === 'google') {
+                    try {
+                        $googleDriveService->deleteFile($submission->certificate_path, 'google');
+                    } catch (\Exception $e) {
+                        \Log::warning('Failed to delete old file from Google Drive: ' . $e->getMessage());
+                    }
+                }
+
+                // Upload new file
+                $uploadResult = $googleDriveService->uploadFile(
+                    $request->file('certificate_file'),
+                    'certificates'
+                );
+                
+                $dataToUpdate['certificate_path'] = $uploadResult['path'];
+                $dataToUpdate['certificate_url'] = $uploadResult['url'] ?? null;
+                $dataToUpdate['certificate_original_name'] = $request->file('certificate_file')->getClientOriginalName();
+                $dataToUpdate['storage_type'] = $uploadResult['storage'] ?? 'google';
+            }
+
+            // Update admin info
+            $dataToUpdate['reviewed_by'] = Auth::id();
+            $dataToUpdate['reviewed_at'] = now();
+
+            $submission->update($dataToUpdate);
+
+            return response()->json(['message' => 'Submission updated successfully by admin!']);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error updating data: ' . $e->getMessage()], 500);
+        }
     }
 }

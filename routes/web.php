@@ -5,7 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\CategoryController; // <-- TAMBAHAN PENTING
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\SCoreReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,6 +55,8 @@ Route::middleware(['auth'])->group(function () {
     // Approval / Rejection
     Route::post('/admin/submissions/{id}/approve', [SubmissionController::class, 'approve'])->name('admin.approve');
     Route::post('/admin/submissions/{id}/reject', [SubmissionController::class, 'reject'])->name('admin.reject');
+    Route::put('/admin/submissions/{id}/edit', [SubmissionController::class, 'adminEdit'])->name('admin.submissions.edit');
+    Route::post('/admin/submissions/{id}/admin-edit', [SubmissionController::class, 'adminEdit'])->name('admin.submissions.admin-edit');
 
     // User Management
     Route::post('/students/store', [UserController::class, 'storeStudent'])->name('students.store');
@@ -82,5 +85,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/subcategories', [CategoryController::class, 'storeSubcategory'])->name('subcategories.store');
     Route::put('/admin/subcategories/{id}', [CategoryController::class, 'updateSubcategory'])->name('subcategories.update'); // <-- Pastikan ini ada
     Route::delete('/admin/subcategories/{id}', [CategoryController::class, 'destroySubcategory'])->name('subcategories.destroy'); // <-- Pastikan ini ada
+
+    // --- S-CORE REPORT ROUTES ---
+    Route::get('/student/{student_id}/report', [SCoreReportController::class, 'downloadReport'])->name('student.report.download');
+    Route::get('/student/{student_id}/report/check', [SCoreReportController::class, 'checkEligibility'])->name('student.report.check');
+    Route::get('/student/{student_id}/status', [SCoreReportController::class, 'getStatus'])->name('student.status');
 
 });

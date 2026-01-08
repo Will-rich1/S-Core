@@ -625,6 +625,68 @@
                     </div>
                 </div>
 
+                <!-- S-Core Eligibility & Report Section -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow p-6 mb-6 border-2 border-blue-200">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <h2 class="text-xl font-bold text-gray-800">S-Core Report</h2>
+                        </div>
+                        <span id="reportEligibilityBadge" class="px-4 py-2 rounded-full text-sm font-bold text-gray-600 bg-gray-200">Checking...</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="bg-white rounded-lg p-4">
+                            <p class="text-sm text-gray-600 mb-1">Minimum Points Required</p>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-3xl font-bold" id="reportPoints">-</span>
+                                <span class="text-sm text-gray-500">/ 20 poin</span>
+                            </div>
+                            <div id="pointsStatusBar" class="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div id="pointsProgressBar" class="h-full bg-blue-500 transition-all w-0"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg p-4">
+                            <p class="text-sm text-gray-600 mb-1">Categories Completed</p>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-3xl font-bold" id="reportCategories">-</span>
+                                <span class="text-sm text-gray-500">/ 6 kategori (min 5)</span>
+                            </div>
+                            <div id="categoriesStatusBar" class="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div id="categoriesProgressBar" class="h-full bg-green-500 transition-all w-0"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-4 mb-4">
+                        <p class="text-sm font-medium text-gray-700 mb-2">📋 Requirements Status:</p>
+                        <ul class="space-y-2 text-sm">
+                            <li id="pointsRequirement" class="flex items-center gap-2 text-gray-600">
+                                <span class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-xs">?</span>
+                                Minimum 20 poin
+                            </li>
+                            <li id="categoriesRequirement" class="flex items-center gap-2 text-gray-600">
+                                <span class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-xs">?</span>
+                                Minimal 5 dari 6 kategori
+                            </li>
+                        </ul>
+                    </div>
+
+                    <button id="downloadReportBtn" 
+                            @click="downloadSCoreReport()" 
+                            disabled
+                            class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Download S-Core Report
+                    </button>
+                    <p id="reportMessage" class="text-xs text-center text-gray-500 mt-2">Loading eligibility status...</p>
+                </div>
+
                 <!-- Mandatory Categories Table -->
                 <div class="bg-white rounded-lg shadow p-6 mb-6" x-data="{ expandedCategories: [false, false, false, false, false, false] }">
                     <h2 class="text-xl font-bold mb-4 text-center">Mandatory S-Core Categories</h2>
@@ -1156,6 +1218,10 @@
             passwordError: '', passwordSuccess: '',
             showAlertModal: false, alertType: 'info', alertTitle: '', alertMessage: '', alertHasCancel: false, alertCallback: null,
 
+            // --- S-CORE REPORT VARS ---
+            reportEligibility: { totalPoints: 0, minPointsMet: false, completedCategories: 0, totalCategories: 6, minCategoriesMet: false, isEligible: false },
+            reportLoading: false,
+
             // --- COMPUTED ---
             get uniqueCategories() {
                 const categorySet = new Set();
@@ -1202,6 +1268,9 @@
                     console.error('Error loading categories:', error);
                     // Fallback: categoryGroups tetap menggunakan data awal dari server
                 }
+                
+                // Load S-Core report eligibility status
+                this.checkReportEligibility();
             },
 
             validateActivityDate(date) {
@@ -1447,6 +1516,103 @@
             
             closeAlertModal(conf) { 
                 this.showAlertModal=false; if(conf && this.alertCallback) this.alertCallback(); 
+            },
+
+            // --- S-CORE REPORT FUNCTIONS ---
+            async checkReportEligibility() {
+                if (this.reportLoading) return;
+                this.reportLoading = true;
+                
+                try {
+                    const response = await fetch(`/student/${this.currentUser.student_id}/report/check`);
+                    if (!response.ok) throw new Error('Failed to check eligibility');
+                    
+                    this.reportEligibility = await response.json();
+                    this.updateReportUI();
+                } catch (error) {
+                    console.error('Error checking report eligibility:', error);
+                    document.getElementById('reportMessage').textContent = '❌ Error loading eligibility status';
+                } finally {
+                    this.reportLoading = false;
+                }
+            },
+
+            updateReportUI() {
+                const { totalPoints, minPointsMet, completedCategories, minCategoriesMet, isEligible } = this.reportEligibility;
+                
+                // Update badge
+                const badge = document.getElementById('reportEligibilityBadge');
+                if (isEligible) {
+                    badge.textContent = '✅ Eligible';
+                    badge.className = 'px-4 py-2 rounded-full text-sm font-bold text-green-700 bg-green-200';
+                } else {
+                    badge.textContent = '❌ Not Eligible';
+                    badge.className = 'px-4 py-2 rounded-full text-sm font-bold text-red-700 bg-red-200';
+                }
+
+                // Update points display
+                document.getElementById('reportPoints').textContent = totalPoints;
+                const pointsProgress = (totalPoints / 20) * 100;
+                document.getElementById('pointsProgressBar').style.width = Math.min(pointsProgress, 100) + '%';
+                document.getElementById('pointsProgressBar').style.backgroundColor = minPointsMet ? '#3b82f6' : '#ef4444';
+
+                // Update categories display
+                document.getElementById('reportCategories').textContent = completedCategories;
+                const categoriesProgress = (completedCategories / 5) * 100;
+                document.getElementById('categoriesProgressBar').style.width = Math.min(categoriesProgress, 100) + '%';
+                document.getElementById('categoriesProgressBar').style.backgroundColor = minCategoriesMet ? '#22c55e' : '#ef4444';
+
+                // Update requirements checkmarks
+                const pointsReq = document.getElementById('pointsRequirement');
+                const categoriesReq = document.getElementById('categoriesRequirement');
+                
+                if (minPointsMet) {
+                    pointsReq.innerHTML = '<span class="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs">✓</span>Minimum 20 poin';
+                    pointsReq.className = 'flex items-center gap-2 text-green-600 font-medium';
+                } else {
+                    pointsReq.innerHTML = '<span class="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs">✕</span>Minimum 20 poin';
+                    pointsReq.className = 'flex items-center gap-2 text-red-600';
+                }
+
+                if (minCategoriesMet) {
+                    categoriesReq.innerHTML = '<span class="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs">✓</span>Minimal 5 dari 6 kategori';
+                    categoriesReq.className = 'flex items-center gap-2 text-green-600 font-medium';
+                } else {
+                    categoriesReq.innerHTML = '<span class="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs">✕</span>Minimal 5 dari 6 kategori';
+                    categoriesReq.className = 'flex items-center gap-2 text-red-600';
+                }
+
+                // Update button state
+                const btn = document.getElementById('downloadReportBtn');
+                const msg = document.getElementById('reportMessage');
+                
+                if (isEligible) {
+                    btn.disabled = false;
+                    btn.classList.remove('disabled:bg-gray-400', 'disabled:cursor-not-allowed');
+                    msg.textContent = '✓ You are eligible to download your report';
+                    msg.className = 'text-xs text-center text-green-600 mt-2 font-medium';
+                } else {
+                    btn.disabled = true;
+                    btn.classList.add('disabled:bg-gray-400', 'disabled:cursor-not-allowed');
+                    let reason = [];
+                    if (!minPointsMet) reason.push('You need at least 20 points');
+                    if (!minCategoriesMet) reason.push('You need to complete at least 5 categories');
+                    msg.textContent = '⚠ ' + reason.join(' and ');
+                    msg.className = 'text-xs text-center text-red-600 mt-2';
+                }
+            },
+
+            downloadSCoreReport() {
+                if (!this.reportEligibility.isEligible) {
+                    this.showAlert('warning', 'Not Eligible', 'You must have at least 20 points and complete 5 out of 6 categories');
+                    return;
+                }
+
+                // Trigger download via window.location
+                const reportUrl = `/student/${this.currentUser.student_id}/report`;
+                window.location.href = reportUrl;
+                
+                this.showAlert('success', 'Success', 'Your S-Core report is being downloaded');
             },
             
             getCategoryTotal(sub, f) { 
