@@ -297,7 +297,7 @@
                 </div>
             </div>
             <div style="margin-top:12px;">
-                <?php $isPassed = ($totalPoints > 20) && ($completedCategories >= 5); ?>
+                <?php $isPassed = ($totalPoints >= 20) && ($completedCategories >= 5); ?>
                 <span class="badge <?php echo $isPassed ? 'badge-success' : 'badge-warning'; ?>">
                     <?php echo $isPassed ? 'PASSED' : 'NOT PASSED'; ?>
                 </span>

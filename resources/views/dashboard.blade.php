@@ -173,7 +173,7 @@
                                         <p class="text-gray-400 text-xs mb-4">or</p>
                                         <label class="cursor-pointer">
                                             <span class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium inline-block">Browse Files</span>
-                                            <input type="file" accept=".pdf" class="hidden" @change="handleFileSelect" />
+                                            <input type="file" accept=".pdf" class="hidden" x-ref="fileInput" @change="handleFileSelect" />
                                         </label>
                                         <p class="text-gray-400 text-xs mt-4">PDF only - Maximum 10MB</p>
                                     </div>
@@ -642,7 +642,7 @@
                             <p class="text-sm text-gray-600 mb-1">Minimum Points Required</p>
                             <div class="flex items-baseline gap-2">
                                 <span class="text-3xl font-bold" id="reportPoints">-</span>
-                                <span class="text-sm text-gray-500">/ 20 poin</span>
+                                <span class="text-sm text-gray-500" id="minPointsLabel">/ 20 poin</span>
                             </div>
                             <div id="pointsStatusBar" class="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
                                 <div id="pointsProgressBar" class="h-full bg-blue-500 transition-all w-0"></div>
@@ -653,26 +653,12 @@
                             <p class="text-sm text-gray-600 mb-1">Categories Completed</p>
                             <div class="flex items-baseline gap-2">
                                 <span class="text-3xl font-bold" id="reportCategories">-</span>
-                                <span class="text-sm text-gray-500">/ 6 kategori (min 5)</span>
+                                <span class="text-sm text-gray-500" id="minCategoriesLabel">/ 6 kategori (min 5)</span>
                             </div>
                             <div id="categoriesStatusBar" class="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
                                 <div id="categoriesProgressBar" class="h-full bg-green-500 transition-all w-0"></div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="bg-white rounded-lg p-4 mb-4">
-                        <p class="text-sm font-medium text-gray-700 mb-2">📋 Requirements Status:</p>
-                        <ul class="space-y-2 text-sm">
-                            <li id="pointsRequirement" class="flex items-center gap-2 text-gray-600">
-                                <span class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-xs">?</span>
-                                Minimum 20 poin
-                            </li>
-                            <li id="categoriesRequirement" class="flex items-center gap-2 text-gray-600">
-                                <span class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-xs">?</span>
-                                Minimal 5 dari 6 kategori
-                            </li>
-                        </ul>
                     </div>
 
                     <button id="downloadReportBtn" 
@@ -1326,21 +1312,31 @@
             openEditModal(activity) {
                 this.selectedActivity = activity;
                 this.showEditModal = true;
-                let catIndex = this.categoryGroups.findIndex(c => c.name === activity.mainCategory);
-                if (catIndex === -1) catIndex = '';
 
+                // Inisialisasi form dengan data kosong dulu
                 this.formData = {
-                    mainCategory: catIndex,
+                    mainCategory: '',
                     subcategory: '', 
-                    activityTitle: activity.judul,
-                    description: activity.keterangan,
+                    activityTitle: activity.judul || '',
+                    description: activity.keterangan || '',
                     activityDate: activity.waktu ? new Date(activity.waktu).toISOString().split('T')[0] : '',
                     fileName: '' 
                 };
 
-                this.updateAvailableSubcategories();
+                // Set main category dan subcategory setelah render
                 setTimeout(() => {
-                    this.formData.subcategory = activity.subcategory;
+                    let catIndex = this.categoryGroups.findIndex(c => c.name === activity.mainCategory);
+                    if (catIndex === -1) {
+                        console.error('Category not found:', activity.mainCategory);
+                        catIndex = 0;
+                    }
+                    this.formData.mainCategory = catIndex;
+                    this.updateAvailableSubcategories();
+                    
+                    // Set subcategory setelah availableSubcategories ter-update
+                    setTimeout(() => {
+                        this.formData.subcategory = activity.subcategory || '';
+                    }, 50);
                 }, 50);
             },
 
@@ -1348,31 +1344,40 @@
             updateActivity() {
                 if (this.isSubmitting) return;
 
-                if (this.formData.mainCategory === '' || !this.formData.subcategory || !this.formData.activityTitle || !this.formData.description || !this.formData.activityDate) {
-                    this.showAlert('warning', 'Missing Info', 'Fill all required fields'); return;
+                if (this.formData.mainCategory === '' || typeof this.formData.mainCategory === 'undefined' || !this.formData.subcategory || !this.formData.activityTitle || !this.formData.description || !this.formData.activityDate) {
+                    this.showAlert('warning', 'Missing Info', 'Please fill all required fields'); 
+                    this.isSubmitting = false;
+                    return;
                 }
 
                 this.isSubmitting = true;
 
                 let data = new FormData();
-                data.append('_method', 'PUT'); 
-                data.append('title', this.formData.activityTitle);
-                data.append('description', this.formData.description);
+                data.append('_method', 'PUT');
+                data.append('title', this.formData.activityTitle.trim());
+                data.append('description', this.formData.description.trim());
                 data.append('activity_date', this.formData.activityDate);
                 
-                const catIndex = this.formData.mainCategory;
+                const catIndex = parseInt(this.formData.mainCategory);
+                if (isNaN(catIndex) || !this.categoryGroups[catIndex]) {
+                    this.showAlert('error', 'Invalid Category', 'Selected category is invalid');
+                    this.isSubmitting = false;
+                    return;
+                }
+                
                 data.append('mainCategory', this.categoryGroups[catIndex].name); 
-                data.append('subcategory', this.formData.subcategory);
+                data.append('subcategory', this.formData.subcategory.trim());
                 
                 if (this.$refs.fileInput && this.$refs.fileInput.files.length > 0) {
                     data.append('certificate_file', this.$refs.fileInput.files[0]);
                 }
-                
-                data.append('_token', '{{ csrf_token() }}');
 
                 fetch(`/submissions/${this.selectedActivity.id}`, { 
                     method: 'POST', 
-                    headers: { 'Accept': 'application/json' }, 
+                    headers: { 
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }, 
                     body: data 
                 })
                 .then(async res => { const json = await res.json(); if (!res.ok) throw new Error(json.message); return json; })
@@ -1538,7 +1543,7 @@
             },
 
             updateReportUI() {
-                const { totalPoints, minPointsMet, completedCategories, minCategoriesMet, isEligible } = this.reportEligibility;
+                const { totalPoints, minPointsMet, completedCategories, totalCategories, minCategoriesMet, isEligible, minPointsRequired, minCategoriesRequired } = this.reportEligibility;
                 
                 // Update badge
                 const badge = document.getElementById('reportEligibilityBadge');
@@ -1550,37 +1555,19 @@
                     badge.className = 'px-4 py-2 rounded-full text-sm font-bold text-red-700 bg-red-200';
                 }
 
-                // Update points display
+                // Update points display with dynamic minimum
                 document.getElementById('reportPoints').textContent = totalPoints;
-                const pointsProgress = (totalPoints / 20) * 100;
+                document.getElementById('minPointsLabel').textContent = '/ ' + minPointsRequired + ' poin';
+                const pointsProgress = (totalPoints / minPointsRequired) * 100;
                 document.getElementById('pointsProgressBar').style.width = Math.min(pointsProgress, 100) + '%';
                 document.getElementById('pointsProgressBar').style.backgroundColor = minPointsMet ? '#3b82f6' : '#ef4444';
 
-                // Update categories display
+                // Update categories display with dynamic minimum
                 document.getElementById('reportCategories').textContent = completedCategories;
-                const categoriesProgress = (completedCategories / 5) * 100;
+                document.getElementById('minCategoriesLabel').textContent = '/ ' + totalCategories + ' kategori (min ' + minCategoriesRequired + ')';
+                const categoriesProgress = (completedCategories / minCategoriesRequired) * 100;
                 document.getElementById('categoriesProgressBar').style.width = Math.min(categoriesProgress, 100) + '%';
                 document.getElementById('categoriesProgressBar').style.backgroundColor = minCategoriesMet ? '#22c55e' : '#ef4444';
-
-                // Update requirements checkmarks
-                const pointsReq = document.getElementById('pointsRequirement');
-                const categoriesReq = document.getElementById('categoriesRequirement');
-                
-                if (minPointsMet) {
-                    pointsReq.innerHTML = '<span class="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs">✓</span>Minimum 20 poin';
-                    pointsReq.className = 'flex items-center gap-2 text-green-600 font-medium';
-                } else {
-                    pointsReq.innerHTML = '<span class="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs">✕</span>Minimum 20 poin';
-                    pointsReq.className = 'flex items-center gap-2 text-red-600';
-                }
-
-                if (minCategoriesMet) {
-                    categoriesReq.innerHTML = '<span class="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs">✓</span>Minimal 5 dari 6 kategori';
-                    categoriesReq.className = 'flex items-center gap-2 text-green-600 font-medium';
-                } else {
-                    categoriesReq.innerHTML = '<span class="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-white text-xs">✕</span>Minimal 5 dari 6 kategori';
-                    categoriesReq.className = 'flex items-center gap-2 text-red-600';
-                }
 
                 // Update button state
                 const btn = document.getElementById('downloadReportBtn');
@@ -1595,8 +1582,8 @@
                     btn.disabled = true;
                     btn.classList.add('disabled:bg-gray-400', 'disabled:cursor-not-allowed');
                     let reason = [];
-                    if (!minPointsMet) reason.push('You need at least 20 points');
-                    if (!minCategoriesMet) reason.push('You need to complete at least 5 categories');
+                    if (!minPointsMet) reason.push('You need at least ' + minPointsRequired + ' points');
+                    if (!minCategoriesMet) reason.push('You need to complete at least ' + minCategoriesRequired + ' categories');
                     msg.textContent = '⚠ ' + reason.join(' and ');
                     msg.className = 'text-xs text-center text-red-600 mt-2';
                 }
@@ -1604,7 +1591,8 @@
 
             downloadSCoreReport() {
                 if (!this.reportEligibility.isEligible) {
-                    this.showAlert('warning', 'Not Eligible', 'You must have at least 20 points and complete 5 out of 6 categories');
+                    const { minPointsRequired, minCategoriesRequired } = this.reportEligibility;
+                    this.showAlert('warning', 'Not Eligible', `You must have at least ${minPointsRequired} points and complete ${minCategoriesRequired} out of 6 categories`);
                     return;
                 }
 

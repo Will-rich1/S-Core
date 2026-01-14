@@ -25,11 +25,23 @@ class GoogleDriveService
      * 
      * @param UploadedFile $file
      * @param string $folder
+     * @param string|null $studentId - NIM mahasiswa untuk penamaan file
      * @return array ['path' => 'file_path', 'url' => 'public_url']
      */
-    public function uploadFile(UploadedFile $file, string $folder = 'certificates'): array
+    public function uploadFile(UploadedFile $file, string $folder = 'certificates', ?string $studentId = null): array
     {
-        $filename = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
+        // Generate filename: YYYYMMDD_NIM_originalname.pdf
+        // Contoh: 20260108_22100006_certificate.pdf
+        if ($studentId) {
+            $date = date('Ymd'); // Format: YYYYMMDD
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $extension = $file->getClientOriginalExtension();
+            $filename = "{$date}_{$studentId}_{$originalName}.{$extension}";
+        } else {
+            // Fallback ke format lama jika studentId tidak ada
+            $filename = time() . '_' . preg_replace('/\s+/', '_', $file->getClientOriginalName());
+        }
+        
         $filePath = $folder . '/' . $filename;
 
         if ($this->useGoogleDrive) {
@@ -108,14 +120,20 @@ class GoogleDriveService
     }
 
     /**
-     * Get public URL untuk file di Google Drive
+     * Get public URL untuk file (Google Drive atau Local)
      * 
-     * @param string $path
+     * @param string $path - File path atau file ID
+     * @param string|null $storageType - 'google' atau 'local' (if null, akan di-deteksi)
      * @return string
      */
-    public function getPublicUrl(string $path): string
+    public function getPublicUrl(string $path, ?string $storageType = null): string
     {
-        if ($this->useGoogleDrive) {
+        // Auto-detect storage type jika tidak diberikan
+        if ($storageType === null) {
+            $storageType = (!str_contains($path, '/') && strlen($path) > 20) ? 'google' : 'local';
+        }
+
+        if ($storageType === 'google' || $this->useGoogleDrive) {
             try {
                 // Jika path sudah berupa file ID (tidak ada slash dan panjangnya tepat)
                 if (!str_contains($path, '/') && strlen($path) > 20) {
@@ -137,7 +155,13 @@ class GoogleDriveService
             }
         }
         
-        // Fallback ke storage URL biasa
+        // Untuk local storage atau fallback
+        // Pastikan path adalah relative path dari storage/app/public
+        if (!str_starts_with($path, 'certificates/')) {
+            // Jika tidak ada prefix folder, assume sudah correct
+            return Storage::disk('public')->url($path);
+        }
+        
         return Storage::disk('public')->url($path);
     }
 

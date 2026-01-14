@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Services\GoogleDriveService;
 use Carbon\Carbon;
 use App\Helpers\SCoreHelper;
+use App\Models\SystemSetting;
 
 class DashboardController extends Controller
 {
@@ -42,7 +43,17 @@ class DashboardController extends Controller
             ->get();
 
         // Mapping Data untuk View Mahasiswa
-        $activities = $rawActivities->map(function($item) {
+        $googleDriveService = app(GoogleDriveService::class);
+        $activities = $rawActivities->map(function($item) use ($googleDriveService) {
+            // Generate viewing URL - prioritas: certificate_url > generated from path
+            if ($item->certificate_url) {
+                $fileUrl = $item->certificate_url;
+            } else {
+                // Generate URL dari certificate_path dan storage_type
+                $storageType = $item->storage_type ?? 'local';
+                $fileUrl = $googleDriveService->getPublicUrl($item->certificate_path, $storageType);
+            }
+            
             return [
                 'id'              => $item->id,
                 'mainCategory'    => $item->category->name ?? '-', 
@@ -54,7 +65,7 @@ class DashboardController extends Controller
                 'activityDate'    => $item->activity_date ? Carbon::parse($item->activity_date)->format('Y-m-d') : '-',
                 'status'          => $item->status,
                 'rejectionReason' => $item->rejection_reason,
-                'file_url'        => $item->certificate_url ?? asset('storage/' . $item->certificate_path),
+                'file_url'        => $fileUrl,
                 'certificate'     => $item->certificate_original_name ?? 'document.pdf',
                 'category_id'     => $item->student_category_id,
                 'certificate_path' => $item->certificate_path, 
@@ -106,13 +117,22 @@ class DashboardController extends Controller
         ];
 
         // 2. Ambil SEMUA Submission untuk direview (Tab Review)
+        $googleDriveService = app(GoogleDriveService::class);
         $submissions = Submission::with(['student', 'category', 'subcategory'])
             ->orderBy('created_at', 'desc')
             ->get()
-            ->map(function ($item) {
+            ->map(function ($item) use ($googleDriveService) {
                 // LOGIC NIM KE TAHUN: Ambil 2 digit pertama NIM (contoh: 22 -> 2022)
                 $nimStr = (string) ($item->student->student_id ?? '00');
                 $year = '20' . substr($nimStr, 0, 2);
+
+                // Generate viewing URL
+                if ($item->certificate_url) {
+                    $fileUrl = $item->certificate_url;
+                } else {
+                    $storageType = $item->storage_type ?? 'local';
+                    $fileUrl = $googleDriveService->getPublicUrl($item->certificate_path, $storageType);
+                }
 
                 return [
                     'id'            => $item->id,
@@ -135,7 +155,7 @@ class DashboardController extends Controller
                     
                     'status'        => $item->status,
                     'certificate'   => $item->certificate_original_name,
-                    'file_url'      => $item->certificate_url ?? asset('storage/' . $item->certificate_path),
+                    'file_url'      => $fileUrl,
                     'certificate_path' => $item->certificate_path,
                 ];
             });
@@ -197,13 +217,16 @@ class DashboardController extends Controller
                 ];
             });
 
-        // 4. Statistik Khusus Tab Student (Target Lulus: 20 Poin)
+        // 4. Statistik Khusus Tab Student (Target Lulus: Points dan Kategori dari Settings)
+        $minPoints = SCoreHelper::getMinPointsRequired();
+        $minCategories = SCoreHelper::getMinCategoriesRequired();
+        
         $studentStats = [
-            'passed'  => $students->filter(function($s) {
-                return ($s['approvedPoints'] > SCoreHelper::MIN_POINTS_REQUIRED) && (count($s['categoryBreakdown']) >= SCoreHelper::MIN_CATEGORIES_REQUIRED);
+            'passed'  => $students->filter(function($s) use ($minPoints, $minCategories) {
+                return ($s['approvedPoints'] >= $minPoints) && (count($s['categoryBreakdown']) >= $minCategories);
             })->count(),
-            'failed'  => $students->filter(function($s) {
-                return !(($s['approvedPoints'] > SCoreHelper::MIN_POINTS_REQUIRED) && (count($s['categoryBreakdown']) >= SCoreHelper::MIN_CATEGORIES_REQUIRED));
+            'failed'  => $students->filter(function($s) use ($minPoints, $minCategories) {
+                return !(($s['approvedPoints'] >= $minPoints) && (count($s['categoryBreakdown']) >= $minCategories));
             })->count(),
             'average' => round($students->avg('approvedPoints') ?? 0, 1)
         ];
@@ -211,7 +234,13 @@ class DashboardController extends Controller
         // Data Kategori untuk Dropdown di Admin
         $categories = Category::with('subcategories')->where('is_active', true)->get();
 
-        return view('admin_review', compact('submissions', 'stats', 'categories', 'students', 'studentStats'));
+        // Get S-Core settings
+        $scoreSettings = [
+            'minPoints' => $minPoints,
+            'minCategories' => $minCategories
+        ];
+
+        return view('admin_review', compact('submissions', 'stats', 'categories', 'students', 'studentStats', 'scoreSettings'));
     }
 
     /**

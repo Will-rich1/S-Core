@@ -7,6 +7,7 @@ use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SCoreReportController;
+use App\Http\Controllers\SettingsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -85,6 +86,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/subcategories', [CategoryController::class, 'storeSubcategory'])->name('subcategories.store');
     Route::put('/admin/subcategories/{id}', [CategoryController::class, 'updateSubcategory'])->name('subcategories.update'); // <-- Pastikan ini ada
     Route::delete('/admin/subcategories/{id}', [CategoryController::class, 'destroySubcategory'])->name('subcategories.destroy'); // <-- Pastikan ini ada
+
+    // --- S-CORE SETTINGS ROUTES ---
+    Route::get('/api/settings/score', [SettingsController::class, 'getScoreSettings'])->name('settings.score.get');
+    Route::post('/admin/settings/score', [SettingsController::class, 'updateScoreSettings'])->name('settings.score.update');
+    Route::get('/api/admin/settings', [SettingsController::class, 'getAllSettings'])->name('settings.all');
 
     // --- S-CORE REPORT ROUTES ---
     Route::get('/student/{student_id}/report', [SCoreReportController::class, 'downloadReport'])->name('student.report.download');

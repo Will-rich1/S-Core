@@ -47,11 +47,12 @@ class SubmissionController extends Controller
                 }
             }
 
-            // 3. Upload File ke Google Drive
+            // 3. Upload File ke Google Drive with student_id for filename
             $googleDriveService = app(GoogleDriveService::class);
             $uploadResult = $googleDriveService->uploadFile(
                 $request->file('certificate_file'),
-                'certificates'
+                'certificates',
+                Auth::user()->student_id // Pass student_id (NIM) for filename
             );
 
 
@@ -135,10 +136,11 @@ class SubmissionController extends Controller
                     }
                 }
 
-                // Upload file baru ke Google Drive
+                // Upload file baru ke Google Drive with student_id for filename
                 $uploadResult = $googleDriveService->uploadFile(
                     $request->file('certificate_file'),
-                    'certificates'
+                    'certificates',
+                    Auth::user()->student_id // Pass student_id (NIM) for filename
                 );
                 
                 $dataToUpdate['certificate_path'] = $uploadResult['path'];

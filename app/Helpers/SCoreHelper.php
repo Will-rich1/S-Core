@@ -4,20 +4,40 @@ namespace App\Helpers;
 
 use App\Models\Submission;
 use App\Models\Category;
+use App\Models\SystemSetting;
 
 class SCoreHelper
 {
-    // Total minimum categories required (5 dari 6)
-    const MIN_CATEGORIES_REQUIRED = 5;
-    const MIN_POINTS_REQUIRED = 20;
+    // Fallback constants if settings not found
+    const DEFAULT_MIN_CATEGORIES_REQUIRED = 5;
+    const DEFAULT_MIN_POINTS_REQUIRED = 20;
+
+    /**
+     * Get minimum points required from settings
+     */
+    public static function getMinPointsRequired()
+    {
+        return SystemSetting::getSetting('min_points_required', self::DEFAULT_MIN_POINTS_REQUIRED);
+    }
+
+    /**
+     * Get minimum categories required from settings
+     */
+    public static function getMinCategoriesRequired()
+    {
+        return SystemSetting::getSetting('min_categories_required', self::DEFAULT_MIN_CATEGORIES_REQUIRED);
+    }
 
     /**
      * Check if student meets S-Core requirements
-     * - Minimum 20 points (approved submissions)
-     * - Minimum 5 dari 6 main categories
+     * - Minimum points (configurable, default 20)
+     * - Minimum categories (configurable, default 5 dari 6)
      */
     public static function checkSCoreEligibility($studentId)
     {
+        $minPoints = self::getMinPointsRequired();
+        $minCategories = self::getMinCategoriesRequired();
+
         // Get total approved points
         $totalPoints = Submission::where('student_id', $studentId)
             ->where('status', 'Approved')
@@ -34,11 +54,13 @@ class SCoreHelper
 
         return [
             'totalPoints' => $totalPoints,
-            'minPointsMet' => $totalPoints > self::MIN_POINTS_REQUIRED,
+            'minPointsMet' => $totalPoints >= $minPoints,
             'completedCategories' => $completedCategories,
             'totalCategories' => $totalCategories,
-            'minCategoriesMet' => $completedCategories >= self::MIN_CATEGORIES_REQUIRED,
-            'isEligible' => ($totalPoints > self::MIN_POINTS_REQUIRED) && ($completedCategories >= self::MIN_CATEGORIES_REQUIRED)
+            'minCategoriesMet' => $completedCategories >= $minCategories,
+            'isEligible' => ($totalPoints >= $minPoints) && ($completedCategories >= $minCategories),
+            'minPointsRequired' => $minPoints,
+            'minCategoriesRequired' => $minCategories
         ];
     }
 

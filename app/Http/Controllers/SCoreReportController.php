@@ -79,7 +79,9 @@ class SCoreReportController extends Controller
             'completedCategories' => $eligibility['completedCategories'],
             'totalCategories' => $eligibility['totalCategories'],
             'minCategoriesMet' => $eligibility['minCategoriesMet'],
-            'isEligible' => $eligibility['isEligible']
+            'isEligible' => $eligibility['isEligible'],
+            'minPointsRequired' => $eligibility['minPointsRequired'],
+            'minCategoriesRequired' => $eligibility['minCategoriesRequired']
         ]);
     }
 
@@ -95,10 +97,13 @@ class SCoreReportController extends Controller
         return response()->json([
             'totalPoints' => $eligibility['totalPoints'],
             'completedCategories' => $eligibility['completedCategories'],
+            'totalCategories' => $eligibility['totalCategories'],
             'categoryBreakdown' => $categoryBreakdown,
             'isEligible' => $eligibility['isEligible'],
             'minPointsMet' => $eligibility['minPointsMet'],
-            'minCategoriesMet' => $eligibility['minCategoriesMet']
+            'minCategoriesMet' => $eligibility['minCategoriesMet'],
+            'minPointsRequired' => $eligibility['minPointsRequired'],
+            'minCategoriesRequired' => $eligibility['minCategoriesRequired']
         ]);
     }
 }
