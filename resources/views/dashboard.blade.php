@@ -1061,98 +1061,326 @@
                         </h2>
                         
                         <div class="space-y-4">
+                            <!-- FAQ 1: Submit Activity -->
                             <div class="border-b pb-4">
                                 <h3 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">1</span>
-                                    How do I submit a new activity?
+                                    How do I submit a new S-Core activity?
                                 </h3>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">Click the "Add New Activity" button in the Dashboard, fill in all required fields (category, activity title, description, activity date), upload your certificate/proof, and click Submit. Your submission will be sent for review.</p>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">To submit a new activity:</p>
+                                <ol class="text-sm text-gray-600 ml-7 space-y-1 list-decimal list-inside">
+                                    <li>Click <strong>"Add New Activity"</strong> button on Dashboard</li>
+                                    <li>Select <strong>Main Category</strong> and <strong>Subcategory</strong> for your activity</li>
+                                    <li>Fill in <strong>Activity Title</strong> (name of your activity/event)</li>
+                                    <li>Write detailed <strong>Description</strong> of what you did</li>
+                                    <li>Enter <strong>Activity Date</strong> (must be within 1 month from today, cannot be future date)</li>
+                                    <li>Upload <strong>Certificate/Proof</strong> (PDF, JPG, or PNG - max 10MB)</li>
+                                    <li>Review all information and click <strong>Submit</strong></li>
+                                </ol>
                                 <div class="mt-2 ml-7 bg-green-50 border border-green-200 rounded p-2">
-                                    <p class="text-xs text-green-800"><strong>📁 File Storage:</strong> All uploaded files are automatically stored in Google Drive for secure and permanent storage. You can preview and download your certificates anytime.</p>
+                                    <p class="text-xs text-green-800"><strong>📁 Google Drive Storage:</strong> All certificates are automatically uploaded to Google Drive for secure, permanent storage. You can preview and access your files anytime from the activity details.</p>
                                 </div>
                             </div>
                             
+                            <!-- FAQ 2: Review Time -->
                             <div class="border-b pb-4">
                                 <h3 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">2</span>
                                     When will my submission be reviewed?
                                 </h3>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">Admin reviewers typically process submissions within 3-5 business days. You can check the status of your submission in the Activities Table on the Dashboard. Status will show as "Waiting", "Approved", or "Rejected".</p>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">Admin reviewers typically process submissions within <strong>3-5 business days</strong>. You can monitor your submission status in the Activities Table:</p>
+                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
+                                    <li><strong>Waiting (Yellow):</strong> Pending admin review</li>
+                                    <li><strong>Approved (Green):</strong> Submission accepted, points awarded</li>
+                                    <li><strong>Rejected (Red):</strong> Submission declined with reason provided</li>
+                                </ul>
                                 <div class="mt-2 ml-7 bg-blue-50 border border-blue-200 rounded p-2">
-                                    <p class="text-xs text-blue-800"><strong>🕐 Timezone:</strong> All timestamps in the system use GMT+7 (Jakarta time). Your submission time will be recorded based on Indonesian time zone.</p>
+                                    <p class="text-xs text-blue-800"><strong>🕐 Timezone:</strong> All timestamps use GMT+7 (Jakarta time). Submissions are processed during business hours (Monday-Friday, 08:00-17:00).</p>
                                 </div>
                             </div>
                             
+                            <!-- FAQ 3: Check Points -->
                             <div class="border-b pb-4">
                                 <h3 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">3</span>
-                                    How do I check my S-Core points?
+                                    How do I check my S-Core points and progress?
                                 </h3>
-                                <p class="text-sm text-gray-600 ml-7">Your approved S-Core points are displayed at the top of the Dashboard. You can also see detailed breakdowns in the Statistics Cards showing Total Activities, Waiting for Review, Approved, and Rejected submissions.</p>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">Your S-Core information is displayed in multiple places:</p>
+                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
+                                    <li><strong>Top Green Card:</strong> Shows total approved S-Core points (large number)</li>
+                                    <li><strong>Statistics Cards:</strong> Total activities, waiting for review, approved, and rejected counts</li>
+                                    <li><strong>Mandatory Categories Table:</strong> Progress per category with achievement count and points earned</li>
+                                    <li><strong>Eligibility Section:</strong> Shows if you meet graduation requirements (20+ points, 5+ categories)</li>
+                                    <li><strong>Activities Table:</strong> Detailed list of all submissions with status and points</li>
+                                </ul>
+                                <div class="mt-2 ml-7 bg-purple-50 border border-purple-200 rounded p-2">
+                                    <p class="text-xs text-purple-800"><strong>📊 Real-time Updates:</strong> Your statistics update automatically when admin reviews your submissions. Refresh the page to see latest changes.</p>
+                                </div>
                             </div>
                             
+                            <!-- FAQ 4: Graduation Requirements -->
                             <div class="border-b pb-4">
                                 <h3 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">4</span>
-                                    What are Mandatory Categories?
+                                    What are the S-Core graduation requirements?
                                 </h3>
-                                <p class="text-sm text-gray-600 ml-7">Mandatory Categories are specific activity types required for graduation. Each category has a suggested minimum and you can track your achievement (Capaian) and total points earned in the Mandatory Categories Table on the Dashboard.</p>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">To graduate, you must meet BOTH requirements:</p>
+                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
+                                    <li><strong>Minimum Total Points:</strong> At least <strong>20 approved S-Core points</strong></li>
+                                    <li><strong>Category Diversity:</strong> Approved submissions must span at least <strong>5 different main categories</strong></li>
+                                </ul>
+                                <p class="text-sm text-gray-600 ml-7 mt-2 mb-2">Check the Mandatory Categories Table to track your progress in each category:</p>
+                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
+                                    <li>Each row shows category name, suggested minimum, your achievement count, and total points</li>
+                                    <li>Green checkmark (✓) indicates you've completed that category</li>
+                                    <li>Focus on completing at least 5 different categories</li>
+                                </ul>
+                                <div class="mt-2 ml-7 bg-yellow-50 border border-yellow-200 rounded p-2">
+                                    <p class="text-xs text-yellow-800"><strong>⚠️ Important:</strong> Having 20 points all in one category is NOT sufficient. You must diversify across at least 5 categories for graduation eligibility.</p>
+                                </div>
                             </div>
                             
+                            <!-- FAQ 5: Rejected Submission -->
                             <div class="border-b pb-4">
                                 <h3 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">5</span>
                                     What should I do if my submission is rejected?
                                 </h3>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">If your submission is rejected, you have several options:</p>
-                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
-                                    <li><strong>View Reason:</strong> Click the "View" button to see the detailed rejection reason from the admin</li>
-                                    <li><strong>Edit & Resubmit:</strong> Fix the issues mentioned in the rejection reason and edit your submission. Once edited, it will return to "Waiting" status for re-review</li>
-                                    <li><strong>Submit New:</strong> Alternatively, you can submit a completely new activity with corrected information and proper documentation</li>
-                                </ul>
-                                <div class="mt-2 ml-7 bg-blue-50 border border-blue-200 rounded p-2">
-                                    <p class="text-xs text-blue-800"><strong>💡 Tip:</strong> Always read the rejection reason carefully and address all issues before resubmitting to avoid another rejection.</p>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">If your submission is rejected, follow these steps:</p>
+                                <ol class="text-sm text-gray-600 ml-7 space-y-1 list-decimal list-inside">
+                                    <li><strong>View Rejection Reason:</strong> Click "View" button to read detailed feedback from admin</li>
+                                    <li><strong>Understand the Issue:</strong> Common reasons include:
+                                        <ul class="ml-5 mt-1 space-y-1 list-disc list-inside">
+                                            <li>Certificate doesn't match activity description</li>
+                                            <li>Evidence unclear or incomplete</li>
+                                            <li>Activity date outside allowed timeframe</li>
+                                            <li>Wrong category selected</li>
+                                            <li>Duplicate submission</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Fix the Issues:</strong> Click "Edit" to modify your submission:
+                                        <ul class="ml-5 mt-1 space-y-1 list-disc list-inside">
+                                            <li>Update description to match certificate</li>
+                                            <li>Upload clearer/correct certificate</li>
+                                            <li>Change category if needed</li>
+                                            <li>Correct activity date</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong>Resubmit:</strong> Save changes - status automatically returns to "Waiting" for re-review</li>
+                                </ol>
+                                <div class="mt-2 ml-7 bg-orange-50 border border-orange-200 rounded p-2">
+                                    <p class="text-xs text-orange-800"><strong>📝 Best Practice:</strong> Address ALL issues mentioned in rejection reason before resubmitting. Contact support if rejection reason is unclear.</p>
                                 </div>
                             </div>
                             
+                            <!-- FAQ 6: Edit/Delete -->
                             <div class="border-b pb-4">
                                 <h3 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">6</span>
                                     Can I edit or delete a submitted activity?
                                 </h3>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">You can edit or delete activities that are in "Waiting" or "Rejected" status. Once edited, rejected submissions will be changed back to "Waiting" status for re-review.</p>
-                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside mt-2">
-                                    <li><strong>Waiting Status:</strong> Edit or delete anytime before admin reviews</li>
-                                    <li><strong>Rejected Status:</strong> Edit to fix issues and resubmit (status changes back to Waiting)</li>
-                                    <li><strong>Approved Status:</strong> Cannot be edited or deleted - final</li>
-                                </ul>
-                                <div class="mt-2 ml-7 bg-green-50 border border-green-200 rounded p-2">
-                                    <p class="text-xs text-green-800"><strong>💡 Tip:</strong> When editing rejected submissions, make sure to address all issues mentioned in the rejection reason to avoid another rejection.</p>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">Edit/delete permissions depend on submission status:</p>
+                                <div class="ml-7 mt-2 space-y-2">
+                                    <div class="bg-yellow-50 rounded p-2">
+                                        <p class="text-sm font-semibold text-gray-700">🟡 Waiting Status:</p>
+                                        <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside ml-2 mt-1">
+                                            <li><strong>Edit:</strong> ✅ Yes - modify any field before admin reviews</li>
+                                            <li><strong>Delete:</strong> ✅ Yes - cancel submission anytime</li>
+                                            <li><strong>Use Case:</strong> Fix typos, upload better certificate, change category</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-red-50 rounded p-2">
+                                        <p class="text-sm font-semibold text-gray-700">🔴 Rejected Status:</p>
+                                        <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside ml-2 mt-1">
+                                            <li><strong>Edit:</strong> ✅ Yes - fix issues and resubmit (status changes to Waiting)</li>
+                                            <li><strong>Delete:</strong> ✅ Yes - remove if you don't want to resubmit</li>
+                                            <li><strong>Use Case:</strong> Address rejection reasons and try again</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-green-50 rounded p-2">
+                                        <p class="text-sm font-semibold text-gray-700">🟢 Approved Status:</p>
+                                        <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside ml-2 mt-1">
+                                            <li><strong>Edit:</strong> ❌ No - approved submissions are final</li>
+                                            <li><strong>Delete:</strong> ❌ No - points have been awarded permanently</li>
+                                            <li><strong>Exception:</strong> Contact admin if serious error needs correction</li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                             
+                            <!-- FAQ 7: Date Restrictions -->
                             <div class="border-b pb-4">
                                 <h3 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">7</span>
                                     What date restrictions apply to activity submissions?
                                 </h3>
-                                <p class="text-sm text-gray-600 ml-7">Activity dates must follow these rules:</p>
-                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside mt-2">
-                                    <li>Activity date cannot be in the future</li>
-                                    <li>Activity date cannot be more than <strong>1 month in the past</strong> from today</li>
-                                    <li>This ensures submissions are timely and reflect recent activities</li>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">Activity dates must follow these rules:</p>
+                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
+                                    <li><strong>Cannot be Future Date:</strong> Activity date must be today or earlier</li>
+                                    <li><strong>Maximum 1 Month Old:</strong> Activity must have occurred within last 30 days</li>
+                                    <li><strong>Validation:</strong> System automatically checks and shows error if date is invalid</li>
+                                </ul>
+                                <p class="text-sm text-gray-600 ml-7 mt-2 mb-2"><strong>Examples (assuming today is January 15, 2026):</strong></p>
+                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
+                                    <li>✅ January 14, 2026 - Valid (yesterday)</li>
+                                    <li>✅ December 20, 2025 - Valid (within 1 month)</li>
+                                    <li>❌ January 16, 2026 - Invalid (future date)</li>
+                                    <li>❌ December 10, 2025 - Invalid (more than 1 month old)</li>
                                 </ul>
                                 <div class="mt-2 ml-7 bg-yellow-50 border border-yellow-200 rounded p-2">
-                                    <p class="text-xs text-yellow-800"><strong>⚠️ Important:</strong> If you have activities older than 1 month that you haven't submitted, please contact the admin for special consideration or approval.</p>
+                                    <p class="text-xs text-yellow-800"><strong>⚠️ Exception:</strong> If you have older activities (> 1 month) with valid certificates, contact admin for special consideration. They can manually adjust or approve backdated submissions.</p>
                                 </div>
                             </div>
                             
-                            <div class="pb-4">
+                            <!-- FAQ 8: Download Report -->
+                            <div class="border-b pb-4">
                                 <h3 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">8</span>
+                                    How do I download my S-Core report?
+                                </h3>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">To download your official S-Core report:</p>
+                                <ol class="text-sm text-gray-600 ml-7 space-y-1 list-decimal list-inside">
+                                    <li>Check the <strong>S-Core Eligibility & Report Section</strong> on Dashboard</li>
+                                    <li>Verify your status:
+                                        <ul class="ml-5 mt-1 space-y-1 list-disc list-inside">
+                                            <li><strong>✅ Eligible:</strong> Badge shows green "Eligible" - you can download</li>
+                                            <li><strong>❌ Not Eligible:</strong> Badge shows red "Not Eligible" - button is disabled</li>
+                                        </ul>
+                                    </li>
+                                    <li>Review requirements:
+                                        <ul class="ml-5 mt-1 space-y-1 list-disc list-inside">
+                                            <li>Points: Shows X/20 with progress bar</li>
+                                            <li>Categories: Shows X/5 with progress bar</li>
+                                        </ul>
+                                    </li>
+                                    <li>If eligible, click <strong>"Download S-Core Report"</strong> button</li>
+                                    <li>System generates PDF with:
+                                        <ul class="ml-5 mt-1 space-y-1 list-disc list-inside">
+                                            <li>Student profile and S-Core summary</li>
+                                            <li>Detailed breakdown by category</li>
+                                            <li>Complete list of approved submissions</li>
+                                            <li>Official completion status</li>
+                                        </ul>
+                                    </li>
+                                </ol>
+                                <div class="mt-2 ml-7 bg-red-50 border border-red-200 rounded p-2">
+                                    <p class="text-xs text-red-800"><strong>🚫 Cannot Download?</strong> You need minimum 20 points AND 5 categories completed. Focus on diversifying your submissions across different categories.</p>
+                                </div>
+                            </div>
+                            
+                            <!-- FAQ 9: Categories -->
+                            <div class="border-b pb-4">
+                                <h3 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">9</span>
+                                    What activities belong to each category?
+                                </h3>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">When submitting, choose the main category and subcategory that best fits your activity. Each category has multiple subcategories with specific point values:</p>
+                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
+                                    <li><strong>Main Category:</strong> Broad classification (e.g., Kompetisi, Organisasi, Pengabdian)</li>
+                                    <li><strong>Subcategory:</strong> Specific activity type with assigned points (e.g., Juara 1 Nasional = 5 points)</li>
+                                </ul>
+                                <div class="mt-2 ml-7 bg-blue-50 border border-blue-200 rounded p-2">
+                                    <p class="text-xs text-blue-800 mb-2"><strong>💡 Category Selection Tips:</strong></p>
+                                    <ul class="text-xs text-blue-800 space-y-1 list-disc list-inside">
+                                        <li>Read subcategory descriptions carefully before selecting</li>
+                                        <li>If unsure, choose the closest match and admin will verify/adjust</li>
+                                        <li>Higher-tier subcategories (e.g., International vs Local) award more points</li>
+                                        <li>Points are determined by subcategory, not main category</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- FAQ 10: Change Password -->
+                            <div class="border-b pb-4">
+                                <h3 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">10</span>
                                     How do I change my password?
                                 </h3>
-                                <p class="text-sm text-gray-600 ml-7">Go to Settings > Change Password section. Enter your current password, then your new password twice to confirm. Your new password must be at least 8 characters long and include uppercase letters, lowercase letters, and numbers for security.</p>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">To change your password:</p>
+                                <ol class="text-sm text-gray-600 ml-7 space-y-1 list-decimal list-inside">
+                                    <li>Go to <strong>Settings</strong> menu in sidebar</li>
+                                    <li>Scroll to <strong>Change Password</strong> section</li>
+                                    <li>Enter your <strong>Current Password</strong></li>
+                                    <li>Enter your <strong>New Password</strong> (minimum 8 characters)</li>
+                                    <li>Enter <strong>Confirm New Password</strong> (must match)</li>
+                                    <li>Click <strong>"Update Password"</strong> button</li>
+                                </ol>
+                                <div class="mt-2 ml-7 bg-green-50 border border-green-200 rounded p-2">
+                                    <p class="text-xs text-green-800 mb-2"><strong>🔐 Password Requirements:</strong></p>
+                                    <ul class="text-xs text-green-800 space-y-1 list-disc list-inside">
+                                        <li>Minimum 8 characters long</li>
+                                        <li>Include uppercase letters (A-Z)</li>
+                                        <li>Include lowercase letters (a-z)</li>
+                                        <li>Include numbers (0-9)</li>
+                                        <li>Recommended: Include special characters (!@#$%)</li>
+                                    </ul>
+                                </div>
+                                <div class="mt-2 ml-7 bg-red-50 border border-red-200 rounded p-2">
+                                    <p class="text-xs text-red-800"><strong>⚠️ Security Tips:</strong> Never share your password. Change it regularly. Don't use the same password as other accounts. Contact admin if you forget your password.</p>
+                                </div>
+                            </div>
+                            
+                            <!-- FAQ 11: File Upload -->
+                            <div class="border-b pb-4">
+                                <h3 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">11</span>
+                                    What file types can I upload as proof/certificate?
+                                </h3>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">Supported file formats:</p>
+                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
+                                    <li><strong>PDF:</strong> ✅ Recommended - best for certificates, letters, official documents</li>
+                                    <li><strong>JPG/JPEG:</strong> ✅ Accepted - good for photos, scanned certificates</li>
+                                    <li><strong>PNG:</strong> ✅ Accepted - good for screenshots, digital certificates</li>
+                                    <li><strong>Maximum File Size:</strong> 10 MB per file</li>
+                                </ul>
+                                <div class="mt-2 ml-7 bg-yellow-50 border border-yellow-200 rounded p-2">
+                                    <p class="text-xs text-yellow-800 mb-2"><strong>⚠️ Upload Tips:</strong></p>
+                                    <ul class="text-xs text-yellow-800 space-y-1 list-disc list-inside">
+                                        <li>Ensure certificate is clearly readable (not blurry)</li>
+                                        <li>Include all relevant information visible (name, activity, date)</li>
+                                        <li>Crop out unnecessary blank spaces to reduce file size</li>
+                                        <li>If physical certificate, scan or photograph with good lighting</li>
+                                        <li>Compress large files before uploading if over 10 MB</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- FAQ 12: Troubleshooting -->
+                            <div class="pb-4">
+                                <h3 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">12</span>
+                                    Common issues and troubleshooting
+                                </h3>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">Solutions for common problems:</p>
+                                <div class="ml-7 space-y-2">
+                                    <div class="bg-gray-50 rounded p-2">
+                                        <p class="text-sm font-semibold text-gray-700">🔍 File upload fails:</p>
+                                        <p class="text-xs text-gray-600">Check file size (max 10MB) and format (PDF/JPG/PNG only). Try compressing the file or converting to PDF. Clear browser cache and try again.</p>
+                                    </div>
+                                    <div class="bg-gray-50 rounded p-2">
+                                        <p class="text-sm font-semibold text-gray-700">⏳ Submission stuck on "Waiting":</p>
+                                        <p class="text-xs text-gray-600">Admin reviews take 3-5 business days. If longer than 1 week, contact support. Avoid submitting duplicates while waiting.</p>
+                                    </div>
+                                    <div class="bg-gray-50 rounded p-2">
+                                        <p class="text-sm font-semibold text-gray-700">❌ Cannot download report:</p>
+                                        <p class="text-xs text-gray-600">Ensure you meet BOTH requirements: 20+ points AND 5+ categories. Button is disabled if not eligible. Check eligibility section for detailed status.</p>
+                                    </div>
+                                    <div class="bg-gray-50 rounded p-2">
+                                        <p class="text-sm font-semibold text-gray-700">📊 Points not updating:</p>
+                                        <p class="text-xs text-gray-600">Points update only when submissions are approved. Refresh page (F5) to see latest changes. "Waiting" submissions don't count toward total yet.</p>
+                                    </div>
+                                    <div class="bg-gray-50 rounded p-2">
+                                        <p class="text-sm font-semibold text-gray-700">🔒 Forgot password:</p>
+                                        <p class="text-xs text-gray-600">Contact admin immediately to reset your password. They can generate a new temporary password for you. Update it immediately after logging in.</p>
+                                    </div>
+                                    <div class="bg-gray-50 rounded p-2">
+                                        <p class="text-sm font-semibold text-gray-700">🖼️ Certificate preview not working:</p>
+                                        <p class="text-xs text-gray-600">Check internet connection. Click "Open in Google Drive" to view in new tab. Some file types may require downloading to view.</p>
+                                    </div>
+                                </div>
+                                <div class="mt-2 ml-7 bg-red-50 border border-red-200 rounded p-2">
+                                    <p class="text-xs text-red-800"><strong>🆘 Still need help?</strong> Contact support team with: (1) Your student ID, (2) Description of the problem, (3) Screenshots if possible, (4) What you've tried so far.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
