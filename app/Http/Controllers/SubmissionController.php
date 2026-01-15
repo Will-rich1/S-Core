@@ -48,6 +48,9 @@ class SubmissionController extends Controller
             }
 
             // 3. Upload File ke Google Drive with student_id for filename
+            // Increase time limit untuk file besar
+            set_time_limit(120); // 2 minutes for upload
+            
             $googleDriveService = app(GoogleDriveService::class);
             $uploadResult = $googleDriveService->uploadFile(
                 $request->file('certificate_file'),
@@ -55,6 +58,12 @@ class SubmissionController extends Controller
                 Auth::user()->student_id // Pass student_id (NIM) for filename
             );
 
+            // Log upload result untuk debugging
+            \Log::info('File uploaded successfully', [
+                'user' => Auth::id(),
+                'storage' => $uploadResult['storage'] ?? 'unknown',
+                'fallback' => $uploadResult['fallback'] ?? false
+            ]);
 
             // 4. Simpan Data ke Database
             Submission::create([
@@ -71,10 +80,22 @@ class SubmissionController extends Controller
                 'status'                 => 'Waiting',
             ]);
 
-            return response()->json(['message' => 'Submission submitted successfully!']);
+            return response()->json([
+                'message' => 'Submission submitted successfully!',
+                'storage' => $uploadResult['storage'] ?? 'google',
+            ]);
 
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error saving data: ' . $e->getMessage()], 500);
+            \Log::error('Submission error', [
+                'user' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'message' => 'Error saving data. Please try again or contact administrator if the problem persists.',
+                'details' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
         }
     }
 

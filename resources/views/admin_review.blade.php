@@ -35,6 +35,114 @@
             </div>
         </div>
 
+        <!-- Delete Subcategory Confirmation Modal -->
+        <div x-show="showDeleteSubcategoryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" style="display: none; z-index: 9999;">
+            <div class="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 overflow-hidden animate-in fade-in duration-300" style="z-index: 10000;">
+                <!-- Header with red accent -->
+                <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4 flex items-center gap-3">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 0v2m0-6h.01M15 9a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <h3 class="text-lg font-semibold text-white">Delete Subcategory</h3>
+                </div>
+                
+                <!-- Content -->
+                <div class="px-6 py-4">
+                    <p class="text-gray-700 mb-2">Are you sure you want to delete this subcategory?</p>
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-3 mt-4">
+                        <p class="text-sm text-gray-600">Subcategory:</p>
+                        <p class="font-semibold text-red-700" x-text="deleteTargetSubcategory || 'N/A'"></p>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-4">This action cannot be undone.</p>
+                </div>
+                
+                <!-- Footer with buttons -->
+                <div class="bg-gray-50 px-6 py-4 flex gap-3 justify-end border-t">
+                    <button @click="showDeleteSubcategoryModal = false; deleteCategoryIndex = null; deleteSubcategoryIndex = null; deleteTargetSubcategory = null;" class="px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg text-sm font-medium transition">
+                        Cancel
+                    </button>
+                    <button @click="confirmDeleteSubcategory()" class="px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Restore Category Confirmation Modal -->
+        <div x-show="showRestoreCategoryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" style="display: none; z-index: 9999;">
+            <div class="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 overflow-hidden animate-in fade-in duration-300" style="z-index: 10000;">
+                <!-- Header with green accent -->
+                <div class="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4 flex items-center gap-3">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h3 class="text-lg font-semibold text-white">Restore Category</h3>
+                </div>
+                
+                <!-- Content -->
+                <div class="px-6 py-4">
+                    <p class="text-gray-700 mb-2">Are you sure you want to restore this category?</p>
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-3 mt-4">
+                        <p class="text-sm text-gray-600">Category:</p>
+                        <p class="font-semibold text-green-700" x-text="restoreTargetCategory || 'N/A'"></p>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-4">This will reactivate the category and make it visible again.</p>
+                </div>
+                
+                <!-- Footer with buttons -->
+                <div class="bg-gray-50 px-6 py-4 flex gap-3 justify-end border-t">
+                    <button @click="showRestoreCategoryModal = false; restoreCategoryIndex = null; restoreTargetCategory = null;" class="px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg text-sm font-medium transition">
+                        Cancel
+                    </button>
+                    <button @click="confirmRestoreCategory()" class="px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Restore
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Restore Subcategory Confirmation Modal -->
+        <div x-show="showRestoreSubcategoryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" style="display: none; z-index: 9999;">
+            <div class="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 overflow-hidden animate-in fade-in duration-300" style="z-index: 10000;">
+                <!-- Header with green accent -->
+                <div class="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4 flex items-center gap-3">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h3 class="text-lg font-semibold text-white">Restore Subcategory</h3>
+                </div>
+                
+                <!-- Content -->
+                <div class="px-6 py-4">
+                    <p class="text-gray-700 mb-2">Are you sure you want to restore this subcategory?</p>
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-3 mt-4">
+                        <p class="text-sm text-gray-600">Subcategory:</p>
+                        <p class="font-semibold text-green-700" x-text="restoreTargetSubcategory || 'N/A'"></p>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-4">This will reactivate the subcategory and make it visible again.</p>
+                </div>
+                
+                <!-- Footer with buttons -->
+                <div class="bg-gray-50 px-6 py-4 flex gap-3 justify-end border-t">
+                    <button @click="showRestoreSubcategoryModal = false; restoreCategoryIndex = null; restoreSubcategoryIndex = null; restoreTargetSubcategory = null;" class="px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg text-sm font-medium transition">
+                        Cancel
+                    </button>
+                    <button @click="confirmRestoreSubcategory()" class="px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Restore
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Detail Modal - Full Screen -->
         <div x-show="showDetailModal" class="fixed inset-0 bg-black bg-opacity-50 z-50" style="display: none;">
             <div class="h-full w-full bg-white flex flex-col">
@@ -705,7 +813,7 @@
                                             </button>
                                         </template>
                                         <template x-if="cat.is_active == 0 || cat.is_active === false">
-                                            <button @click="reactivateCategory(catIndex)" class="text-green-600 hover:text-green-800 p-1" title="Restore Category">
+                                            <button @click="reactivateCategoryPrompt(catIndex)" class="text-green-600 hover:text-green-800 p-1" title="Restore Category">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
                                             </button>
                                         </template>
@@ -742,13 +850,13 @@
                                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                                                 </button>
                                                                 <!-- show delete only when active (1) or when property missing; hide for 0/'0'/false -->
-                                                                <button x-show="subcat.is_active == 1 || typeof(subcat.is_active) === 'undefined'" @click="deleteSubcategory(catIndex, subIndex)" class="flex items-center gap-1 text-red-500 hover:text-red-700 px-3 py-1 rounded-md text-sm bg-red-50 hover:bg-red-100" title="Delete Subcategory" aria-label="Delete Subcategory">
+                                                                <button x-show="subcat.is_active == 1 || typeof(subcat.is_active) === 'undefined'" @click="deleteSubcategoryPrompt(catIndex, subIndex)" class="flex items-center gap-1 text-red-500 hover:text-red-700 px-3 py-1 rounded-md text-sm bg-red-50 hover:bg-red-100" title="Delete Subcategory" aria-label="Delete Subcategory">
                                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                                                     <span class="hidden sm:inline">Hapus</span>
                                                                 </button>
                                                             </div>
                                                             <template x-if="subcat.is_active == 0 || subcat.is_active === false">
-                                                                <button @click="reactivateSubcategory(catIndex, subIndex)" class="text-green-600 hover:text-green-800 p-1" title="Restore Subcategory">
+                                                                <button @click="reactivateSubcategoryPrompt(catIndex, subIndex)" class="text-green-600 hover:text-green-800 p-1" title="Restore Subcategory">
                                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-6-6 6-6" /></svg>
                                                                 </button>
                                                             </template>
@@ -2170,342 +2278,136 @@
                             Frequently Asked Questions
                         </h3>
                         <div class="space-y-4">
-                            <!-- FAQ 1: Review Submission -->
                             <div class="border-b pb-4">
                                 <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">1</span>
                                     How do I review a submission?
                                 </h4>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">Click on the "Review" button in the Review Submissions page to view submission details. You can:</p>
-                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
-                                    <li>View student information and submission details</li>
-                                    <li>Preview certificate/proof directly from Google Drive (PDFs, images)</li>
-                                    <li>Verify or change the main category and subcategory</li>
-                                    <li>Review suggested points based on selected subcategory</li>
-                                    <li>Approve or reject the submission with appropriate reason</li>
-                                </ul>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">Click on the "Review" button in the Review Submissions page to view submission details. You can assign the correct category, preview the certificate/proof directly from Google Drive, and either approve or reject the submission. When approving, make sure to select the appropriate category and verify the suggested points.</p>
                                 <div class="mt-2 ml-7 bg-green-50 border border-green-200 rounded p-2">
-                                    <p class="text-xs text-green-800"><strong>📁 Google Drive Integration:</strong> All certificates are automatically uploaded to Google Drive. You can preview PDFs and images directly in the browser without downloading. Click "Open in Google Drive" to view the full file.</p>
+                                    <p class="text-xs text-green-800"><strong>📁 Google Drive Integration:</strong> All certificates are stored in Google Drive. You can preview PDFs directly in the browser without downloading.</p>
                                 </div>
                             </div>
 
-                            <!-- FAQ 2: Point Allocation -->
                             <div class="border-b pb-4">
                                 <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">2</span>
-                                    What are the point allocation rules and S-Core requirements?
+                                    What are the point allocation rules?
                                 </h4>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">Points are automatically suggested based on the activity subcategory. Students must meet the following requirements to pass:</p>
-                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
-                                    <li><strong>Minimum Total Points:</strong> 20 approved S-Core points</li>
-                                    <li><strong>Category Diversity:</strong> Submissions must span at least 5 different main categories</li>
-                                    <li><strong>Valid Timeframe:</strong> Activities should be within the student's academic period</li>
-                                </ul>
-                                <div class="mt-2 ml-7 bg-blue-50 border border-blue-200 rounded p-2">
-                                    <p class="text-xs text-blue-800"><strong>💡 Tip:</strong> Each subcategory has predefined points that you can configure in Settings > Category Management. The system will automatically suggest these points during approval.</p>
-                                </div>
+                                <p class="text-sm text-gray-600 ml-7">Points are automatically suggested based on the activity category. Each category has a default point value that can be configured in Settings > Category Management. The system suggests these points during the review process, but you can verify and adjust if needed.</p>
                             </div>
 
-                            <!-- FAQ 3: Category Management -->
                             <div class="border-b pb-4">
                                 <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">3</span>
-                                    How do I manage categories and subcategories?
+                                    How do I manage categories and points?
                                 </h4>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">Go to Settings > Category Management and click "Manage Categories". Available operations:</p>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">Go to Settings > Category Management and click "Manage Categories". You can:</p>
                                 <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
-                                    <li><strong>Add Main Category:</strong> Enter category name in the green box and click "Add Category"</li>
-                                    <li><strong>Add Subcategory:</strong> Select parent category, enter name, points, and description, then click "Add Subcategory"</li>
-                                    <li><strong>Edit Category/Subcategory:</strong> Click the pencil icon, modify values, then click "Save"</li>
-                                    <li><strong>Delete Category/Subcategory:</strong> Click the trash icon (soft delete - can be restored)</li>
-                                    <li><strong>View Inactive Categories:</strong> Toggle "Show Inactive Categories" to see deleted items</li>
-                                    <li><strong>Restore Categories:</strong> Click restore button on inactive categories to reactivate them</li>
+                                    <li><strong>Add new categories:</strong> Enter category name and default points, then click "Add Category"</li>
+                                    <li><strong>Edit/Rename categories:</strong> Click the edit (pencil) icon, modify the name or points, then click "Save"</li>
+                                    <li><strong>Update default points:</strong> Edit the category and change the points value</li>
+                                    <li><strong>Delete categories:</strong> Click the delete (trash) icon. System will warn if the category is currently in use</li>
                                 </ul>
                                 <div class="mt-2 ml-7 bg-yellow-50 border border-yellow-200 rounded p-2">
-                                    <p class="text-xs text-yellow-800"><strong>⚠️ Important:</strong> Deleting categories performs a "soft delete" - they're marked inactive but not removed from database. Existing submissions keep their assigned categories. You can restore deleted categories anytime.</p>
+                                    <p class="text-xs text-yellow-800"><strong>⚠️ Important:</strong> Be careful when deleting categories that are currently used in submissions. The system will show a warning with the number of affected submissions.</p>
                                 </div>
                             </div>
 
-                            <!-- FAQ 4: Change Category -->
                             <div class="border-b pb-4">
                                 <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">4</span>
                                     How can I change a student's submission category?
                                 </h4>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">When reviewing a submission:</p>
-                                <ol class="text-sm text-gray-600 ml-7 space-y-1 list-decimal list-inside">
-                                    <li>Use the "Main Category" dropdown to select the correct parent category</li>
-                                    <li>Choose appropriate "Subcategory" (points are shown automatically)</li>
-                                    <li>If changed from student's original selection, provide a reason explaining the recategorization</li>
-                                    <li>Review the suggested points before approving</li>
-                                </ol>
-                                <div class="mt-2 ml-7 bg-blue-50 border border-blue-200 rounded p-2">
-                                    <p class="text-xs text-blue-800"><strong>💡 Best Practice:</strong> Always provide clear reasoning when changing categories. This helps students understand the S-Core system better and submit correctly in the future.</p>
-                                </div>
+                                <p class="text-sm text-gray-600 ml-7">When reviewing a submission, use the "Assign Category" dropdown to select the correct category. If you change the category from the student's original selection, an optional field will appear where you can provide a reason for the change. This helps the student understand why their submission was recategorized.</p>
                             </div>
 
-                            <!-- FAQ 5: Rejection Reasons -->
                             <div class="border-b pb-4">
                                 <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">5</span>
-                                    What rejection reasons should I use?
+                                    What rejection reasons are available?
                                 </h4>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">When rejecting a submission, select from predefined reasons or write a custom message:</p>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">When rejecting a submission, you can select from predefined reasons or write a custom message:</p>
                                 <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
-                                    <li><strong>Certificate does not match:</strong> When uploaded proof doesn't align with activity description</li>
-                                    <li><strong>Evidence unclear/incomplete:</strong> When certificate is unreadable, partially visible, or missing key information</li>
-                                    <li><strong>Activity date exceeds timeframe:</strong> When activity is outside allowed period</li>
-                                    <li><strong>Wrong category:</strong> When activity clearly doesn't fit the selected category and student should resubmit</li>
-                                    <li><strong>Duplicate submission:</strong> When same activity has been submitted before</li>
-                                    <li><strong>Does not meet requirements:</strong> When activity doesn't qualify for S-Core points</li>
-                                    <li><strong>Other:</strong> Write custom detailed explanation for unique cases</li>
+                                    <li>Certificate does not match activity description</li>
+                                    <li>Evidence unclear or incomplete</li>
+                                    <li>Activity date exceeds allowed timeframe</li>
+                                    <li>Wrong category selected</li>
+                                    <li>Duplicate submission</li>
+                                    <li>Does not meet S-Core requirements</li>
+                                    <li>Other (custom reason) - Select this to write your own detailed explanation</li>
                                 </ul>
-                                <div class="mt-2 ml-7 bg-orange-50 border border-orange-200 rounded p-2">
-                                    <p class="text-xs text-orange-800"><strong>📝 Note:</strong> Be specific in rejection reasons. Students can view your feedback and may resubmit after corrections.</p>
-                                </div>
                             </div>
 
-                            <!-- FAQ 6: Student Details -->
                             <div class="border-b pb-4">
                                 <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">6</span>
-                                    How do I view detailed student information and history?
+                                    How do I view detailed student information?
                                 </h4>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">In the Students page, click on a student row or hover over total points to see:</p>
+                                <p class="text-sm text-gray-600 ml-7">In the Students page, hover your mouse over a student's total points to see a detailed breakdown including:</p>
                                 <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
-                                    <li><strong>Overview:</strong> Total points, pass/fail status, progress bar</li>
-                                    <li><strong>Category Breakdown:</strong> Points earned per category with completion status</li>
-                                    <li><strong>Submission History:</strong> Complete list of all submissions (approved, rejected, pending)</li>
-                                    <li><strong>Statistics:</strong> Total submissions, pending count, completion percentage</li>
+                                    <li>Total points and progress toward 1000 points requirement</li>
+                                    <li>Pass/Not Pass status</li>
+                                    <li>Points breakdown by category</li>
+                                    <li>Total submissions, approved count, and pending submissions</li>
                                 </ul>
-                                <p class="text-sm text-gray-600 ml-7 mt-2 mb-2">You can also:</p>
-                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
-                                    <li>Download individual student S-Core report (PDF)</li>
-                                    <li>Reset student password if they forgot it</li>
-                                    <li>Filter students by major, year, shift, or pass/fail status</li>
-                                </ul>
+                                <p class="text-sm text-gray-600 ml-7 mt-2">You can also filter students by year (angkatan) and pass/fail status using the filters at the top.</p>
                             </div>
 
-                            <!-- FAQ 7: Export Reports -->
                             <div class="border-b pb-4">
                                 <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">7</span>
-                                    How do I export reports and statistics?
+                                    How do I export statistics and reports?
                                 </h4>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">The system offers multiple export options:</p>
-                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
-                                    <li><strong>Student Report (CSV):</strong> Go to Students page > Click "Export Report" to download CSV with all student data based on current filters</li>
-                                    <li><strong>Individual S-Core Report (PDF):</strong> Click student name > "Download S-Core Report" to get detailed PDF report</li>
-                                    <li><strong>Statistics View:</strong> Visit Statistics page for real-time metrics and charts</li>
-                                </ul>
-                                <div class="mt-2 ml-7 bg-blue-50 border border-blue-200 rounded p-2">
-                                    <p class="text-xs text-blue-800"><strong>💡 Tip:</strong> Apply filters before exporting to get specific subsets (e.g., only 2023 students, only passed students, specific majors).</p>
-                                </div>
+                                <p class="text-sm text-gray-600 ml-7">Go to the Statistics page to view overall system metrics, or visit the Students page and use the "Export Report" button to download comprehensive reports. The export will include student information, total points, pass/fail status, and pending submissions. You can filter the data before exporting using the available filters.</p>
                             </div>
 
-                            <!-- FAQ 8: Add Users -->
                             <div class="border-b pb-4">
                                 <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">8</span>
-                                    How do I add new students and admins?
+                                    How do I add new users to the system?
                                 </h4>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">Go to Settings and select the appropriate tab:</p>
-                                <div class="ml-7 mt-2 space-y-3">
-                                    <div>
-                                        <p class="text-sm font-semibold text-gray-700">For Students:</p>
-                                        <ul class="text-sm text-gray-600 space-y-1 list-disc list-inside ml-2">
-                                            <li><strong>Bulk Upload (CSV):</strong> Upload CSV file with columns: name, email, password, student_id, major, year, shift</li>
-                                            <li><strong>Manual Add:</strong> Fill form with student details and click "Add Student"</li>
-                                            <li>Download sample CSV template for correct format</li>
-                                        </ul>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-semibold text-gray-700">For Admins:</p>
-                                        <ul class="text-sm text-gray-600 space-y-1 list-disc list-inside ml-2">
-                                            <li>Go to Settings > Admin Accounts tab</li>
-                                            <li>Fill in name, email, and password (min 8 characters)</li>
-                                            <li>System validates password strength automatically</li>
-                                            <li>All passwords are hashed before storage</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="mt-2 ml-7 bg-yellow-50 border border-yellow-200 rounded p-2">
-                                    <p class="text-xs text-yellow-800"><strong>⚠️ Security:</strong> Always use strong passwords for admin accounts. Student passwords should be unique and communicated securely.</p>
-                                </div>
+                                <p class="text-sm text-gray-600 ml-7">Go to User Management and fill out the Add New User form. Enter the required information (name, email, password, role) and optional student details. The user will be automatically added to the database when you click "Add User". Passwords are securely hashed before storage.</p>
                             </div>
 
-                            <!-- FAQ 9: Bulk Score -->
-                            <div class="border-b pb-4">
+                            <div class="pb-4">
                                 <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">9</span>
                                     How do I use the Bulk Score feature?
                                 </h4>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">The Bulk Score feature assigns S-Core points to multiple students at once for group activities:</p>
+                                <p class="text-sm text-gray-600 ml-7 mb-2">The Bulk Score feature allows you to assign S-Core points to multiple students at once for group activities. To use it:</p>
                                 <ol class="text-sm text-gray-600 ml-7 space-y-1 list-decimal list-inside">
-                                    <li>Go to <strong>Bulk Score</strong> menu in sidebar</li>
+                                    <li>Go to the <strong>Bulk Score</strong> menu in the sidebar</li>
                                     <li>Select target students using filters:
                                         <ul class="ml-5 mt-1 space-y-1 list-disc list-inside">
-                                            <li><strong>Major:</strong> Choose program (Informatika, Sistem Informasi, etc.) or leave empty for all</li>
-                                            <li><strong>Year (Angkatan):</strong> Select graduation year or leave empty for all</li>
-                                            <li><strong>Shift:</strong> Morning (Pagi) or Afternoon (Sore) or leave empty for all</li>
+                                            <li><strong>Major:</strong> Choose the program (Informatika, Sistem Informasi, etc.)</li>
+                                            <li><strong>Year (Angkatan):</strong> Select graduation year</li>
+                                            <li><strong>Shift:</strong> Morning (Pagi) or Afternoon (Sore) classes</li>
                                         </ul>
                                     </li>
-                                    <li>Select <strong>Main Category</strong> and <strong>Subcategory</strong></li>
-                                    <li>Fill in required fields:
+                                    <li>Select the <strong>Main Category</strong> and <strong>Subcategory</strong> for the activity</li>
+                                    <li>Fill in:
                                         <ul class="ml-5 mt-1 space-y-1 list-disc list-inside">
-                                            <li><strong>Activity Title:</strong> Name of the event/activity</li>
-                                            <li><strong>Description:</strong> Detailed activity description</li>
-                                            <li><strong>Activity Date:</strong> When activity occurred</li>
-                                            <li><strong>Certificate (Optional):</strong> Upload shared certificate/proof</li>
+                                            <li><strong>Activity Title:</strong> Name of the group activity</li>
+                                            <li><strong>Description:</strong> Details about the activity</li>
+                                            <li><strong>Activity Date:</strong> When the activity took place</li>
+                                            <li><strong>Certificate/Proof (Optional):</strong> Upload shared certificate if available</li>
                                         </ul>
                                     </li>
-                                    <li>Review affected student count and click <strong>Submit Bulk Score</strong></li>
+                                    <li>Click <strong>Submit Bulk Score</strong></li>
                                 </ol>
                                 <div class="mt-2 ml-7 bg-blue-50 border border-blue-200 rounded p-2">
                                     <p class="text-xs text-blue-800 mb-2"><strong>🎯 Key Features:</strong></p>
                                     <ul class="text-xs text-blue-800 space-y-1 list-disc list-inside">
                                         <li>Submissions are <strong>auto-approved</strong> and immediately visible to students</li>
-                                        <li>All students receive same points based on selected subcategory</li>
-                                        <li>Perfect for seminars, workshops, competitions, or institutional events</li>
-                                        <li>If certificate uploaded, all students share the same file</li>
-                                        <li>System shows preview of affected students before submission</li>
+                                        <li>All students receive the same points based on the selected category</li>
+                                        <li>Perfect for group events, seminars, workshops, or competitions</li>
+                                        <li>If certificate is uploaded, all students share the same certificate file</li>
+                                        <li>System will show preview of how many students will receive the score before submitting</li>
                                     </ul>
                                 </div>
                                 <div class="mt-2 ml-7 bg-yellow-50 border border-yellow-200 rounded p-2">
-                                    <p class="text-xs text-yellow-800"><strong>⚠️ Important:</strong> Double-check filters before submitting! Bulk scores are immediately approved and cannot be easily undone. Verify that selected students actually participated.</p>
-                                </div>
-                            </div>
-
-                            <!-- FAQ 10: Edit Submissions -->
-                            <div class="border-b pb-4">
-                                <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">10</span>
-                                    Can I edit a student's submission after it's submitted?
-                                </h4>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">Yes! When reviewing a submission, click the "Edit Submission" button to:</p>
-                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
-                                    <li>Modify activity title and description</li>
-                                    <li>Change activity date</li>
-                                    <li>Update main category and subcategory</li>
-                                    <li>Change status (Pending, Approved, Rejected)</li>
-                                    <li>Edit or add rejection reason</li>
-                                    <li>Replace certificate/proof file</li>
-                                </ul>
-                                <div class="mt-2 ml-7 bg-purple-50 border border-purple-200 rounded p-2">
-                                    <p class="text-xs text-purple-800"><strong>✏️ Use Case:</strong> Useful for correcting minor errors, typos, or helping students fix submissions instead of rejecting them.</p>
-                                </div>
-                            </div>
-
-                            <!-- FAQ 11: Filter and Search -->
-                            <div class="border-b pb-4">
-                                <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">11</span>
-                                    How do I filter and search submissions efficiently?
-                                </h4>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">Use the filter toolbar at the top of Review Submissions page:</p>
-                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
-                                    <li><strong>Search Bar:</strong> Type student name, student ID, or activity title for instant filtering</li>
-                                    <li><strong>Status Filter:</strong> Show only Waiting, Approved, or Rejected submissions</li>
-                                    <li><strong>Category Filter:</strong> Filter by main category to focus on specific activity types</li>
-                                    <li><strong>Student Filter:</strong> Select specific student to see all their submissions</li>
-                                </ul>
-                                <div class="mt-2 ml-7 bg-blue-50 border border-blue-200 rounded p-2">
-                                    <p class="text-xs text-blue-800"><strong>💡 Pro Tip:</strong> Combine multiple filters for precise results. For example: Status = "Waiting" + Category = "Kompetisi" to review only pending competition submissions.</p>
-                                </div>
-                            </div>
-
-                            <!-- FAQ 12: Password Reset -->
-                            <div class="border-b pb-4">
-                                <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">12</span>
-                                    How do I reset a student's password?
-                                </h4>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">To reset a student's password:</p>
-                                <ol class="text-sm text-gray-600 ml-7 space-y-1 list-decimal list-inside">
-                                    <li>Go to <strong>Students</strong> page</li>
-                                    <li>Click on the student's name to open detail modal</li>
-                                    <li>Click <strong>"Reset Password"</strong> button</li>
-                                    <li>Choose to:
-                                        <ul class="ml-5 mt-1 space-y-1 list-disc list-inside">
-                                            <li>Leave empty to <strong>generate random password</strong> (system will display it)</li>
-                                            <li>Enter new password manually (minimum 6 characters)</li>
-                                        </ul>
-                                    </li>
-                                    <li>Confirm the action</li>
-                                </ol>
-                                <div class="mt-2 ml-7 bg-red-50 border border-red-200 rounded p-2">
-                                    <p class="text-xs text-red-800"><strong>🔐 Security:</strong> If system generates random password, copy it immediately and share it securely with the student. The password won't be shown again.</p>
-                                </div>
-                            </div>
-
-                            <!-- FAQ 13: Google Drive -->
-                            <div class="border-b pb-4">
-                                <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">13</span>
-                                    How does Google Drive integration work?
-                                </h4>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">All submission certificates are automatically stored in Google Drive:</p>
-                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
-                                    <li><strong>Automatic Upload:</strong> When students submit, files are uploaded to configured Google Drive folder</li>
-                                    <li><strong>Preview in Browser:</strong> PDFs and images can be viewed directly without downloading</li>
-                                    <li><strong>Organized Storage:</strong> Files are named with pattern: studentID_timestamp_originalname</li>
-                                    <li><strong>Direct Links:</strong> Click "Open in Google Drive" to view full file in new tab</li>
-                                    <li><strong>Backup Safety:</strong> All files remain in Google Drive even if submissions are deleted</li>
-                                </ul>
-                                <div class="mt-2 ml-7 bg-green-50 border border-green-200 rounded p-2">
-                                    <p class="text-xs text-green-800"><strong>✅ Benefits:</strong> Reduces server storage costs, provides reliable backup, enables easy sharing and collaboration, and offers built-in version history.</p>
-                                </div>
-                            </div>
-
-                            <!-- FAQ 14: System Settings -->
-                            <div class="border-b pb-4">
-                                <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">14</span>
-                                    What settings can I configure in the system?
-                                </h4>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">Access Settings menu to configure:</p>
-                                <ul class="text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
-                                    <li><strong>Student Accounts:</strong> Add students manually or bulk upload via CSV, manage existing accounts</li>
-                                    <li><strong>Admin Accounts:</strong> Create new admin users with secure passwords</li>
-                                    <li><strong>Category Management:</strong> Add, edit, delete, or restore categories and subcategories with points configuration</li>
-                                    <li><strong>System Info:</strong> View system version, Laravel version, and environment details</li>
-                                </ul>
-                                <div class="mt-2 ml-7 bg-blue-50 border border-blue-200 rounded p-2">
-                                    <p class="text-xs text-blue-800"><strong>💡 Note:</strong> Category changes affect new submissions immediately. Existing approved submissions keep their original categories and points.</p>
-                                </div>
-                            </div>
-
-                            <!-- FAQ 15: Troubleshooting -->
-                            <div class="pb-4">
-                                <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">15</span>
-                                    Common issues and troubleshooting
-                                </h4>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">Solutions for common problems:</p>
-                                <div class="ml-7 space-y-2">
-                                    <div class="bg-gray-50 rounded p-2">
-                                        <p class="text-sm font-semibold text-gray-700">🔍 Certificate won't preview:</p>
-                                        <p class="text-xs text-gray-600">Check your internet connection. Click "Open in Google Drive" to view in new tab. Ensure file format is supported (PDF, JPG, PNG).</p>
-                                    </div>
-                                    <div class="bg-gray-50 rounded p-2">
-                                        <p class="text-sm font-semibold text-gray-700">📊 Statistics not updating:</p>
-                                        <p class="text-xs text-gray-600">Statistics are calculated in real-time. Refresh the page (F5) to see latest data. Clear browser cache if issues persist.</p>
-                                    </div>
-                                    <div class="bg-gray-50 rounded p-2">
-                                        <p class="text-sm font-semibold text-gray-700">❌ Cannot delete category:</p>
-                                        <p class="text-xs text-gray-600">System performs "soft delete" for data integrity. Check if category has active submissions. Use "Show Inactive Categories" to verify deletion.</p>
-                                    </div>
-                                    <div class="bg-gray-50 rounded p-2">
-                                        <p class="text-sm font-semibold text-gray-700">📧 CSV upload fails:</p>
-                                        <p class="text-xs text-gray-600">Verify CSV format matches sample template exactly. Check for special characters in emails. Ensure all required columns are present.</p>
-                                    </div>
-                                    <div class="bg-gray-50 rounded p-2">
-                                        <p class="text-sm font-semibold text-gray-700">🔄 Page loads slowly:</p>
-                                        <p class="text-xs text-gray-600">Large datasets may take time. Use filters to reduce displayed data. Consider exporting data for offline analysis.</p>
-                                    </div>
-                                </div>
-                                <div class="mt-2 ml-7 bg-red-50 border border-red-200 rounded p-2">
-                                    <p class="text-xs text-red-800"><strong>🆘 Still having issues?</strong> Contact technical support with detailed description of the problem, steps to reproduce, and screenshots if possible.</p>
+                                    <p class="text-xs text-yellow-800"><strong>⚠️ Important:</strong> Double-check your filters before submitting, as bulk scores are immediately approved and cannot be easily undone. Make sure the selected students actually participated in the activity.</p>
                                 </div>
                             </div>
                         </div>
@@ -2595,6 +2497,22 @@
         editingCategory: null,
         deletingCategory: null,
         selectedSubmission: null,
+        
+        // Delete Confirmation Modal
+        showDeleteSubcategoryModal: false,
+        showDeleteCategoryModal: false,
+        deleteTargetCategory: null,
+        deleteTargetSubcategory: null,
+        deleteCategoryIndex: null,
+        deleteSubcategoryIndex: null,
+        
+        // Restore Confirmation Modal
+        showRestoreCategoryModal: false,
+        showRestoreSubcategoryModal: false,
+        restoreTargetCategory: null,
+        restoreTargetSubcategory: null,
+        restoreCategoryIndex: null,
+        restoreSubcategoryIndex: null,
         
         rejectReason: '',
         rejectReasonType: '',
@@ -2740,10 +2658,19 @@
             }
         },
 
-        // Reactivate main category
-        reactivateCategory(catIndex) {
+        // Reactivate main category - Open Modal
+        reactivateCategoryPrompt(catIndex) {
             const cat = this.categories[catIndex];
-            if (!confirm(`Restore category "${cat.name}"?`)) return;
+            this.restoreTargetCategory = cat.name;
+            this.restoreCategoryIndex = catIndex;
+            this.showRestoreCategoryModal = true;
+        },
+        
+        // Confirm Reactivate Category
+        confirmRestoreCategory() {
+            const catIndex = this.restoreCategoryIndex;
+            const cat = this.categories[catIndex];
+            this.showRestoreCategoryModal = false;
 
             fetch(`/admin/categories/${cat.id}/reactivate`, {
                 method: 'POST',
@@ -2760,7 +2687,6 @@
                 }
                 if (!res.ok) {
                     const msg = data && data.message ? data.message : (data.__raw || 'Server error');
-                    // If server returned HTML (stack trace), log it and show concise message
                     if (data && data.__raw && /<\/?html|<!doctype/i.test(data.__raw)) {
                         console.error('Server returned HTML error on reactivateCategory:', data.__raw);
                         throw new Error('Server error (see console)');
@@ -2773,13 +2699,28 @@
                 this.showAlert('success', 'Success', json.message || 'Category restored');
                 this.loadCategories();
             })
-            .catch(err => this.showAlert('error', 'Failed', err.message));
+            .catch(err => this.showAlert('error', 'Failed', err.message))
+            .finally(() => {
+                this.restoreCategoryIndex = null;
+                this.restoreTargetCategory = null;
+            });
         },
 
-        // Reactivate subcategory
-        reactivateSubcategory(catIndex, subIndex) {
+        // Reactivate subcategory - Open Modal
+        reactivateSubcategoryPrompt(catIndex, subIndex) {
             const sub = this.categories[catIndex].subcategories[subIndex];
-            if (!confirm(`Restore subcategory "${sub.name}"?`)) return;
+            this.restoreTargetSubcategory = sub.name;
+            this.restoreCategoryIndex = catIndex;
+            this.restoreSubcategoryIndex = subIndex;
+            this.showRestoreSubcategoryModal = true;
+        },
+        
+        // Confirm Reactivate Subcategory
+        confirmRestoreSubcategory() {
+            const catIndex = this.restoreCategoryIndex;
+            const subIndex = this.restoreSubcategoryIndex;
+            const sub = this.categories[catIndex].subcategories[subIndex];
+            this.showRestoreSubcategoryModal = false;
 
             fetch(`/admin/subcategories/${sub.id}/reactivate`, {
                 method: 'POST',
@@ -2808,7 +2749,12 @@
                 this.showAlert('success', 'Success', json.message || 'Subcategory restored');
                 this.loadCategories();
             })
-            .catch(err => this.showAlert('error', 'Failed', err.message));
+            .catch(err => this.showAlert('error', 'Failed', err.message))
+            .finally(() => {
+                this.restoreCategoryIndex = null;
+                this.restoreSubcategoryIndex = null;
+                this.restoreTargetSubcategory = null;
+            });
         },
         // ============================================================
         
@@ -3295,10 +3241,21 @@
             .catch(() => this.showAlert('error', 'Error', 'Failed to update subcategory'));
         },
 
-        // 7. DELETE SUBCATEGORY
-        deleteSubcategory(catIndex, subIndex) {
+        // 7. DELETE SUBCATEGORY - Open Modal
+        deleteSubcategoryPrompt(catIndex, subIndex) {
             const sub = this.categories[catIndex].subcategories[subIndex];
-            if (!confirm(`Delete subcategory "${sub.name}"?`)) return;
+            this.deleteTargetSubcategory = sub.name;
+            this.deleteCategoryIndex = catIndex;
+            this.deleteSubcategoryIndex = subIndex;
+            this.showDeleteSubcategoryModal = true;
+        },
+        
+        // Confirm Delete Subcategory
+        confirmDeleteSubcategory() {
+            const catIndex = this.deleteCategoryIndex;
+            const subIndex = this.deleteSubcategoryIndex;
+            const sub = this.categories[catIndex].subcategories[subIndex];
+            this.showDeleteSubcategoryModal = false;
 
             fetch(`/admin/subcategories/${sub.id}`, {
                 method: 'DELETE',
@@ -3327,7 +3284,12 @@
                 // Reload categories dari API untuk sinkronisasi
                 this.loadCategories();
             })
-            .catch(err => this.showAlert('error', 'Failed', err.message || 'Unknown error'));
+            .catch(err => this.showAlert('error', 'Failed', err.message || 'Unknown error'))
+            .finally(() => {
+                this.deleteCategoryIndex = null;
+                this.deleteSubcategoryIndex = null;
+                this.deleteTargetSubcategory = null;
+            });
         },
 
         // Bulk Score Management
@@ -3367,6 +3329,20 @@
                     body: formData
                 });
                 
+                if (!response.ok) {
+                    // Handle non-2xx HTTP responses
+                    let errorMessage = `Server error: ${response.status} ${response.statusText}`;
+                    try {
+                        const errorData = await response.json();
+                        if (errorData.message) {
+                            errorMessage = errorData.message;
+                        }
+                    } catch (e) {
+                        // Response is not JSON, use status message
+                    }
+                    throw new Error(errorMessage);
+                }
+                
                 const result = await response.json();
                 
                 if (result.success) {
@@ -3378,7 +3354,8 @@
                 }
             } catch (error) {
                 console.error('Bulk score error:', error);
-                this.showAlert('error', 'Error', 'Failed to connect to server');
+                const errorMsg = error.message || 'Failed to connect to server. Please ensure the server is running and try again.';
+                this.showAlert('error', 'Error', errorMsg);
             } finally {
                 this.bulkScore.isSubmitting = false;
             }

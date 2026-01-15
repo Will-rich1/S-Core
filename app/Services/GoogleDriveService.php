@@ -45,12 +45,16 @@ class GoogleDriveService
         $filePath = $folder . '/' . $filename;
 
         if ($this->useGoogleDrive) {
-            // Upload ke Google Drive
-            $content = file_get_contents($file->getRealPath());
-            Storage::disk('google')->put($filePath, $content);
-            
-            // Get file ID dari Google Drive metadata
             try {
+                // Upload ke Google Drive dengan stream untuk file besar
+                $stream = fopen($file->getRealPath(), 'r');
+                Storage::disk('google')->put($filePath, $stream);
+                
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
+                
+                // Get file ID dari Google Drive metadata
                 $adapter = Storage::disk('google')->getAdapter();
                 $metadata = $adapter->getMetadata($filePath);
                 
@@ -76,7 +80,18 @@ class GoogleDriveService
                 
                 \Log::warning('File ID is null, using fallback');
             } catch (\Exception $e) {
-                \Log::error('Error getting Google Drive file ID: ' . $e->getMessage());
+                \Log::error('Error uploading to Google Drive: ' . $e->getMessage());
+                
+                // Fallback ke local storage jika Google Drive gagal
+                \Log::info('Falling back to local storage');
+                $path = $file->storeAs($folder, $filename, 'public');
+                
+                return [
+                    'path' => $path,
+                    'url' => Storage::disk('public')->url($path),
+                    'storage' => 'local',
+                    'fallback' => true,
+                ];
             }
             
             // Fallback jika gagal ambil file ID
