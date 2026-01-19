@@ -266,6 +266,36 @@ class SubmissionController extends Controller
     }
     
     /**
+     * Update Category Only (without changing approval status)
+     */
+    public function updateCategory(Request $request, $id)
+    {
+        $submission = Submission::findOrFail($id);
+        
+        // Validasi input
+        $request->validate([
+            'assigned_subcategory_id' => 'required|exists:subcategories,id'
+        ]);
+
+        $subcategory = Subcategory::findOrFail($request->assigned_subcategory_id);
+        
+        // Update category dan points (jika sudah approved, update points juga)
+        $dataToUpdate = [
+            'student_subcategory_id' => $subcategory->id,
+            'student_category_id' => $subcategory->category_id,
+        ];
+        
+        // Jika submission sudah approved, update juga points-nya
+        if ($submission->status === 'Approved') {
+            $dataToUpdate['points_awarded'] = $subcategory->points;
+        }
+        
+        $submission->update($dataToUpdate);
+
+        return response()->json(['message' => 'Category updated successfully!']);
+    }
+    
+    /**
      * 6. Simpan Komplain (Mahasiswa)
      */
     public function storeComplaint(Request $request)

@@ -216,4 +216,34 @@ class UserController extends Controller
 
         return back()->with('success', $message);
     }
+
+    public function deleteStudents(Request $request)
+    {
+        if (!Auth::user() || Auth::user()->role !== 'admin') {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $request->validate([
+            'student_ids' => 'required|array|min:1',
+            'student_ids.*' => 'required|string'
+        ]);
+
+        $studentIds = $request->input('student_ids');
+        $deletedCount = 0;
+
+        try {
+            foreach ($studentIds as $studentId) {
+                $user = User::where('student_id', $studentId)->where('role', 'student')->first();
+                if ($user) {
+                    $user->delete();
+                    $deletedCount++;
+                }
+            }
+
+            return response()->json(['message' => 'Successfully deleted students', 'deleted_count' => $deletedCount]);
+        } catch (\Exception $e) {
+            Log::error('Error deleting students: '.$e->getMessage());
+            return response()->json(['message' => 'Failed to delete'], 500);
+        }
+    }
 }

@@ -161,34 +161,93 @@
                 <div class="flex-1 overflow-hidden flex">
                     <template x-if="selectedActivity">
                         <div class="flex w-full h-full">
-                            <!-- Left Column - File Upload -->
-                            <div class="w-1/2 bg-gray-100 border-r overflow-auto p-6">
-                                <div class="bg-white rounded-lg shadow-sm h-full flex flex-col p-6">
-                                    <h4 class="font-semibold text-gray-800 mb-4">Update Certificate/Evidence</h4>
-                                    <div class="flex-1 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center p-8 hover:border-blue-400 transition-colors cursor-pointer">
-                                        <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                        </svg>
-                                        <p class="text-gray-600 text-sm mb-2">Drag and drop your PDF file here</p>
-                                        <p class="text-gray-400 text-xs mb-4">or</p>
-                                        <label class="cursor-pointer">
-                                            <span class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium inline-block">Browse Files</span>
-                                            <input type="file" accept=".pdf" class="hidden" x-ref="fileInput" @change="handleFileSelect" />
-                                        </label>
-                                        <p class="text-gray-400 text-xs mt-4">PDF only - Maximum 10MB</p>
+                            <!-- Left Column - PDF Viewer with Upload Option -->
+                            <div class="w-1/2 bg-gray-100 border-r overflow-hidden p-6">
+                                <div class="bg-white rounded-lg shadow-sm h-full flex flex-col">
+                                    <div class="bg-gray-800 text-white px-4 py-3 rounded-t-lg flex items-center justify-between">
+                                        <span class="text-sm font-medium">Certificate/Evidence</span>
+                                        <span class="text-xs text-gray-300" x-text="selectedActivity ? (selectedActivity.certificate || 'document.pdf') : ''"></span>
                                     </div>
-                                    <div x-show="formData.fileName" class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
-                                        <div class="flex items-center gap-2">
-                                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                            </svg>
-                                            <span class="text-sm text-gray-700" x-text="formData.fileName"></span>
-                                        </div>
-                                        <button @click="formData.fileName = ''" class="text-red-500 hover:text-red-700">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
+
+                                    <div class="flex-1 bg-gray-50 relative h-full overflow-hidden">
+                                        <!-- Current PDF Display -->
+                                        <template x-if="selectedActivity && selectedActivity.file_url && !editShowUploadBox && editPdfKey >= 0">
+                                            <div class="relative w-full h-full" :key="editPdfKey">
+                                                <!-- Loading spinner -->
+                                                <div x-show="editPdfLoading" class="absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
+                                                    <div class="text-center">
+                                                        <svg class="animate-spin h-12 w-12 text-blue-600 mx-auto mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                        </svg>
+                                                        <p class="text-sm text-gray-600">Loading PDF...</p>
+                                                    </div>
+                                                </div>
+                                                <!-- PDF iframe -->
+                                                <iframe
+                                                    :src="selectedActivity.file_url + '?v=' + pdfTimestamp"
+                                                    @load="editPdfLoading = false"
+                                                    class="w-full h-full"
+                                                    style="border: none;"
+                                                    type="application/pdf"
+                                                ></iframe>
+                                                <!-- Change PDF Button Overlay -->
+                                                <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                                                    <button @click="editShowUploadBox = true" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg flex items-center gap-2">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                                        </svg>
+                                                        Change PDF
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <!-- Upload Box (shown when changing PDF or no PDF exists) -->
+                                        <template x-if="!selectedActivity || !selectedActivity.file_url || editShowUploadBox">
+                                            <div class="p-6 h-full flex flex-col">
+                                                <div class="flex justify-between items-center mb-4">
+                                                    <h4 class="font-semibold text-gray-800">Update Certificate/Evidence</h4>
+                                                    <button x-show="selectedActivity && selectedActivity.file_url && editShowUploadBox" @click="editShowUploadBox = false; formData.fileName = ''" class="text-gray-500 hover:text-gray-700 text-sm">
+                                                        Cancel
+                                                    </button>
+                                                </div>
+                                                <div class="flex-1 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center p-8 hover:border-blue-400 transition-colors cursor-pointer">
+                                                    <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                                    </svg>
+                                                    <p class="text-gray-600 text-sm mb-2">Drag and drop your PDF file here</p>
+                                                    <p class="text-gray-400 text-xs mb-4">or</p>
+                                                    <label class="cursor-pointer">
+                                                        <span class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium inline-block">Browse Files</span>
+                                                        <input type="file" accept=".pdf" class="hidden" x-ref="fileInputEdit" @change="handleEditFileSelect($event)" />
+                                                    </label>
+                                                    <p class="text-gray-400 text-xs mt-4">PDF only - Maximum 10MB</p>
+                                                </div>
+                                                <div x-show="formData.fileName" class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+                                                    <div class="flex items-center gap-2">
+                                                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                        </svg>
+                                                        <span class="text-sm text-gray-700" x-text="formData.fileName"></span>
+                                                    </div>
+                                                    <button @click="
+                                                        formData.fileName = ''; 
+                                                        $refs.fileInputEdit.value = ''; 
+                                                        if(selectedActivity.originalFileUrl) {
+                                                            selectedActivity.file_url = selectedActivity.originalFileUrl;
+                                                            pdfTimestamp = Date.now();
+                                                            editPdfKey++;
+                                                            editPdfLoading = true;
+                                                        }
+                                                    " class="text-red-500 hover:text-red-700">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </template>
                                     </div>
                                 </div>
                             </div>
@@ -1183,6 +1242,10 @@
             // --- UI VARS ---
             showLogoutModal: false, showAddModal: false, showEditModal: false,
             showViewModal: false, showDeleteModal: false,
+            editShowUploadBox: false,
+            editPdfLoading: true,
+            pdfTimestamp: Date.now(),
+            editPdfKey: 0,
             
             // --- FILTER VARS ---
             statusFilter: '', 
@@ -1270,7 +1333,50 @@
                 this.dateValidationError = ''; return true;
             },
 
-            handleFileSelect(e) { if(e.target.files[0]) this.formData.fileName = e.target.files[0].name; },
+            handleFileSelect(e) { 
+                if(e.target.files[0]) {
+                    this.formData.fileName = e.target.files[0].name;
+                }
+            },
+
+            handleEditFileSelect(e) {
+                if(e.target.files[0]) {
+                    const file = e.target.files[0];
+                    console.log('File selected:', file.name, 'Size:', (file.size / 1024 / 1024).toFixed(2) + ' MB');
+                    
+                    // Set file name
+                    this.formData.fileName = file.name;
+                    
+                    // Simpan original URL jika belum ada
+                    if (!this.selectedActivity.originalFileUrl) {
+                        this.selectedActivity.originalFileUrl = this.selectedActivity.file_url;
+                    }
+                    
+                    // Buat preview URL untuk file baru
+                    const newFileUrl = URL.createObjectURL(file);
+                    console.log('Preview URL created:', newFileUrl);
+                    
+                    // Update file_url langsung (reactive)
+                    this.selectedActivity.file_url = newFileUrl;
+                    
+                    // Update timestamp untuk force reload iframe
+                    this.pdfTimestamp = Date.now();
+                    
+                    // INCREMENT editPdfKey untuk FORCE re-render x-if
+                    this.editPdfKey++;
+                    
+                    // Hide upload box dan show loading
+                    this.editShowUploadBox = false;
+                    this.editPdfLoading = true;
+                    
+                    console.log('PDF changed! editPdfKey:', this.editPdfKey, 'New URL:', newFileUrl);
+                    
+                    // Force Alpine to update
+                    this.$nextTick(() => {
+                        console.log('After nextTick - file_url:', this.selectedActivity.file_url);
+                    });
+                }
+            },
 
             // --- CRUD ACTIONS ---
 
@@ -1336,6 +1442,17 @@
             openEditModal(activity) {
                 this.selectedActivity = activity;
                 this.showEditModal = true;
+                
+                // Reset edit state
+                this.editShowUploadBox = false;
+                this.editPdfLoading = true;
+                this.pdfTimestamp = Date.now();
+                this.editPdfKey = 0;
+                
+                // Simpan original file URL
+                if (activity.file_url && !activity.originalFileUrl) {
+                    activity.originalFileUrl = activity.file_url;
+                }
 
                 // Inisialisasi form dengan data kosong dulu
                 this.formData = {
@@ -1392,8 +1509,10 @@
                 data.append('mainCategory', this.categoryGroups[catIndex].name); 
                 data.append('subcategory', this.formData.subcategory.trim());
                 
-                if (this.$refs.fileInput && this.$refs.fileInput.files.length > 0) {
-                    data.append('certificate_file', this.$refs.fileInput.files[0]);
+                // Check if file was changed in edit modal
+                if (this.$refs.fileInputEdit && this.$refs.fileInputEdit.files.length > 0) {
+                    data.append('certificate_file', this.$refs.fileInputEdit.files[0]);
+                    console.log('Updating with new file:', this.$refs.fileInputEdit.files[0].name);
                 }
 
                 fetch(`/submissions/${this.selectedActivity.id}`, { 
@@ -1534,6 +1653,11 @@
                 this.showDeleteModal = false; this.selectedActivity = null; 
                 this.formData = { mainCategory: '', subcategory: '', activityTitle: '', description: '', activityDate: '', fileName: '' };
                 this.availableSubcategories = [];
+                // Reset edit modal state
+                this.editShowUploadBox = false;
+                this.editPdfLoading = true;
+                this.pdfTimestamp = Date.now();
+                this.editPdfKey = 0;
                 // Reset loading state on modal close just in case
                 this.isSubmitting = false;
             },
