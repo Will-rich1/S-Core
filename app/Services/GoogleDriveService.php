@@ -123,13 +123,92 @@ class GoogleDriveService
     {
         try {
             // Deteksi storage dari path atau parameter
-            if ($storage === 'google' || ($this->useGoogleDrive && !str_starts_with($path, 'certificates/'))) {
-                return Storage::disk('google')->delete($path);
+            // Jika storage explicitly set atau useGoogleDrive aktif, gunakan Google Drive
+            // File ID Google Drive biasanya string panjang tanpa slash (e.g., 1ABCxyz123...)
+            $isGoogleDriveFile = $storage === 'google' || 
+                                 ($this->useGoogleDrive && !str_contains($path, '/')) ||
+                                 (strlen($path) > 20 && !str_contains($path, '.'));
+            
+            if ($isGoogleDriveFile) {
+                \Log::info('Attempting to delete file from Google Drive');
+                \Log::info('File path/ID: ' . $path);
+                \Log::info('Storage type: ' . ($storage ?? 'auto-detected as google'));
+                
+                // Gunakan Google Drive disk
+                $disk = Storage::disk('google');
+                
+                // Cek apakah file exists terlebih dahulu
+                $exists = $disk->exists($path);
+                \Log::info('File exists check: ' . ($exists ? 'yes' : 'no'));
+                
+                if (!$exists) {
+                    \Log::warning('File not found in Google Drive, skipping delete');
+                    return false;
+                }
+                
+                // Delete file
+                $result = $disk->delete($path);
+                \Log::info('Google Drive delete result: ' . ($result ? 'success' : 'failed'));
+                
+                // Double check if file is deleted
+                $stillExists = $disk->exists($path);
+                \Log::info('File still exists after delete: ' . ($stillExists ? 'yes (DELETE FAILED!)' : 'no (SUCCESS)'));
+                
+                return $result && !$stillExists;
             } else {
+                \Log::info('Attempting to delete file from local storage: ' . $path);
                 return Storage::disk('public')->delete($path);
             }
         } catch (\Exception $e) {
             \Log::error('Error deleting file: ' . $e->getMessage());
+            \Log::error('File path: ' . $path);
+            \Log::error('Storage: ' . ($storage ?? 'auto-detect'));
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            return false;
+        }
+    }
+
+    /**
+     * Permanently delete file from Google Drive using API (not just move to trash)
+     * 
+     * @param string $fileId - Google Drive file ID
+     * @return bool
+     */
+    public function permanentlyDeleteFile(string $fileId): bool
+    {
+        try {
+            \Log::info('Attempting permanent delete for file ID: ' . $fileId);
+            
+            // Get Google Client with Guzzle configuration
+            $client = new \Google\Client();
+            $client->setClientId(env('GOOGLE_DRIVE_CLIENT_ID'));
+            $client->setClientSecret(env('GOOGLE_DRIVE_CLIENT_SECRET'));
+            $client->setAccessType('offline');
+            
+            // Configure Guzzle client to bypass SSL verification (development mode)
+            // This is necessary for Windows development environments without proper CA certificates
+            $httpClient = new \GuzzleHttp\Client([
+                'verify' => false, // Disable SSL verification (development only)
+                'timeout' => 30,
+            ]);
+            $client->setHttpClient($httpClient);
+            
+            // Set refresh token
+            $client->fetchAccessTokenWithRefreshToken(env('GOOGLE_DRIVE_REFRESH_TOKEN'));
+            
+            // Create Drive service
+            $service = new \Google\Service\Drive($client);
+            
+            // Permanently delete (not trash)
+            $service->files->delete($fileId);
+            
+            \Log::info('File permanently deleted from Google Drive: ' . $fileId);
+            return true;
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to permanently delete file: ' . $e->getMessage());
+            \Log::error('File ID: ' . $fileId);
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
             return false;
         }
     }

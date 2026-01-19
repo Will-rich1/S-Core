@@ -21,7 +21,7 @@
 <body>
     <div class="flex h-screen bg-gray-100" x-data="dashboardData()" x-init="loadCategories()">
         <!-- Logout Confirmation Modal -->
-        <div x-show="showLogoutModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
+        <div x-show="showLogoutModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]" style="display: none;">
             <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
                 <h3 class="text-lg font-semibold mb-4">Confirm Logout</h3>
                 <p class="text-gray-600 mb-6">Are you sure you want to logout?</p>
@@ -33,7 +33,7 @@
         </div>
 
         <!-- Add New Activity Modal - Full Screen -->
-        <div x-show="showAddModal" class="fixed inset-0 bg-black bg-opacity-50 z-50" style="display: none;">
+        <div x-show="showAddModal" class="fixed inset-0 bg-black bg-opacity-50 z-[9999]" style="display: none;">
             <div class="h-full w-full bg-white flex flex-col">
                 <div class="bg-white border-b px-6 py-4 flex justify-between items-center">
                     <h3 class="text-xl font-semibold">Submit New S-Core</h3>
@@ -46,7 +46,14 @@
                         <div class="w-1/2 bg-gray-100 border-r overflow-auto p-6">
                             <div class="bg-white rounded-lg shadow-sm h-full flex flex-col p-6">
                                 <h4 class="font-semibold text-gray-800 mb-4">Upload Certificate/Evidence</h4>
-                                <div class="flex-1 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center p-8 hover:border-blue-400 transition-colors cursor-pointer">
+                                <div 
+                                    class="flex-1 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center p-8 hover:border-blue-400 transition-colors cursor-pointer"
+                                    @dragover.prevent="dragActive = true"
+                                    @dragleave.prevent="dragActive = false"
+                                    @drop.prevent="handleFileDrop"
+                                    :class="dragActive ? 'bg-blue-50 border-blue-400' : ''"
+                                    @click="$refs.fileInput.click()"
+                                >
                                     <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                     </svg>
@@ -151,7 +158,7 @@
         </div>
 
         <!-- Edit Activity Modal - Full Screen -->
-        <div x-show="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 z-50" style="display: none;">
+        <div x-show="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 z-[9999]" style="display: none;">
             <div class="h-full w-full bg-white flex flex-col">
                 <div class="bg-white border-b px-6 py-4 flex justify-between items-center">
                     <h3 class="text-xl font-semibold">Edit S-Core Submission</h3>
@@ -303,8 +310,16 @@
                                 <!-- Fixed Action Buttons -->
                                 <div class="border-t bg-white px-6 py-4">
                                     <div class="flex gap-3 justify-end">
-                                        <button @click="closeModal" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition-colors">Cancel</button>
-                                        <button @click="updateActivity" class="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors">Update</button>
+                                        <button @click="closeModal" :disabled="isSubmitting" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg text-sm font-medium transition-colors">Cancel</button>
+                                        <button @click="updateActivity" :disabled="isSubmitting" class="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                                            <span x-show="!isSubmitting">Update</span>
+                                            <span x-show="isSubmitting" class="flex items-center gap-2">
+                                                <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                                </svg>
+                                                Processing...
+                                            </span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -315,7 +330,7 @@
         </div>
 
         <!-- View Activity Modal - Full Screen -->
-        <div x-show="showViewModal" class="fixed inset-0 bg-black bg-opacity-50 z-50" style="display: none;">
+        <div x-show="showViewModal" class="fixed inset-0 bg-black bg-opacity-50 z-[9999]" style="display: none;">
             <div class="h-full w-full bg-white flex flex-col">
                 <div class="bg-white border-b px-6 py-4 flex justify-between items-center">
                     <h3 class="text-xl font-semibold">View S-Core Submission</h3>
@@ -466,7 +481,7 @@
         </div>
 
         <!-- Delete Confirmation Modal -->
-        <div x-show="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-60" style="display: none;">
+        <div x-show="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999]" style="display: none;">
             <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-2xl">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-xl font-semibold text-red-600">Cancel Submission</h3>
@@ -490,7 +505,7 @@
         </div>
 
         <!-- Generic Alert/Confirmation Modal -->
-        <div x-show="showAlertModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[70]" style="display: none;">
+        <div x-show="showAlertModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999]" style="display: none;">
             <div class="bg-white rounded-lg max-w-md w-full mx-4 shadow-2xl">
                 <div class="p-6">
                     <div class="flex items-start gap-3 mb-4">
@@ -533,8 +548,8 @@
         </div>
 
         <!-- Sidebar -->
-        <div :class="isSidebarOpen ? 'w-64' : 'w-20'" class="bg-white shadow-lg transition-all duration-300 flex flex-col">
-            <div class="p-4 border-b flex flex-col items-center">
+        <div :class="isSidebarOpen ? 'w-64' : 'w-20'" class="bg-white shadow-lg transition-all duration-300 flex flex-col h-screen">
+            <div class="p-4 border-b flex flex-col items-center flex-shrink-0">
                 <img src="/images/logo.png" alt="Logo" class="w-12 h-12 object-contain">
                 <div x-show="isSidebarOpen" class="mt-2 text-center">
                     <h2 class="text-sm font-bold text-gray-800">S-Core ITBSS</h2>
@@ -542,7 +557,7 @@
                 </div>
             </div>
 
-            <nav class="mt-4 flex-1">
+            <nav class="mt-4">
                 <button @click="activeMenu = 'Dashboard'" class="w-full flex items-center py-3 text-left hover:bg-gray-100 transition-colors" :class="[
                     isSidebarOpen ? 'gap-3 px-4' : 'justify-center',
                     activeMenu === 'Dashboard' ? 'bg-blue-50 border-l-4 border-blue-500' : ''
@@ -574,7 +589,7 @@
                 </button>
             </nav>
 
-            <div class="border-t mt-auto">
+            <div class="border-t mt-auto flex-shrink-0">
                 <button @click="showLogoutModal = true" class="w-full flex items-center py-3 text-left hover:bg-gray-100 transition-colors" :class="isSidebarOpen ? 'gap-3 px-4' : 'justify-center'">
                     <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -586,7 +601,7 @@
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
-            <div class="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-10">
+            <div class="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-[100]">
                 <button @click="isSidebarOpen = !isSidebarOpen" class="p-2 hover:bg-gray-100 rounded">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16" />
@@ -1256,6 +1271,7 @@
             dateValidationError: '',
             formData: { mainCategory: '', subcategory: '', activityTitle: '', description: '', activityDate: '', fileName: '' },
             availableSubcategories: [],
+            dragActive: false,
             
             // --- ACTION VARS ---
             selectedActivity: null, 

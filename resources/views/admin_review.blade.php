@@ -975,9 +975,17 @@
             <div class="flex-1 overflow-auto p-6">
                 <!-- Review Submissions Page -->
                 <div x-show="activeMenu === 'Review Submissions'">
-                    <div class="mb-6">
-                        <h1 class="text-3xl font-bold text-gray-800 mb-2">S-Core Submission Review</h1>
-                        <p class="text-gray-600">Review and approve student activity submissions</p>
+                    <div class="mb-6 flex justify-between items-start">
+                        <div>
+                            <h1 class="text-3xl font-bold text-gray-800 mb-2">S-Core Submission Review</h1>
+                            <p class="text-gray-600">Review and approve student activity submissions</p>
+                        </div>
+                        <button @click="fetchSubmissions()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Load New Submission
+                        </button>
                     </div>
 
                     <!-- Filters -->
@@ -1525,8 +1533,27 @@
                             <!-- Certificate Upload -->
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Certificate/Proof <span class="text-gray-500">(Optional)</span></label>
-                                <input type="file" x-ref="bulkCertificate" accept=".pdf,.jpg,.jpeg,.png" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <p class="text-xs text-gray-500 mt-1">Upload PDF, JPG, or PNG if available (max 10MB)</p>
+                                <div 
+                                    class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer transition-colors"
+                                    @dragover.prevent="dragActiveBulk = true"
+                                    @dragleave.prevent="dragActiveBulk = false"
+                                    @drop.prevent="handleBulkFileDrop"
+                                    :class="dragActiveBulk ? 'bg-blue-50 border-blue-400' : 'hover:border-blue-400'"
+                                    @click="$refs.bulkCertificate.click()"
+                                >
+                                    <svg class="w-10 h-10 text-gray-400 mb-2 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    <p class="text-gray-600 text-sm mb-1">Drag and drop PDF, JPG, or PNG here</p>
+                                    <p class="text-gray-400 text-xs">or</p>
+                                    <p class="text-blue-500 text-sm font-medium mt-1">Browse Files</p>
+                                </div>
+                                <input type="file" x-ref="bulkCertificate" accept=".pdf,.jpg,.jpeg,.png" class="hidden" @change="bulkFileName = $event.target.files[0]?.name || ''" />
+                                <p class="text-xs text-gray-500 mt-2">Upload PDF, JPG, or PNG if available (max 10MB)</p>
+                                <div x-show="bulkFileName" class="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+                                    <span class="text-sm text-gray-700" x-text="bulkFileName"></span>
+                                    <button type="button" @click="bulkFileName = ''; $refs.bulkCertificate.value = ''" class="text-red-500 hover:text-red-700 text-sm">Remove</button>
+                                </div>
                             </div>
                         </div>
 
@@ -2621,6 +2648,9 @@
         approveModalSubcategory: '',
         approveModalPoints: 0,
         
+        dragActiveBulk: false,
+        bulkFileName: '',
+        
         pinInput: '',
         pinError: false,
         isPinVerified: false,
@@ -2711,6 +2741,11 @@
             await this.loadCategories();
             // LOAD S-CORE SETTINGS
             await this.loadScoreSettings();
+        },
+
+        fetchSubmissions() {
+            // Reload halaman untuk mendapatkan data submission terbaru
+            window.location.reload();
         },
 
         async loadCategories() {
@@ -3604,6 +3639,32 @@
                 this.deleteSubcategoryIndex = null;
                 this.deleteTargetSubcategory = null;
             });
+        },
+
+        handleBulkFileDrop(e) {
+            this.dragActiveBulk = false;
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                // Validate allowed file types
+                const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+                if (!allowedTypes.includes(file.type)) {
+                    this.showAlert('error', 'Invalid File', 'Only PDF, JPG, or PNG files are allowed');
+                    return;
+                }
+                // Validate file size (10MB max)
+                if (file.size > 10 * 1024 * 1024) {
+                    this.showAlert('error', 'File Too Large', 'Maximum file size is 10MB');
+                    return;
+                }
+                // Set file name and sync to input
+                this.bulkFileName = file.name;
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                if (this.$refs.bulkCertificate) {
+                    this.$refs.bulkCertificate.files = dataTransfer.files;
+                }
+            }
         },
 
         // Bulk Score Management
