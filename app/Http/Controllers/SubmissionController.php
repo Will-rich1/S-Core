@@ -148,12 +148,45 @@ class SubmissionController extends Controller
             if ($request->hasFile('certificate_file')) {
                 $googleDriveService = app(GoogleDriveService::class);
                 
-                // Hapus file lama dari Google Drive jika ada
-                if ($submission->certificate_path && $submission->storage_type === 'google') {
+                // Hapus file lama dari storage jika ada
+                if ($submission->certificate_path) {
                     try {
-                        $googleDriveService->deleteFile($submission->certificate_path, 'google');
+                        \Log::info('Updating submission - deleting old file: ' . $submission->certificate_path);
+                        
+                        // Coba permanent delete dulu (untuk Google Drive)
+                        if ($submission->storage_type === 'google' || strlen($submission->certificate_path) > 20) {
+                            \Log::info('Attempting permanent delete via Google API');
+                            $permanentDeleteResult = $googleDriveService->permanentlyDeleteFile($submission->certificate_path);
+                            
+                            if ($permanentDeleteResult) {
+                                \Log::info('Old file permanently deleted successfully');
+                            } else {
+                                \Log::warning('Permanent delete failed, trying regular delete');
+                                $deleteResult = $googleDriveService->deleteFile(
+                                    $submission->certificate_path, 
+                                    $submission->storage_type ?? 'google'
+                                );
+                                
+                                if ($deleteResult) {
+                                    \Log::info('Old file deleted successfully (moved to trash)');
+                                } else {
+                                    \Log::warning('Regular delete also failed');
+                                }
+                            }
+                        } else {
+                            $deleteResult = $googleDriveService->deleteFile(
+                                $submission->certificate_path, 
+                                $submission->storage_type ?? 'google'
+                            );
+                            
+                            if ($deleteResult) {
+                                \Log::info('Old file deleted successfully');
+                            } else {
+                                \Log::warning('Old file deletion returned false');
+                            }
+                        }
                     } catch (\Exception $e) {
-                        \Log::warning('Failed to delete old file from Google Drive: ' . $e->getMessage());
+                        \Log::error('Failed to delete old file: ' . $e->getMessage());
                     }
                 }
 
@@ -195,10 +228,49 @@ class SubmissionController extends Controller
             // Hapus file dari storage jika ada
             if ($submission->certificate_path) {
                 try {
+                    \Log::info('Deleting file for submission ID: ' . $id);
+                    \Log::info('File path: ' . $submission->certificate_path);
+                    \Log::info('Storage type: ' . ($submission->storage_type ?? 'not set'));
+                    
                     $googleDriveService = app(GoogleDriveService::class);
-                    $googleDriveService->deleteFile($submission->certificate_path, $submission->storage_type);
+                    
+                    // Coba permanent delete dulu (untuk Google Drive)
+                    if ($submission->storage_type === 'google' || strlen($submission->certificate_path) > 20) {
+                        \Log::info('Attempting permanent delete via Google API');
+                        $permanentDeleteResult = $googleDriveService->permanentlyDeleteFile($submission->certificate_path);
+                        
+                        if ($permanentDeleteResult) {
+                            \Log::info('File permanently deleted successfully');
+                        } else {
+                            \Log::warning('Permanent delete failed, trying regular delete');
+                            // Fallback ke regular delete
+                            $deleteResult = $googleDriveService->deleteFile(
+                                $submission->certificate_path, 
+                                $submission->storage_type ?? 'google'
+                            );
+                            
+                            if ($deleteResult) {
+                                \Log::info('File deleted successfully (moved to trash)');
+                            } else {
+                                \Log::warning('Regular delete also failed');
+                            }
+                        }
+                    } else {
+                        // Local storage
+                        $deleteResult = $googleDriveService->deleteFile(
+                            $submission->certificate_path, 
+                            $submission->storage_type ?? 'google'
+                        );
+                        
+                        if ($deleteResult) {
+                            \Log::info('File deleted successfully from local storage');
+                        } else {
+                            \Log::warning('File deletion returned false');
+                        }
+                    }
                 } catch (\Exception $e) {
-                    \Log::warning('Failed to delete file from storage: ' . $e->getMessage());
+                    \Log::error('Failed to delete file from storage: ' . $e->getMessage());
+                    \Log::error('Stack trace: ' . $e->getTraceAsString());
                 }
             }
 
