@@ -56,6 +56,7 @@ Route::middleware(['auth'])->group(function () {
     // Approval / Rejection
     Route::post('/admin/submissions/{id}/approve', [SubmissionController::class, 'approve'])->name('admin.approve');
     Route::post('/admin/submissions/{id}/reject', [SubmissionController::class, 'reject'])->name('admin.reject');
+    Route::post('/admin/submissions/{id}/update-category', [SubmissionController::class, 'updateCategory'])->name('admin.submissions.update-category');
     Route::put('/admin/submissions/{id}/edit', [SubmissionController::class, 'adminEdit'])->name('admin.submissions.edit');
     Route::post('/admin/submissions/{id}/admin-edit', [SubmissionController::class, 'adminEdit'])->name('admin.submissions.admin-edit');
 
@@ -63,6 +64,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/students/store', [UserController::class, 'storeStudent'])->name('students.store');
     Route::post('/students/import', [UserController::class, 'importStudents'])->name('students.import');
     Route::post('/admins/store', [UserController::class, 'storeAdmin'])->name('admins.store');
+    Route::post('/admin/students/delete', [UserController::class, 'deleteStudents'])->name('students.delete');
     // Admin: reset user password
     Route::post('/admin/users/{id}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
 

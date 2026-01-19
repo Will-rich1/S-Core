@@ -265,7 +265,7 @@
                                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                                 Assign Subcategory <span class="text-red-500">*</span>
                                             </label>
-                                            <select x-model="assignedSubcategory" :disabled="assignedMainCategory === ''" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                            <select x-model="assignedSubcategory" @change="categoryChanged = true" :disabled="assignedMainCategory === ''" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                                 <option value="">Select Subcategory</option>
                                                 <template x-for="(subcat, subIdx) in assignedAvailableSubcategories" :key="subIdx">
                                                     <option :value="subIdx" x-text="subcat.name + ' (' + subcat.points + ' points)'"></option>
@@ -297,10 +297,13 @@
                                         <button @click="closeModal" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition-colors">
                                             Cancel
                                         </button>
-                                        <button @click="showRejectModal = true" class="px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                        <button x-show="categoryChanged" @click="updateCategoryOnly" class="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                            Update Category
+                                        </button>
+                                        <button x-show="selectedSubmission?.status !== 'Rejected'" @click="showRejectModal = true" class="px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors">
                                             Reject
                                         </button>
-                                        <button @click="handleApprove" class="px-6 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                        <button x-show="selectedSubmission?.status !== 'Approved'" @click="handleApprove" class="px-6 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors">
                                             Approve
                                         </button>
                                     </div>
@@ -1224,6 +1227,19 @@
                             Export Report
                         </button>
                     </div>
+                    
+                    <!-- Delete Selected Button -->
+                    <div x-show="selectedStudents.length > 0" class="mt-3 flex items-center justify-between bg-red-50 border border-red-200 rounded-lg p-3">
+                        <span class="text-sm text-red-700 font-medium">
+                            <span x-text="selectedStudents.length"></span> student(s) selected
+                        </span>
+                        <button @click="deleteSelectedStudents" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Delete Selected
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Summary Cards -->
@@ -1290,6 +1306,12 @@
                     <table class="w-full">
                         <thead class="bg-gray-50">
                             <tr>
+                                <th class="text-center py-3 px-4 font-semibold text-sm w-12">
+                                    <input type="checkbox" 
+                                        @change="toggleSelectAll($event.target.checked)"
+                                        :checked="selectedStudents.length > 0 && selectedStudents.length === filteredStudentsList.length"
+                                        class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500">
+                                </th>
                                 <th class="text-left py-3 px-4 font-semibold text-sm">Student ID</th>
                                 <th class="text-left py-3 px-4 font-semibold text-sm">Name</th>
                                 <th class="text-center py-3 px-4 font-semibold text-sm">Major</th>
@@ -1303,6 +1325,13 @@
                         <tbody>
                         <template x-for="student in filteredStudentsList" :key="student.id">
                             <tr class="border-b hover:bg-blue-50 transition-colors group" x-data="{ showTooltip: false, tooltipX: 0, tooltipY: 0 }">
+                                <td class="text-center py-3 px-4">
+                                    <input type="checkbox" 
+                                        :value="student.id"
+                                        @change="toggleStudentSelection(student.id, $event.target.checked)"
+                                        :checked="selectedStudents.includes(student.id)"
+                                        class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500">
+                                </td>
                                 <td class="py-3 px-4 text-sm" x-text="student.id"></td>
                                 <td class="py-3 px-4 text-sm font-medium" x-text="student.name"></td>
                                 
@@ -1396,14 +1425,17 @@
                                 <td class="text-center py-3 px-4 text-sm text-yellow-600 font-medium" x-text="student.pending"></td>
                                 
                                 <td class="text-center py-3 px-4">
-                                    <button @click="viewStudentDetail(student)" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium">View Details</button>
+                                    <div class="flex gap-2 justify-center">
+                                        <button @click="viewStudentDetail(student)" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium">View Details</button>
+                                        <button @click="deleteStudent(student.id)" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs font-medium">Delete</button>
+                                    </div>
                                 </td>
                             </tr>
                         </template>
                         
                         <template x-if="filteredStudentsList.length === 0">
                             <tr>
-                                <td colspan="8" class="text-center py-8 text-gray-500">No students found matching your filters</td>
+                                <td colspan="9" class="text-center py-8 text-gray-500">No students found matching your filters</td>
                             </tr>
                         </template>
                     </tbody>
@@ -1603,26 +1635,32 @@
 
                 <!-- Tab Navigation -->
                 <div class="mb-6 border-b border-gray-200">
-                    <nav class="flex gap-4">
-                        <button @click="settingsTab = 'students'" :class="settingsTab === 'students' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-2 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2">
+                    <nav class="flex gap-4 overflow-x-auto">
+                        <button @click="settingsTab = 'profile'" :class="settingsTab === 'profile' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-2 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            Profile & Password
+                        </button>
+                        <button @click="settingsTab = 'students'" :class="settingsTab === 'students' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-2 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
                             Student Accounts
                         </button>
-                        <button @click="settingsTab = 'admins'" :class="settingsTab === 'admins' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-2 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2">
+                        <button @click="settingsTab = 'admins'" :class="settingsTab === 'admins' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-2 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                             </svg>
                             Admin Accounts
                         </button>
-                        <button @click="settingsTab = 'categories'" :class="settingsTab === 'categories' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-2 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2">
+                        <button @click="settingsTab = 'categories'" :class="settingsTab === 'categories' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-2 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                             </svg>
                             Category Management
                         </button>
-                        <button @click="settingsTab = 'system'" :class="settingsTab === 'system' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-2 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2">
+                        <button @click="settingsTab = 'system'" :class="settingsTab === 'system' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-2 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
@@ -1658,6 +1696,111 @@
                         </ul>
                     </div>
                 @endif
+
+                <!-- Profile & Password Tab -->
+                <div x-show="settingsTab === 'profile'" class="space-y-6">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-6 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            Admin Profile Information
+                        </h3>
+
+                        <div class="space-y-4 mb-8">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Name</label>
+                                <div class="bg-gray-50 border rounded-lg px-4 py-3 text-sm text-gray-700">{{ Auth::user()->name }}</div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                <div class="bg-gray-50 border rounded-lg px-4 py-3 text-sm text-gray-700">{{ Auth::user()->email }}</div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                                <div class="bg-gray-50 border rounded-lg px-4 py-3 text-sm">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                        </svg>
+                                        Admin
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border-t pt-6">
+                            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                                </svg>
+                                Change Password
+                            </h3>
+
+                            <form @submit.prevent="updatePassword" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Current Password <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <input :type="showCurrentPassword ? 'text' : 'password'" x-model="passwordData.currentPassword" class="w-full border rounded-lg px-4 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter current password">
+                                        <button type="button" @click="showCurrentPassword = !showCurrentPassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                            <svg x-show="!showCurrentPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            <svg x-show="showCurrentPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">New Password <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <input :type="showNewPassword ? 'text' : 'password'" x-model="passwordData.newPassword" class="w-full border rounded-lg px-4 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter new password (min 8 characters)">
+                                        <button type="button" @click="showNewPassword = !showNewPassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                            <svg x-show="!showNewPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            <svg x-show="showNewPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Confirm New Password <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <input :type="showConfirmPassword ? 'text' : 'password'" x-model="passwordData.confirmPassword" class="w-full border rounded-lg px-4 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Confirm new password">
+                                        <button type="button" @click="showConfirmPassword = !showConfirmPassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                            <svg x-show="!showConfirmPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            <svg x-show="showConfirmPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-end gap-3 pt-2">
+                                    <button type="button" @click="passwordData = {currentPassword: '', newPassword: '', confirmPassword: ''}" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition-colors">
+                                        Clear
+                                    </button>
+                                    <button type="submit" :disabled="isSubmitting" class="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span x-text="isSubmitting ? 'Updating...' : 'Update Password'"></span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Student Accounts Tab -->
                 <div x-show="settingsTab === 'students'" class="space-y-6">
@@ -2572,6 +2715,9 @@
         showStudentDetailModal: false, 
         selectedStudent: null,
         
+        // Selected Students for Deletion
+        selectedStudents: [],
+        
         // Reset Password Modal
         showResetPasswordModal: false,
         resetPasswordInput: '',
@@ -2579,7 +2725,18 @@
         
         // Tabs
         userTab: 'students',
-        settingsTab: 'students',
+        settingsTab: 'profile',
+        
+        // Password Change
+        passwordData: {
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: ''
+        },
+        showCurrentPassword: false,
+        showNewPassword: false,
+        showConfirmPassword: false,
+        isSubmitting: false,
         
         // S-Core Settings
         scoreSettings: {
@@ -2690,6 +2847,67 @@
             } catch (error) {
                 console.error('Error updating score settings:', error);
                 this.showAlert('error', 'Failed', error.message || 'Could not update settings');
+            }
+        },
+
+        // --- PASSWORD CHANGE FUNCTION ---
+        async updatePassword() {
+            // Validation
+            if (!this.passwordData.currentPassword || !this.passwordData.newPassword || !this.passwordData.confirmPassword) {
+                this.showAlert('warning', 'Incomplete', 'All fields are required');
+                return;
+            }
+
+            if (this.passwordData.newPassword.length < 8) {
+                this.showAlert('warning', 'Invalid Password', 'New password must be at least 8 characters long');
+                return;
+            }
+
+            if (this.passwordData.newPassword !== this.passwordData.confirmPassword) {
+                this.showAlert('error', 'Password Mismatch', 'New password and confirm password do not match');
+                return;
+            }
+
+            this.isSubmitting = true;
+
+            try {
+                const response = await fetch('{{ route("profile.update-password") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        current_password: this.passwordData.currentPassword,
+                        new_password: this.passwordData.newPassword,
+                        new_password_confirmation: this.passwordData.confirmPassword
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to update password');
+                }
+
+                this.showAlert('success', 'Success', 'Password updated successfully');
+                
+                // Reset form
+                this.passwordData = {
+                    currentPassword: '',
+                    newPassword: '',
+                    confirmPassword: ''
+                };
+                this.showCurrentPassword = false;
+                this.showNewPassword = false;
+                this.showConfirmPassword = false;
+
+            } catch (error) {
+                console.error('Error updating password:', error);
+                this.showAlert('error', 'Failed', error.message || 'Could not update password. Please check your current password.');
+            } finally {
+                this.isSubmitting = false;
             }
         },
 
@@ -2877,9 +3095,11 @@
             if (this.assignedMainCategory !== '') {
                 this.assignedAvailableSubcategories = this.categories[this.assignedMainCategory].subcategories;
                 this.assignedSubcategory = '';
+                this.categoryChanged = true;
             } else {
                 this.assignedAvailableSubcategories = [];
                 this.assignedSubcategory = '';
+                this.categoryChanged = false;
             }
         },
 
@@ -2897,6 +3117,45 @@
             this.approveModalPoints = subCat.points;
             
             this.showApproveModal = true;
+        },
+
+        async updateCategoryOnly() {
+            if (this.assignedMainCategory === '' || this.assignedSubcategory === '') {
+                this.showAlert('warning', 'Incomplete', 'Please select both Main Category and Subcategory.');
+                return;
+            }
+
+            const mainCat = this.categories[this.assignedMainCategory];
+            const subCat = mainCat.subcategories[this.assignedSubcategory];
+            const url = `/admin/submissions/${this.selectedSubmission.id}/update-category`;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        assigned_subcategory_id: subCat.id,
+                        category_change_reason: this.categoryChangeReason || ''
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to update category');
+                }
+
+                this.showAlert('success', 'Updated', 'Category updated successfully! Reloading...');
+                setTimeout(() => window.location.reload(), 1500);
+                this.closeModal();
+            } catch (error) {
+                console.error(error);
+                this.showAlert('error', 'Error', error.message || 'Failed to update category');
+            }
         },
 
         confirmApprove() {
@@ -3073,6 +3332,73 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+        },
+
+        // Toggle select all students
+        toggleSelectAll(checked) {
+            if (checked) {
+                this.selectedStudents = this.filteredStudentsList.map(s => s.id);
+            } else {
+                this.selectedStudents = [];
+            }
+        },
+
+        // Toggle individual student selection
+        toggleStudentSelection(studentId, checked) {
+            if (checked) {
+                if (!this.selectedStudents.includes(studentId)) {
+                    this.selectedStudents.push(studentId);
+                }
+            } else {
+                this.selectedStudents = this.selectedStudents.filter(id => id !== studentId);
+            }
+        },
+
+        // Delete single student
+        deleteStudent(studentId) {
+            this.showAlert('warning', 'Confirm Deletion', 'Are you sure you want to delete this student? This action cannot be undone.', true, () => {
+                this.performDeleteStudents([studentId]);
+            });
+        },
+
+        // Delete selected students
+        deleteSelectedStudents() {
+            if (this.selectedStudents.length === 0) {
+                this.showAlert('warning', 'No Selection', 'Please select at least one student to delete.');
+                return;
+            }
+
+            this.showAlert('warning', 'Confirm Bulk Deletion', `Are you sure you want to delete ${this.selectedStudents.length} student(s)? This action cannot be undone.`, true, () => {
+                this.performDeleteStudents([...this.selectedStudents]);
+            });
+        },
+
+        // Perform actual deletion
+        async performDeleteStudents(studentIds) {
+            try {
+                const response = await fetch('/admin/students/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ student_ids: studentIds })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Failed to delete students');
+                }
+
+                this.showAlert('success', 'Success', `Successfully deleted ${studentIds.length} student(s). Reloading...`);
+                this.selectedStudents = [];
+                setTimeout(() => window.location.reload(), 1500);
+            } catch (error) {
+                console.error('Error deleting students:', error);
+                this.showAlert('error', 'Failed', error.message || 'Could not delete students');
+            }
         },
 
         confirmLogout() {
