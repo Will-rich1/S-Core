@@ -16,10 +16,10 @@ class DatabaseSeeder extends Seeder
         // 1. MASTER DATA: AKUN SUPER ADMIN
         // Ini wajib ada biar kamu bisa login pertama kali
         DB::table('users')->updateOrInsert(
-            ['email' => 'admin@itbss.ac.id'],
+            ['email' => 's-core.mahasiswa@itbss.ac.id'],
             [
-                'name' => 'Super Admin',
-                'password' => Hash::make('admin'), // Passwordnya: admin
+                'name' => 'Kemahasiswaan ITBSS',
+                'password' => Hash::make('scoremahasiswa123'), // Passwordnya: admin
                 'role' => 'admin',
                 'student_id' => null, // Admin tidak punya NIM
                 'major' => null,      // Admin tidak punya Jurusan
@@ -45,34 +45,119 @@ class DatabaseSeeder extends Seeder
         }
 
         // 3. MASTER DATA: KATEGORI & SUBKATEGORI
-        // Wajib ada biar dropdown di form tidak kosong
-        
-        // Kategori 1: OrKeSS
-        $cat1Id = DB::table('categories')->insertGetId([
-            'name' => 'OrKeSS dan Retreat (WAJIB)',
-            'is_mandatory' => true,
-            'display_order' => 1,
-            'created_at' => now(), 'updated_at' => now()
-        ]);
+        // Disusun sesuai daftar pada foto (a-f)
+        $categories = [
+            [
+                'name' => 'OrKeSS (WAJIB)',
+                'is_mandatory' => true,
+                'display_order' => 1,
+                'subcategories' => [
+                    ['name' => 'OrKeSS', 'points' => 1, 'description' => 'Per Kegiatan'],
+                ],
+            ],
+            [
+                'name' => 'Retreat (WAJIB)',
+                'is_mandatory' => true,
+                'display_order' => 2,
+                'subcategories' => [
+                    ['name' => 'Retreat', 'points' => 1, 'description' => 'Per Kegiatan'],
+                ],
+            ],
+            [
+                'name' => 'Kegiatan Ilmiah dan Penalaran',
+                'is_mandatory' => false,
+                'display_order' => 3,
+                'subcategories' => [
+                    ['name' => 'Penguasaan Bahasa Inggris Aktif (ITP TOEFL 450 atau setara) (WAJIB)', 'points' => 2, 'description' => 'Per bahasa'],
+                    ['name' => 'Penguasaan Bahasa Mandarin Aktif (HSK setara 4)', 'points' => 2, 'description' => 'Per bahasa'],
+                    ['name' => 'Penguasaan Bahasa Asing lain', 'points' => 2, 'description' => 'Per bahasa'],
+                    ['name' => 'Peningkatan kemampuan ilmiah dan penalaran - Peserta seminar, kuliah umum, dan sejenisnya', 'points' => 1, 'description' => 'Per kegiatan'],
+                    ['name' => 'Peningkatan kemampuan ilmiah dan penalaran - Peserta pelatihan, workshop, lokakarya, upgrading program, dan sejenisnya', 'points' => 3, 'description' => 'Per kegiatan'],
+                    ['name' => 'Peningkatan kemampuan ilmiah dan penalaran - Menyelesaikan online course/bootcamp bersertifikat', 'points' => 3, 'description' => 'Per course'],
+                    ['name' => 'Pemakalah/Pemateri/Presenter/Trainer - Seminar/workshop kota/provinsi', 'points' => 6, 'description' => 'Per kegiatan'],
+                    ['name' => 'Pemakalah/Pemateri/Presenter/Trainer - Seminar/workshop nasional', 'points' => 8, 'description' => 'Per kegiatan'],
+                    ['name' => 'Pemakalah/Pemateri/Presenter/Trainer - Seminar/workshop internasional', 'points' => 10, 'description' => 'Per kegiatan'],
+                    ['name' => 'Publikasi tulisan/karya di media massa bereputasi (online/offline)', 'points' => 2, 'description' => 'Per karya'],
+                    ['name' => 'Publikasi tulisan/karya di media massa bereputasi (online/offline) dalam Bahasa Asing', 'points' => 4, 'description' => 'Per karya'],
+                    ['name' => 'Asistensi dosen/lab', 'points' => 3, 'description' => 'Per semester'],
+                    ['name' => 'Tenaga pengajar sukarela', 'points' => 2, 'description' => 'Per kegiatan'],
+                ],
+            ],
+            [
+                'name' => 'Performance, Pengembangan, dan Perlombaan',
+                'is_mandatory' => false,
+                'display_order' => 4,
+                'subcategories' => [
+                    ['name' => 'Peserta lomba - Tingkat lokal', 'points' => 2, 'description' => 'Per lomba'],
+                    ['name' => 'Peserta lomba - Tingkat kota/provinsi', 'points' => 3, 'description' => 'Per lomba'],
+                    ['name' => 'Peserta lomba - Tingkat nasional', 'points' => 4, 'description' => 'Per lomba'],
+                    ['name' => 'Peserta lomba - Tingkat internasional', 'points' => 5, 'description' => 'Per lomba'],
+                    ['name' => 'Pemenang lomba - Tingkat lokal', 'points' => 3, 'description' => 'Per lomba'],
+                    ['name' => 'Pemenang lomba - Tingkat kota/provinsi', 'points' => 5, 'description' => 'Per lomba'],
+                    ['name' => 'Pemenang lomba - Tingkat nasional', 'points' => 8, 'description' => 'Per lomba'],
+                    ['name' => 'Pemenang lomba - Tingkat internasional', 'points' => 10, 'description' => 'Per lomba'],
+                    ['name' => 'Parade budaya/seni - Tingkat lokal', 'points' => 1, 'description' => 'Per kegiatan'],
+                    ['name' => 'Parade budaya/seni - Tingkat kota/provinsi', 'points' => 3, 'description' => 'Per kegiatan'],
+                    ['name' => 'Parade budaya/seni - Tingkat nasional', 'points' => 5, 'description' => 'Per kegiatan'],
+                    ['name' => 'Parade budaya/seni - Tingkat internasional', 'points' => 8, 'description' => 'Per kegiatan'],
+                ],
+            ],
+            [
+                'name' => 'Kepengurusan Organisasi/Kepanitiaan',
+                'is_mandatory' => false,
+                'display_order' => 5,
+                'subcategories' => [
+                    ['name' => 'Organisasi Kemahasiswaan - Pengurus Harian (Ketua, Wakil Ketua, Sekretaris, Bendahara)', 'points' => 5, 'description' => 'Per periode kepengurusan'],
+                    ['name' => 'Organisasi Kemahasiswaan - Koordinator/Anggota Seksi', 'points' => 3, 'description' => 'Per periode kepengurusan'],
+                    ['name' => 'Organisasi Kemahasiswaan - Anggota', 'points' => 1, 'description' => 'Per periode kepengurusan'],
+                    ['name' => 'Organisasi di luar kampus - Pengurus Harian (Ketua, Wakil Ketua, Sekretaris, Bendahara)', 'points' => 4, 'description' => 'Per periode kepengurusan'],
+                    ['name' => 'Organisasi di luar kampus - Koordinator/Anggota Seksi', 'points' => 2, 'description' => 'Per periode kepengurusan'],
+                    ['name' => 'Organisasi di luar kampus - Anggota', 'points' => 1, 'description' => 'Per periode kepengurusan'],                   
+                ],
+            ],
+            [
+                'name' => 'Kegiatan Sosial Kemasyarakatan',
+                'is_mandatory' => false,
+                'display_order' => 6,
+                'subcategories' => [
+                    ['name' => 'Internship di badan bereputasi nasional', 'points' => 6, 'description' => 'Per periode'],
+                    ['name' => 'Internship di badan bereputasi internasional', 'points' => 10, 'description' => 'Per periode'],
+                    ['name' => 'Kegiatan bakti sosial', 'points' => 1, 'description' => 'Per kegiatan'],
+                    ['name' => 'Social campaign (online/offline) pribadi', 'points' => 2, 'description' => 'Per karya'],
+                    ['name' => 'Social campaign (online/offline) sebagai bagian kegiatan dari badan berputasi', 'points' => 4, 'description' => 'Per karya'],
+                    ['name' => 'Mengembangkan hal bermanfaat bagi masyarakat (pembuatan aplikasi/produk) yang diakui dan digunakan oleh masyarakat', 'points' => 5, 'description' => 'Per karya'],
+                ],
+            ],
+        ];
 
-        DB::table('subcategories')->insert([
-            ['category_id' => $cat1Id, 'name' => 'OrKeSS (Orientasi Kemahasiswaan Sabda Setia)', 'points' => 1, 'description' => 'Per kegiatan', 'created_at' => now(), 'updated_at' => now()],
-            ['category_id' => $cat1Id, 'name' => 'Retreat', 'points' => 1, 'description' => 'Per kegiatan', 'created_at' => now(), 'updated_at' => now()],
-        ]);
+        foreach ($categories as $category) {
+            DB::table('categories')->updateOrInsert(
+                ['name' => $category['name']],
+                [
+                    'is_mandatory' => $category['is_mandatory'],
+                    'display_order' => $category['display_order'],
+                    'updated_at' => now(),
+                    'created_at' => now(),
+                ]
+            );
 
-        // Kategori 2: Kegiatan Ilmiah
-        $cat2Id = DB::table('categories')->insertGetId([
-            'name' => 'Kegiatan Ilmiah dan Penalaran',
-            'is_mandatory' => false,
-            'display_order' => 2,
-            'created_at' => now(), 'updated_at' => now()
-        ]);
+            $categoryId = DB::table('categories')->where('name', $category['name'])->value('id');
+            if (!$categoryId) {
+                continue;
+            }
 
-        DB::table('subcategories')->insert([
-            ['category_id' => $cat2Id, 'name' => 'Magang/Kerja Praktek', 'points' => 20, 'description' => 'Minimal 1 bulan', 'created_at' => now(), 'updated_at' => now()],
-            ['category_id' => $cat2Id, 'name' => 'Program Kampus Merdeka', 'points' => 20, 'description' => 'Mengikuti program resmi Kemendikbud', 'created_at' => now(), 'updated_at' => now()],
-            ['category_id' => $cat2Id, 'name' => 'HKI/Paten', 'points' => 20, 'description' => 'Per HKI yang terdaftar', 'created_at' => now(), 'updated_at' => now()],
-        ]);
+            foreach ($category['subcategories'] as $sub) {
+                DB::table('subcategories')->updateOrInsert(
+                    ['category_id' => $categoryId, 'name' => $sub['name']],
+                    [
+                        'points' => $sub['points'],
+                        'description' => $sub['description'],
+                        'updated_at' => now(),
+                        'created_at' => now(),
+                    ]
+                );
+            }
+        }
 
         // 4. SAMPLE DATA: AKUN MAHASISWA TEST
         $students = [
