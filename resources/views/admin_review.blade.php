@@ -275,18 +275,6 @@
                                                 <span class="font-medium">Points for this category:</span> 
                                                 <span class="text-blue-600 font-semibold" x-text="assignedAvailableSubcategories[assignedSubcategory]?.points || 0"></span> points
                                             </p>
-                                            
-                                            <!-- Category Change Reason (Optional) -->
-                                            <div x-show="categoryChanged" class="mt-4 pt-4 border-t border-yellow-300">
-                                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                    <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                    </svg>
-                                                    Reason for Category Change (Optional)
-                                                </label>
-                                                <textarea x-model="categoryChangeReason" rows="3" class="w-full border border-yellow-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-white" placeholder="Explain why you changed the category from the student's original selection (this will be included in the notification email)..."></textarea>
-                                                <p class="text-xs text-gray-500 mt-1">This note will help the student understand the category reassignment</p>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -297,7 +285,7 @@
                                         <button @click="closeModal" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition-colors">
                                             Cancel
                                         </button>
-                                        <button x-show="categoryChanged" @click="updateCategoryOnly" class="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                        <button x-show="categoryChanged && selectedSubmission?.status !== 'Waiting'" @click="updateCategoryOnly" class="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors">
                                             Update Category
                                         </button>
                                         <button x-show="selectedSubmission?.status !== 'Rejected'" @click="showRejectModal = true" class="px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors">
