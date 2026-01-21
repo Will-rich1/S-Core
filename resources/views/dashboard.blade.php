@@ -1067,7 +1067,7 @@
                         </div>
 
                         <!-- Notification Preferences -->
-                        <div class="bg-white rounded-lg shadow p-6">
+                        <!-- <div class="bg-white rounded-lg shadow p-6">
                             <h3 class="text-lg font-semibold mb-4">Notification Preferences</h3>
                             <div class="space-y-3">
                                 <label class="flex items-center gap-3 cursor-pointer">
@@ -1085,7 +1085,7 @@
                                     </div>
                                 </label>
                             </div>
-                        </div>
+                        </div> -->
 
                         <!-- System Information -->
                         <div class="bg-white rounded-lg shadow p-6">
@@ -1097,7 +1097,7 @@
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Last Updated:</span>
-                                    <span class="font-medium">November 19, 2025</span>
+                                    <span class="font-medium">January 21, 2026</span>
                                 </div>
                             </div>
                         </div>

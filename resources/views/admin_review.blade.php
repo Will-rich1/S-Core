@@ -1615,7 +1615,7 @@
             </div>
 
             <!-- Settings Page -->
-            <div x-show="activeMenu === 'Settings'" x-data="{ settingsTab: 'students' }">
+            <div x-show="activeMenu === 'Settings'" x-data="{ settingsTab: 'profile' }">
                 <div class="mb-6">
                     <h1 class="text-3xl font-bold text-gray-800 mb-2">Settings</h1>
                     <p class="text-gray-600">Configure S-Core system settings and manage user accounts</p>
@@ -2026,29 +2026,7 @@
 
                 <!-- Category Management Tab -->
                 <div x-show="settingsTab === 'categories'" class="space-y-6">
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                            </svg>
-                            Manage Categories
-                        </h3>
-                        <p class="text-sm text-gray-600 mb-4">Manage S-Core categories, rename, add/remove categories, and configure their default point values</p>
-                        <div class="flex flex-wrap gap-2 mb-4">
-                            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Total Categories: <span class="font-bold" x-text="categories.length"></span></span>
-                        </div>
-                        <button @click="requestCategoryManagement" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                            Manage Categories
-                        </button>
-                    </div>
-                </div>
-
-                <!-- System Info Tab -->
-                <div x-show="settingsTab === 'system'" class="space-y-6">
-                    <!-- S-Core Settings -->
+                                        <!-- S-Core Settings -->
                     <div class="bg-white rounded-lg shadow p-6">
                         <h3 class="text-lg font-semibold mb-4">S-Core Eligibility Settings</h3>
                         <p class="text-sm text-gray-600 mb-6">Configure the minimum requirements for students to be considered as PASSED</p>
@@ -2113,7 +2091,28 @@
                             </div>
                         </form>
                     </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
+                            Manage Categories
+                        </h3>
+                        <p class="text-sm text-gray-600 mb-4">Manage S-Core categories, rename, add/remove categories, and configure their default point values</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Total Categories: <span class="font-bold" x-text="categories.length"></span></span>
+                        </div>
+                        <button @click="requestCategoryManagement" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            Manage Categories
+                        </button>
+                    </div>
+                </div>
 
+                <!-- System Info Tab -->
+                <div x-show="settingsTab === 'system'" class="space-y-6">
                     <!-- System Information -->
                     <div class="bg-white rounded-lg shadow p-6">
                         <h3 class="text-lg font-semibold mb-4">System Information</h3>
@@ -2124,7 +2123,7 @@
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Last Updated:</span>
-                                <span class="font-medium">January 8, 2026</span>
+                                <span class="font-medium">January 21, 2026</span>
                             </div>
                         </div>
                     </div>
