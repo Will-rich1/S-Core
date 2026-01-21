@@ -137,31 +137,26 @@ class CategoryController extends Controller
         return response()->json(['message' => 'Category updated successfully!']);
     }
 
-    // DELETE MAIN CATEGORY
+    // DELETE MAIN CATEGORY (Soft Delete Only)
     public function destroy($id)
     {
         $category = Category::findOrFail($id);
-        // Jika kategori pernah dipakai di submissions, jangan hapus fisik.
-        // Sebagai gantinya, tandai sebagai tidak aktif agar tidak muncul
-        // di dropdown untuk submission baru, namun tetap tersedia
-        // untuk history pada submission lama.
-        if ($category->submissions()->count() > 0) {
-            $category->update(['is_active' => false]);
-            // Log deactivation (best-effort)
-            try {
-                $this->writeActivityLog('deactivate_category', 'category', $category->id, 'Deactivated category: '.$category->name);
-            } catch (\Exception $e) {
-                Log::error('Failed to insert activity_log for deactivate category: '.$e->getMessage());
-            }
-
-            return response()->json(['message' => 'Category deactivated because it is used in submissions.']);
+        
+        // Selalu soft delete dengan set is_active = false
+        // Tidak pernah melakukan hard delete permanent
+        $category->update(['is_active' => false]);
+        
+        // Juga nonaktifkan semua subcategories
+        $category->subcategories()->update(['is_active' => false]);
+        
+        // Log deactivation (best-effort)
+        try {
+            $this->writeActivityLog('deactivate_category', 'category', $category->id, 'Deactivated category: '.$category->name);
+        } catch (\Exception $e) {
+            Log::error('Failed to insert activity_log for deactivate category: '.$e->getMessage());
         }
 
-        // Jika tidak pernah dipakai, hapus subkategori dan kategori secara fisik
-        $category->subcategories()->delete();
-        $category->delete();
-
-        return response()->json(['message' => 'Category deleted successfully!']);
+        return response()->json(['message' => 'Category deactivated successfully!']);
     }
 
     // --- SUBCATEGORY ---
@@ -207,20 +202,18 @@ class CategoryController extends Controller
     public function destroySubcategory($id)
     {
         $sub = Subcategory::findOrFail($id);
-        // Jika subkategori pernah dipakai di submissions, tandai sebagai tidak aktif
-        if ($sub->submissions()->count() > 0) {
-            $sub->update(['is_active' => false]);
-            try {
-                $this->writeActivityLog('deactivate_subcategory', 'subcategory', $sub->id, 'Deactivated subcategory: '.$sub->name);
-            } catch (\Exception $e) {
-                Log::error('Failed to insert activity_log for deactivate subcategory: '.$e->getMessage());
-            }
-
-            return response()->json(['message' => 'Subcategory deactivated because it is used in submissions.']);
+        
+        // Selalu soft delete dengan set is_active = false
+        // Tidak pernah melakukan hard delete permanent
+        $sub->update(['is_active' => false]);
+        
+        try {
+            $this->writeActivityLog('deactivate_subcategory', 'subcategory', $sub->id, 'Deactivated subcategory: '.$sub->name);
+        } catch (\Exception $e) {
+            Log::error('Failed to insert activity_log for deactivate subcategory: '.$e->getMessage());
         }
 
-        $sub->delete();
-        return response()->json(['message' => 'Subcategory deleted successfully!']);
+        return response()->json(['message' => 'Subcategory deactivated successfully!']);
     }
 
     // Helper: write activity log supporting old/new schema

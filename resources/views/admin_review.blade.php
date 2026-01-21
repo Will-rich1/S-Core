@@ -35,6 +35,48 @@
             </div>
         </div>
 
+        <!-- Delete Category Confirmation Modal -->
+        <div x-show="showDeleteCategoryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" style="display: none; z-index: 9999;">
+            <div class="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 overflow-hidden animate-in fade-in duration-300" style="z-index: 10000;">
+                <!-- Header with red accent -->
+                <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4 flex items-center gap-3">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <h3 class="text-lg font-semibold text-white">Delete Category</h3>
+                </div>
+                
+                <!-- Content -->
+                <div class="px-6 py-4">
+                    <p class="text-gray-700 mb-2">Are you sure you want to delete this category?</p>
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-3 mt-4">
+                        <p class="text-sm text-gray-600">Category:</p>
+                        <p class="font-semibold text-red-700" x-text="deleteTargetCategory || 'N/A'"></p>
+                    </div>
+                    <p class="text-sm text-yellow-600 mt-3 flex items-start gap-2">
+                        <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span class="text-sm">All subcategories in this category will also be deactivated.</span>
+                    </p>
+                    <p class="text-sm text-gray-500 mt-4">This action cannot be undone.</p>
+                </div>
+                
+                <!-- Footer with buttons -->
+                <div class="bg-gray-50 px-6 py-4 flex gap-3 justify-end border-t">
+                    <button @click="showDeleteCategoryModal = false; deleteCategoryIndex = null; deleteTargetCategory = null;" class="px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg text-sm font-medium transition">
+                        Cancel
+                    </button>
+                    <button @click="confirmDeleteCategory()" class="px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Delete Subcategory Confirmation Modal -->
         <div x-show="showDeleteSubcategoryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" style="display: none; z-index: 9999;">
             <div class="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 overflow-hidden animate-in fade-in duration-300" style="z-index: 10000;">
@@ -829,7 +871,10 @@
                                                 <template x-if="!subcat.isEditing">
                                                     <div class="flex-1 flex items-center justify-between">
                                                         <div class="flex-1">
-                                                            <h6 class="font-medium text-gray-800 text-sm" x-text="subcat.name"></h6>
+                                                            <h6 class="font-medium text-gray-800 text-sm">
+                                                                <span x-text="subcat.name"></span>
+                                                                <span x-show="subcat.is_active == 0 || subcat.is_active === false" class="ml-2 inline-block text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">Inactive</span>
+                                                            </h6>
                                                             <p class="text-xs text-gray-500 mt-1">
                                                                 Points: <span class="font-semibold text-blue-600" x-text="subcat.points"></span> | 
                                                                 <span x-text="subcat.description"></span>
@@ -1193,14 +1238,22 @@
                             <option value="KWU">KWU</option>
                         </select>
                         
-                        <select x-model="yearFilter" class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Years</option>
-                            <option value="2021">Angkatan 2021</option>
-                            <option value="2022">Angkatan 2022</option>
-                            <option value="2023">Angkatan 2023</option>
-                            <option value="2024">Angkatan 2024</option>
-                            <option value="2025">Angkatan 2025</option>
-                        </select>
+                        <div class="grid grid-cols-2 gap-2">
+                            <select x-model="yearFilterMode" @change="if(yearFilterMode === 'all') yearFilter = ''" class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="all">All Years</option>
+                                <option value="specific">Specific Year</option>
+                            </select>
+                            <input 
+                                type="number" 
+                                x-model="yearFilter" 
+                                :disabled="yearFilterMode === 'all'"
+                                :class="yearFilterMode === 'all' ? 'bg-gray-100 cursor-not-allowed' : ''"
+                                placeholder="Enter year" 
+                                class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                min="2020"
+                                max="2030"
+                            />
+                        </div>
                         
                         <select x-model="statusPassFilter" class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">All Status</option>
@@ -1460,14 +1513,22 @@
                                 <!-- Year Filter -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Batch Year</label>
-                                    <select x-model="bulkScore.selectedYear" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                        <option value="">All Years</option>
-                                        <option value="2021">2021</option>
-                                        <option value="2022">2022</option>
-                                        <option value="2023">2023</option>
-                                        <option value="2024">2024</option>
-                                        <option value="2025">2025</option>
-                                    </select>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <select x-model="bulkScore.yearMode" @change="if(bulkScore.yearMode === 'all') bulkScore.selectedYear = ''" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="all">All Years</option>
+                                            <option value="specific">Specific Year</option>
+                                        </select>
+                                        <input 
+                                            type="number" 
+                                            x-model="bulkScore.selectedYear" 
+                                            :disabled="bulkScore.yearMode === 'all'"
+                                            :class="bulkScore.yearMode === 'all' ? 'bg-gray-100 cursor-not-allowed' : ''"
+                                            placeholder="Enter year" 
+                                            class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            min="2020"
+                                            max="2030"
+                                        />
+                                    </div>
                                 </div>
 
                                 <!-- Shift Filter -->
@@ -1587,9 +1648,10 @@
                                 <p><strong>Target Students:</strong></p>
                                 <ul class="list-disc ml-5">
                                     <li x-show="bulkScore.selectedMajor">Major: <span class="font-bold" x-text="bulkScore.selectedMajor"></span></li>
-                                    <li x-show="bulkScore.selectedYear">Year: <span class="font-bold" x-text="bulkScore.selectedYear"></span></li>
+                                    <li x-show="bulkScore.yearMode === 'specific' && bulkScore.selectedYear">Year: <span class="font-bold" x-text="bulkScore.selectedYear"></span></li>
+                                    <li x-show="bulkScore.yearMode === 'all'">Year: <span class="font-bold">All Years</span></li>
                                     <li x-show="bulkScore.selectedShift">Shift: <span class="font-bold" x-text="bulkScore.selectedShift === 'pagi' ? 'Pagi' : 'Sore'"></span></li>
-                                    <li x-show="!bulkScore.selectedMajor && !bulkScore.selectedYear && !bulkScore.selectedShift" class="text-gray-600">All students (no filter applied)</li>
+                                    <li x-show="!bulkScore.selectedMajor && bulkScore.yearMode === 'all' && !bulkScore.selectedShift" class="text-gray-600">All students (no filter applied)</li>
                                 </ul>
                             </div>
                         </div>
@@ -2616,6 +2678,7 @@
         // Bulk Score Data
         bulkScore: {
             selectedMajor: '',
+            yearMode: 'all', // 'all' or 'specific'
             selectedYear: '',
             selectedShift: '',
             mainCategory: '',
@@ -2696,6 +2759,7 @@
         // Filter Student Management
         studentSearchQuery: '',
         majorFilter: '',
+        yearFilterMode: 'all', // 'all' or 'specific'
         yearFilter: '',
         statusPassFilter: '',    
         
@@ -3041,7 +3105,8 @@
                                       student.id.toString().includes(searchLower);
 
                 const matchesMajor = this.majorFilter === '' || student.major === this.majorFilter;
-                const matchesYear = this.yearFilter === '' || student.year == this.yearFilter;
+                // Only filter by year if yearFilterMode is 'specific' and yearFilter has value
+                const matchesYear = this.yearFilterMode === 'all' || this.yearFilter === '' || student.year == this.yearFilter;
 
                 let matchesStatus = true;
                 if (this.statusPassFilter === 'pass') {
@@ -3488,10 +3553,19 @@
             .catch(() => this.showAlert('error', 'Error', 'Failed to update category'));
         },
 
-        // 3. DELETE MAIN CATEGORY
+        // 3. DELETE MAIN CATEGORY - Open Modal
         deleteMainCategory(index) {
             const cat = this.categories[index];
-            if (!confirm(`Delete category "${cat.name}" and all its subcategories?`)) return;
+            this.deleteTargetCategory = cat.name;
+            this.deleteCategoryIndex = index;
+            this.showDeleteCategoryModal = true;
+        },
+        
+        // Confirm Delete Category
+        confirmDeleteCategory() {
+            const index = this.deleteCategoryIndex;
+            const cat = this.categories[index];
+            this.showDeleteCategoryModal = false;
 
             fetch(`/admin/categories/${cat.id}`, {
                 method: 'DELETE',
@@ -3524,7 +3598,11 @@
                 // Reload categories dari API untuk sinkronisasi dengan server
                 this.loadCategories();
             })
-            .catch(err => this.showAlert('error', 'Failed', err.message));
+            .catch(err => this.showAlert('error', 'Failed', err.message))
+            .finally(() => {
+                this.deleteCategoryIndex = null;
+                this.deleteTargetCategory = null;
+            });
         },
 
         // 4. ADD SUBCATEGORY
@@ -3683,7 +3761,12 @@
             try {
                 const formData = new FormData();
                 formData.append('selectedMajor', this.bulkScore.selectedMajor);
-                formData.append('selectedYear', this.bulkScore.selectedYear);
+                // Only send year if specific year is selected
+                if (this.bulkScore.yearMode === 'specific' && this.bulkScore.selectedYear) {
+                    formData.append('selectedYear', this.bulkScore.selectedYear);
+                } else {
+                    formData.append('selectedYear', '');
+                }
                 formData.append('selectedShift', this.bulkScore.selectedShift);
                 formData.append('mainCategory', this.bulkScore.mainCategory);
                 formData.append('subcategory', this.bulkScore.subcategory);
@@ -3737,6 +3820,7 @@
         
         resetBulkScoreForm() {
             this.bulkScore.selectedMajor = '';
+            this.bulkScore.yearMode = 'all';
             this.bulkScore.selectedYear = '';
             this.bulkScore.selectedShift = '';
             this.bulkScore.mainCategory = '';
