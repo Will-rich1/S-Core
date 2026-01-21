@@ -94,6 +94,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/settings/score', [SettingsController::class, 'updateScoreSettings'])->name('settings.score.update');
     Route::get('/api/admin/settings', [SettingsController::class, 'getAllSettings'])->name('settings.all');
 
+    // --- SECURITY PIN ROUTES ---
+    Route::get('/api/settings/security-pin', [SettingsController::class, 'getSecurityPin'])->name('settings.pin.get');
+    Route::post('/admin/settings/security-pin', [SettingsController::class, 'updateSecurityPin'])->name('settings.pin.update');
+    Route::post('/api/verify-security-pin', [SettingsController::class, 'verifySecurityPin'])->name('settings.pin.verify');
+    Route::post('/admin/reset-pin', [SettingsController::class, 'resetPin'])->name('admin.reset-pin');
+
     // --- S-CORE REPORT ROUTES ---
     Route::get('/student/{student_id}/report', [SCoreReportController::class, 'downloadReport'])->name('student.report.download');
     Route::get('/student/{student_id}/report/check', [SCoreReportController::class, 'checkEligibility'])->name('student.report.check');
