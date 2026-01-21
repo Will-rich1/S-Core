@@ -47,6 +47,9 @@ class SCoreReportController extends Controller
             'totalPoints' => $eligibility['totalPoints'],
             'completedCategories' => $eligibility['completedCategories'],
             'totalCategories' => $eligibility['totalCategories'],
+            'minPointsRequired' => $eligibility['minPointsRequired'],
+            'minCategoriesRequired' => $eligibility['minCategoriesRequired'],
+            'isPassed' => $eligibility['isEligible'],
             'categoryBreakdown' => $categoryBreakdown,
             'generatedDate' => now()->format('d M Y'),
             'generatedTime' => now()->format('H:i')

@@ -83,14 +83,14 @@
         .status-section {
             margin-bottom: 25px;
             padding: 15px;
-            background: #ecfdf5;
-            border-left: 4px solid #10b981;
+            background: {{ $isPassed ? '#ecfdf5' : '#fef2f2' }};
+            border-left: 4px solid {{ $isPassed ? '#10b981' : '#ef4444' }};
             border-radius: 5px;
         }
 
         .status-section h2 {
             font-size: 14px;
-            color: #10b981;
+            color: {{ $isPassed ? '#10b981' : '#ef4444' }};
             margin-bottom: 10px;
         }
 
@@ -107,7 +107,7 @@
         .status-item-value {
             font-size: 18px;
             font-weight: bold;
-            color: #10b981;
+            color: {{ $isPassed ? '#10b981' : '#ef4444' }};
         }
 
         .status-item-label {
@@ -209,8 +209,8 @@
         }
 
         .badge-warning {
-            background: #fef3c7;
-            color: #92400e;
+            background: #fee2e2;
+            color: #991b1b;
         }
 
         /* Table for detailed list */
@@ -283,30 +283,29 @@
 
         <!-- Status Section -->
         <div class="status-section">
-            <h2>✓ STATUS PENGAKUAN S-CORE</h2>
+            <h2>STATUS PENGAKUAN S-CORE</h2>
             <div class="status-grid">
                 <div class="status-item">
                     <div class="status-item-value">{{ $totalPoints }}</div>
                     <div class="status-item-label">Total Poin S-Core</div>
-                    <div class="status-item-label" style="color: #10b981; font-weight: bold;">Minimum: 20 ✓</div>
+                    <div class="status-item-label" style="color: {{ $isPassed ? '#10b981' : '#ef4444' }}; font-weight: bold;">Minimum: {{ $minPointsRequired }}</div>
                 </div>
                 <div class="status-item">
                     <div class="status-item-value">{{ $completedCategories }}/{{ $totalCategories }}</div>
                     <div class="status-item-label">Kategori Selesai</div>
-                    <div class="status-item-label" style="color: #10b981; font-weight: bold;">Minimum: 5 ✓</div>
+                    <div class="status-item-label" style="color: {{ $isPassed ? '#10b981' : '#ef4444' }}; font-weight: bold;">Minimum: {{ $minCategoriesRequired }}</div>
                 </div>
             </div>
             <div style="margin-top:12px;">
-                <?php $isPassed = ($totalPoints >= 20) && ($completedCategories >= 5); ?>
-                <span class="badge <?php echo $isPassed ? 'badge-success' : 'badge-warning'; ?>">
-                    <?php echo $isPassed ? 'PASSED' : 'NOT PASSED'; ?>
+                <span class="badge {{ $isPassed ? 'badge-success' : 'badge-warning' }}">
+                    {{ $isPassed ? 'PASSED' : 'NOT PASSED' }}
                 </span>
             </div>
         </div>
 
         <!-- Category Breakdown -->
         <div class="breakdown-section">
-            <h3>📋 RINCIAN KATEGORI YANG DISELESAIKAN</h3>
+            <h3>RINCIAN KATEGORI YANG DISELESAIKAN</h3>
             
             @if($categoryBreakdown && count($categoryBreakdown) > 0)
                 @foreach($categoryBreakdown as $category)
@@ -345,6 +344,17 @@
         </div>
 
         <!-- Footer & Signature -->
+        <div style="margin-top: 40px; position: relative;">
+            <div style="text-align: right; margin-bottom: 10px;">
+                <p style="font-size: 11px; margin-bottom: 5px;">Disetujui oleh,</p>
+                <div style="margin-top: 60px;">
+                    <p style="font-size: 11px; font-weight: bold; margin-bottom: 2px;">William Sandy, Phd</p>
+                    <p style="font-size: 10px; color: #666;">Wakil Rektor Bidang Akademik dan</p>
+                    <p style="font-size: 10px; color: #666;">Kemahasiswaan</p>
+                </div>
+            </div>
+        </div>
+        
         <div class="footer">
             <p>Laporan ini digenerate pada {{ $generatedDate }} pukul {{ $generatedTime }}</p>
             <p>Sistem Core ITBSS v2.0 - Pengesahan Otomatis</p>
