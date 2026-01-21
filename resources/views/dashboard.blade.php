@@ -1656,7 +1656,29 @@
             },
             
             // --- UI HELPERS ---
-            confirmLogout() { fetch('{{ route("logout") }}', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' } }).then(() => window.location.href = '/login'); },
+            confirmLogout() { 
+                fetch('{{ route("logout") }}', { 
+                    method: 'POST', 
+                    headers: { 
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}', 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => {
+                    if (response.ok || response.redirected) {
+                        window.location.href = '/login';
+                    } else {
+                        console.error('Logout failed:', response.status);
+                        window.location.href = '/login';
+                    }
+                })
+                .catch(error => {
+                    console.error('Logout error:', error);
+                    window.location.href = '/login';
+                });
+            },
             openViewModal(a) { 
                 console.log('Opening view modal with activity:', a); 
                 console.log('File URL:', a.file_url); 

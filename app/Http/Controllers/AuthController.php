@@ -49,6 +49,16 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+        
+        // Jika request dari AJAX/fetch, kembalikan JSON response
+        if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Logout berhasil',
+                'redirect' => '/login'
+            ], 200);
+        }
+        
         return redirect('/login');
     }
 
