@@ -48,10 +48,12 @@ class DashboardController extends Controller
             // Generate viewing URL - prioritas: certificate_url > generated from path
             if ($item->certificate_url) {
                 $fileUrl = $item->certificate_url;
-            } else {
+            } elseif ($item->certificate_path && !empty($item->certificate_path)) {
                 // Generate URL dari certificate_path dan storage_type
                 $storageType = $item->storage_type ?? 'local';
                 $fileUrl = $googleDriveService->getPublicUrl($item->certificate_path, $storageType);
+            } else {
+                $fileUrl = null;
             }
             
             return [
@@ -129,9 +131,11 @@ class DashboardController extends Controller
                 // Generate viewing URL
                 if ($item->certificate_url) {
                     $fileUrl = $item->certificate_url;
-                } else {
+                } elseif ($item->certificate_path && !empty($item->certificate_path)) {
                     $storageType = $item->storage_type ?? 'local';
                     $fileUrl = $googleDriveService->getPublicUrl($item->certificate_path, $storageType);
+                } else {
+                    $fileUrl = null;
                 }
 
                 return [

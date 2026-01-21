@@ -18,22 +18,18 @@ class CategoryController extends Controller
     {
         $includeInactive = request()->query('include_inactive') == '1';
 
-        $query = Category::with('subcategories')->orderBy('display_order');
+        $query = Category::with(['subcategories' => function($query) use ($includeInactive) {
+            if (!$includeInactive) {
+                $query->where('is_active', true);
+            }
+            // If includeInactive is true, get ALL subcategories (no filter)
+        }])->orderBy('display_order');
+        
         if (!$includeInactive) {
             $query->where('is_active', true);
         }
 
         $categories = $query->get();
-
-        // If not including inactive, filter out inactive subcategories as well
-        if (!$includeInactive) {
-            $categories = $categories->map(function ($cat) {
-                $cat->subcategories = $cat->subcategories->filter(function ($sub) {
-                    return ($sub->is_active == 1 || $sub->is_active === true || $sub->is_active === '1');
-                })->values();
-                return $cat;
-            });
-        }
 
         return response()->json($categories);
     }
