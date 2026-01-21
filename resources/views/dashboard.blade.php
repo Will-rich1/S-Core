@@ -59,7 +59,7 @@
                                     </svg>
                                     <p class="text-gray-600 text-sm mb-2">Drag and drop your PDF file here</p>
                                     <p class="text-gray-400 text-xs mb-4">or</p>
-                                    <label class="cursor-pointer">
+                                    <label class="cursor-pointer" @click.stop>
                                         <span class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium inline-block">Browse Files</span>
                                         <input type="file" accept=".pdf" class="hidden" x-ref="fileInput" @change="handleFileSelect" />
                                     </label>
@@ -225,7 +225,7 @@
                                                     </svg>
                                                     <p class="text-gray-600 text-sm mb-2">Drag and drop your PDF file here</p>
                                                     <p class="text-gray-400 text-xs mb-4">or</p>
-                                                    <label class="cursor-pointer">
+                                                    <label class="cursor-pointer" @click.stop>
                                                         <span class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium inline-block">Browse Files</span>
                                                         <input type="file" accept=".pdf" class="hidden" x-ref="fileInputEdit" @change="handleEditFileSelect($event)" />
                                                     </label>
