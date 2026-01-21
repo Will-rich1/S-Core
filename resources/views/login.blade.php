@@ -118,7 +118,7 @@
 
                 <!-- Footer Info -->
                 <p class="text-center text-gray-500 text-xs sm:text-sm mt-6">
-                    Sabda Setia Student Point System &copy; 2026
+                    Developed by CT WR &copy; 2026
                 </p>
             </div>
         </div>
