@@ -160,50 +160,32 @@ class DatabaseSeeder extends Seeder
         }
 
         // 4. SAMPLE DATA: AKUN MAHASISWA TEST
-        $students = [
-            [
-                'name' => 'Budi Santoso',
-                'email' => 'budi.santoso@student.itbss.ac.id',
-                'password' => Hash::make('password123'),
-                'role' => 'student',
-                'student_id' => '2021001',
-                'major' => 'STI',
-                'year' => 2021,
-            ],
-            [
-                'name' => 'Siti Nurhaliza',
-                'email' => 'siti.nurhaliza@student.itbss.ac.id',
-                'password' => Hash::make('password123'),
-                'role' => 'student',
-                'student_id' => '2021002',
-                'major' => 'BD',
-                'year' => 2021,
-            ],
-            [
-                'name' => 'Ahmad Wijaya',
-                'email' => 'ahmad.wijaya@student.itbss.ac.id',
-                'password' => Hash::make('password123'),
-                'role' => 'student',
-                'student_id' => '2022001',
-                'major' => 'KWU',
-                'year' => 2022,
-            ],
-            [
-                'name' => 'Diana Kusuma',
-                'email' => 'diana.kusuma@student.itbss.ac.id',
-                'password' => Hash::make('password123'),
-                'role' => 'student',
-                'student_id' => '2022002',
-                'major' => 'STI',
-                'year' => 2022,
-            ],
-        ];
+        // $students = [
+        //     [
+        //         'name' => 'Calvin Tai',
+        //         'email' => 'calvin.tai@itbss.ac.id',
+        //         'password' => Hash::make('22100006'),
+        //         'role' => 'student',
+        //         'student_id' => '22100006',
+        //         'major' => 'STI',
+        //         'year' => 2022,
+        //     ],
+        //     [
+        //         'name' => 'William Richnady',
+        //         'email' => 'william.richnady@itbss.ac.id',
+        //         'password' => Hash::make('22100042'),
+        //         'role' => 'student',
+        //         'student_id' => '22100042',
+        //         'major' => 'STI',
+        //         'year' => 2022,
+        //     ],
+        // ];
 
-        foreach ($students as $student) {
-            DB::table('users')->updateOrInsert(
-                ['email' => $student['email']],
-                array_merge($student, ['updated_at' => now()])
-            );
-        }
+        // foreach ($students as $student) {
+        //     DB::table('users')->updateOrInsert(
+        //         ['email' => $student['email']],
+        //         array_merge($student, ['updated_at' => now()])
+        //     );
+        // }
     }
 }
