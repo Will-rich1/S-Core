@@ -171,6 +171,7 @@ class DatabaseSeeder extends Seeder
         //         'year' => 2022,
         //     ],
         //     [
+<<<<<<< Updated upstream
         //         'name' => 'William Richnady',
         //         'email' => 'william.richnady@itbss.ac.id',
         //         'password' => Hash::make('22100042'),
@@ -178,6 +179,15 @@ class DatabaseSeeder extends Seeder
         //         'student_id' => '22100042',
         //         'major' => 'STI',
         //         'year' => 2022,
+=======
+        //         'name' => 'Siti Nurhaliza',
+        //         'email' => 'siti.nurhaliza@student.itbss.ac.id',
+        //         'password' => Hash::make('password123'),
+        //         'role' => 'student',
+        //         'student_id' => '2021002',
+        //         'major' => 'BD',
+        //         'year' => 2021,
+>>>>>>> Stashed changes
         //     ],
         // ];
 
