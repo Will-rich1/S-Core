@@ -479,7 +479,7 @@
         </div>
 
         <!-- Reset Password Modal -->
-        <div x-show="showResetPasswordModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[90]" style="display: none;">
+        <div x-show="showResetPasswordModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[110]" style="display: none;">
             <div @click.away="showResetPasswordModal = false" class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
                 <div class="p-6">
                     <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -491,18 +491,19 @@
                     
                     <div class="mb-6">
                         <p class="text-sm text-gray-600 mb-4">
-                            Enter new password for <strong x-text="selectedStudent?.name"></strong><br>
-                            <span class="text-gray-500">(Leave empty to generate a random one)</span>
+                            Enter new password for <strong x-text="selectedStudent?.name"></strong>
                         </p>
                         
-                        <label class="block text-sm font-medium text-gray-700 mb-2">New Password</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">New Password <span class="text-red-500">*</span></label>
                         <div class="relative">
                             <input 
                                 :type="showResetPasswordVisible ? 'text' : 'password'" 
                                 x-model="resetPasswordInput" 
+                                @input="resetPasswordError = ''"
                                 @keydown.enter="confirmResetPassword()"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" 
-                                placeholder="Enter password or leave empty for random"
+                                :class="resetPasswordError ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-yellow-500 focus:border-yellow-500'"
+                                class="w-full border rounded-lg px-4 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2" 
+                                placeholder="Enter new password (required)"
                                 autofocus
                             />
                             <button 
@@ -519,12 +520,13 @@
                                 </svg>
                             </button>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">Minimum 6 characters if manually entered</p>
+                        <p x-show="resetPasswordError" x-text="resetPasswordError" class="text-xs text-red-600 mt-1.5 font-medium" style="display: none;"></p>
+                        <p x-show="!resetPasswordError" class="text-xs text-gray-500 mt-1" style="display: block;">Minimum 6 characters if manually entered</p>
                     </div>
 
                     <div class="flex gap-3 justify-end">
                         <button 
-                            @click="showResetPasswordModal = false; resetPasswordInput = ''; showResetPasswordVisible = false;" 
+                            @click="showResetPasswordModal = false; resetPasswordInput = ''; showResetPasswordVisible = false; resetPasswordError = '';" 
                             class="px-5 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition-colors"
                         >
                             Cancel
@@ -2921,6 +2923,7 @@
         showResetPasswordModal: false,
         resetPasswordInput: '',
         showResetPasswordVisible: false,
+        resetPasswordError: '',
         
         // Tabs
         userTab: 'students',
@@ -3484,6 +3487,7 @@
         resetStudentPassword() {
             if (!this.selectedStudent || !this.selectedStudent.id) return;
             this.resetPasswordInput = '';
+            this.resetPasswordError = '';
             this.showResetPasswordModal = true;
         },
 
@@ -3494,9 +3498,15 @@
             const id = this.selectedStudent.id;
             const pw = this.resetPasswordInput.trim();
             
-            // Validate if password is provided but too short
-            if (pw !== '' && pw.length < 6) {
-                this.showAlert('warning', 'Invalid Password', 'Password must be at least 6 characters');
+            // Validate password is not empty
+            if (pw === '') {
+                this.resetPasswordError = 'Password tidak boleh dikosongkan. Harap isi password minimal 6 karakter.';
+                return;
+            }
+            
+            // Validate minimum length
+            if (pw.length < 6) {
+                this.resetPasswordError = 'Password harus minimal 6 karakter.';
                 return;
             }
             
@@ -3510,7 +3520,7 @@
                     method: 'POST',
                     credentials: 'same-origin',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                    body: JSON.stringify({ password: pw || '' })
+                    body: JSON.stringify({ password: pw })
                 });
 
                 const ct = response.headers.get('content-type') || '';
@@ -3532,11 +3542,7 @@
                 }
 
                 const message = data.message || 'Password reset successfully';
-                if (data.generated && data.password) {
-                    this.showAlert('success', 'Password Reset', message + '\n\nGenerated password: ' + data.password + '\n\nPlease save this password and share it with the user.');
-                } else {
-                    this.showAlert('success', 'Password Reset', message);
-                }
+                this.showAlert('success', 'Password Reset', message);
                 this.resetPasswordInput = '';
                 this.showStudentDetailModal = false;
             } catch (err) {

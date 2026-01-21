@@ -55,8 +55,9 @@ class SCoreReportController extends Controller
             'generatedTime' => now()->format('H:i')
         ];
 
-        // Generate PDF
-        $pdf = Pdf::loadView('reports.score-report', $data);
+        // Generate PDF with proper settings
+        $pdf = Pdf::loadView('reports.score-report', $data)
+            ->setPaper('a4', 'portrait');
         
         // Download file
         return $pdf->download('S-Core-Report-' . $student->student_id . '-' . now()->format('YmdHis') . '.pdf');

@@ -12,19 +12,17 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             line-height: 1.6;
             color: #333;
             background: white;
+            padding: 25mm 20mm;
         }
 
         .container {
-            max-width: 210mm;
-            height: 297mm;
+            max-width: 100%;
             margin: 0 auto;
-            padding: 20mm;
             background: white;
-            position: relative;
         }
 
         /* Header */
@@ -62,6 +60,7 @@
             padding: 15px;
             background: #f3f4f6;
             border-radius: 5px;
+            page-break-inside: avoid;
         }
 
         .student-info-item {
@@ -86,6 +85,7 @@
             background: {{ $isPassed ? '#ecfdf5' : '#fef2f2' }};
             border-left: 4px solid {{ $isPassed ? '#10b981' : '#ef4444' }};
             border-radius: 5px;
+            page-break-inside: avoid;
         }
 
         .status-section h2 {
@@ -107,7 +107,6 @@
         .status-item-value {
             font-size: 18px;
             font-weight: bold;
-            color: {{ $isPassed ? '#10b981' : '#ef4444' }};
         }
 
         .status-item-label {
@@ -123,18 +122,19 @@
 
         .breakdown-section h3 {
             font-size: 13px;
-            color: #1e40af;
             margin-bottom: 12px;
-            padding-bottom: 8px;
             border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 8px;
+            color: #1e40af;
         }
 
         .category-item {
-            margin-bottom: 12px;
+            margin-bottom: 15px;
             padding: 10px;
             background: #f9fafb;
             border-left: 3px solid #3b82f6;
             border-radius: 3px;
+            page-break-inside: avoid;
         }
 
         .category-name {
@@ -149,49 +149,21 @@
             margin-top: 3px;
         }
 
-        .activity-list {
-            font-size: 10px;
-            color: #555;
-            margin-top: 5px;
-            margin-left: 10px;
-            line-height: 1.4;
-        }
-
-        .activity-item {
-            margin-bottom: 3px;
+        /* Signature Section */
+        .signature-section {
+            margin-top: 50px;
+            text-align: right;
+            page-break-inside: avoid;
         }
 
         /* Footer */
         .footer {
-            position: absolute;
-            bottom: 20mm;
-            left: 20mm;
-            right: 20mm;
+            margin-top: 40px;
             font-size: 10px;
             color: #999;
             border-top: 1px solid #e5e7eb;
             padding-top: 10px;
             text-align: center;
-        }
-
-        /* Signature Section */
-        .signature-section {
-            margin-top: 30px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            padding-top: 20px;
-        }
-
-        .signature-box {
-            text-align: center;
-            font-size: 11px;
-        }
-
-        .signature-line {
-            border-top: 1px solid #333;
-            margin-top: 40px;
-            padding-top: 3px;
         }
 
         /* Status Badge */
@@ -218,37 +190,24 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 10px;
-            margin-top: 10px;
+            margin-top: 8px;
+            page-break-inside: avoid;
         }
 
         .submissions-table th {
             background: #e5e7eb;
             padding: 6px;
             text-align: left;
-            font-weight: bold;
-            border-bottom: 1px solid #d1d5db;
+            border-bottom: 1px solid #ccc;
         }
 
         .submissions-table td {
             padding: 6px;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid #eee;
         }
 
         .submissions-table tr:nth-child(even) {
             background: #f9fafb;
-        }
-
-        /* Print styles */
-        @media print {
-            body {
-                margin: 0;
-                padding: 0;
-            }
-            .container {
-                box-shadow: none;
-                margin: 0;
-                padding: 20mm;
-            }
         }
     </style>
 </head>
@@ -343,15 +302,13 @@
             @endif
         </div>
 
-        <!-- Footer & Signature -->
-        <div style="margin-top: 40px; position: relative;">
-            <div style="text-align: right; margin-bottom: 10px;">
-                <p style="font-size: 11px; margin-bottom: 5px;">Disetujui oleh,</p>
-                <div style="margin-top: 60px;">
-                    <p style="font-size: 11px; font-weight: bold; margin-bottom: 2px;">William Sandy, Phd</p>
-                    <p style="font-size: 10px; color: #666;">Wakil Rektor Bidang Akademik dan</p>
-                    <p style="font-size: 10px; color: #666;">Kemahasiswaan</p>
-                </div>
+        <!-- Signature -->
+        <div class="signature-section">
+            <p style="font-size: 11px; margin-bottom: 5px;">Disetujui oleh,</p>
+            <div style="margin-top: 60px;">
+                <p style="font-size: 11px; font-weight: bold; margin-bottom: 2px;">William Sandy, Phd</p>
+                <p style="font-size: 10px; color: #666;">Wakil Rektor Bidang Akademik dan</p>
+                <p style="font-size: 10px; color: #666;">Kemahasiswaan</p>
             </div>
         </div>
         

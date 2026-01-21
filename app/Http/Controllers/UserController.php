@@ -48,7 +48,7 @@ class UserController extends Controller
         Log::info('resetPassword called', ['admin_id' => Auth::id(), 'target_user' => $id, 'ip' => request()->ip()]);
 
         $request->validate([
-            'password' => 'nullable|string|min:6'
+            'password' => 'required|string|min:6'
         ]);
 
         // Support both internal primary-key id and student_id passed from UI
@@ -58,20 +58,15 @@ class UserController extends Controller
             $user = User::where('student_id', $id)->firstOrFail();
         }
 
-        // If password provided, use it; otherwise generate a random one
+        // Use the provided password
         $provided = $request->input('password');
-        if ($provided && strlen(trim($provided)) >= 6) {
-            $newPassword = $provided;
-            $generated = false;
-        } else {
-            $newPassword = substr(str_shuffle('ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'), 0, 10);
-            $generated = true;
-        }
+        $newPassword = $provided;
+        $generated = false;
 
         $user->password = Hash::make($newPassword);
         $user->save();
 
-        Log::info('resetPassword saved', ['admin_id' => Auth::id(), 'target_user' => $user->id, 'generated' => $generated]);
+        Log::info('resetPassword saved', ['admin_id' => Auth::id(), 'target_user' => $user->id]);
 
         // Log activity (best-effort)
         try {
@@ -82,7 +77,7 @@ class UserController extends Controller
                     'action' => 'admin_reset_password',
                     'entity_type' => 'user',
                     'entity_id' => $user->id,
-                    'details' => json_encode(['generated' => $generated ? true : false]),
+                    'details' => json_encode(['user_provided' => true]),
                     'ip_address' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                     'created_at' => $now,
@@ -94,7 +89,7 @@ class UserController extends Controller
                     'action' => 'admin_reset_password',
                     'target_type' => 'user',
                     'target_id' => $user->id,
-                    'message' => json_encode(['generated' => $generated ? true : false]),
+                    'message' => json_encode(['user_provided' => true]),
                     'created_at' => $now,
                     'updated_at' => $now
                 ]);
@@ -102,7 +97,7 @@ class UserController extends Controller
                 DB::table('activity_logs')->insert([
                     'user_id' => Auth::id(),
                     'action' => 'admin_reset_password',
-                    'details' => json_encode(['generated' => $generated ? true : false]),
+                    'details' => json_encode(['user_provided' => true]),
                     'created_at' => $now,
                     'updated_at' => $now
                 ]);
@@ -113,8 +108,7 @@ class UserController extends Controller
 
         return response()->json([
             'message' => 'Password reset successfully',
-            'generated' => $generated,
-            'password' => $generated ? $newPassword : null
+            'generated' => false
         ]);
     }
 
