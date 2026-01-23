@@ -48,7 +48,8 @@ class GoogleDriveService
             try {
                 // Upload ke Google Drive dengan stream untuk file besar
                 $stream = fopen($file->getRealPath(), 'r');
-                Storage::disk('google')->put($filePath, $stream);
+                $mimetype = ($extension === 'pdf') ? 'application/pdf' : $file->getClientMimeType();
+                Storage::disk('google')->put($filePath, $stream, ['mimetype' => $mimetype]);
                 
                 if (is_resource($stream)) {
                     fclose($stream);
