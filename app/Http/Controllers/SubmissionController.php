@@ -101,7 +101,7 @@ class SubmissionController extends Controller
 
     /**
      * 2. Update Pengajuan (Edit Data)
-     * UPDATE: Membolehkan edit jika status 'Waiting' ATAU 'Rejected'
+     * UPDATE: Hanya membolehkan edit jika status 'Rejected' (tidak bisa edit Waiting)
      */
     public function update(Request $request, $id)
     {
@@ -109,9 +109,9 @@ class SubmissionController extends Controller
             // Cari data punya user yang sedang login
             $submission = Submission::where('student_id', Auth::id())->where('id', $id)->firstOrFail();
 
-            // Cek status: Boleh edit jika 'Waiting' ATAU 'Rejected'
-            if ($submission->status !== 'Waiting' && $submission->status !== 'Rejected') {
-                return response()->json(['message' => 'Cannot edit submission that has been approved.'], 403);
+            // Cek status: Hanya boleh edit jika 'Rejected' saja (tidak boleh edit Waiting)
+            if ($submission->status !== 'Rejected') {
+                return response()->json(['message' => 'Can only edit rejected submissions. Waiting submissions cannot be edited.'], 403);
             }
 
             // Validasi (File bersifat nullable/opsional disini)

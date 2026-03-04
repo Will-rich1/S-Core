@@ -25,12 +25,12 @@
     <div class="flex h-screen bg-gray-100" x-data="adminReviewData()" x-init="init()">
         <!-- Logout Confirmation Modal -->
         <div x-show="showLogoutModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
-            <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-                <h3 class="text-lg font-semibold mb-4">Confirm Logout</h3>
-                <p class="text-gray-600 mb-6">Are you sure you want to logout?</p>
-                <div class="flex gap-3 justify-end">
-                    <button @click="showLogoutModal = false" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium">No</button>
-                    <button @click="confirmLogout" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded text-sm font-medium">Yes</button>
+            <div class="bg-white rounded-lg p-4 sm:p-6 max-w-sm w-full mx-4">
+                <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Confirm Logout</h3>
+                <p class="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">Are you sure you want to logout?</p>
+                <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end">
+                    <button @click="showLogoutModal = false" class="w-full sm:w-auto px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-xs sm:text-sm font-medium">No</button>
+                    <button @click="confirmLogout" class="w-full sm:w-auto px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded text-xs sm:text-sm font-medium">Yes</button>
                 </div>
             </div>
         </div>
@@ -39,25 +39,25 @@
         <div x-show="showDeleteCategoryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" style="display: none; z-index: 9999;">
             <div class="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 overflow-hidden animate-in fade-in duration-300" style="z-index: 10000;">
                 <!-- Header with red accent -->
-                <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4 flex items-center gap-3">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="bg-gradient-to-r from-red-500 to-red-600 px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-2 sm:gap-3">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                    <h3 class="text-lg font-semibold text-white">Delete Category</h3>
+                    <h3 class="text-base sm:text-lg font-semibold text-white">Delete Category</h3>
                 </div>
                 
                 <!-- Content -->
-                <div class="px-6 py-4">
-                    <p class="text-gray-700 mb-2">Are you sure you want to delete this category?</p>
-                    <div class="bg-red-50 border border-red-200 rounded-lg p-3 mt-4">
-                        <p class="text-sm text-gray-600">Category:</p>
-                        <p class="font-semibold text-red-700" x-text="deleteTargetCategory || 'N/A'"></p>
+                <div class="px-4 sm:px-6 py-3 sm:py-4">
+                    <p class="text-sm sm:text-base text-gray-700 mb-2">Are you sure you want to delete this category?</p>
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-2 sm:p-3 mt-3 sm:mt-4">
+                        <p class="text-xs sm:text-sm text-gray-600">Category:</p>
+                        <p class="text-sm sm:text-base font-semibold text-red-700" x-text="deleteTargetCategory || 'N/A'"></p>
                     </div>
-                    <p class="text-sm text-yellow-600 mt-3 flex items-start gap-2">
-                        <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <p class="text-xs sm:text-sm text-yellow-600 mt-2 sm:mt-3 flex items-start gap-1.5 sm:gap-2">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
-                        <span class="text-sm">All subcategories in this category will also be deactivated.</span>
+                        <span class="text-xs sm:text-sm">All subcategories in this category will also be deactivated.</span>
                     </p>
                     <p class="text-sm text-gray-500 mt-4">This action cannot be undone.</p>
                 </div>
@@ -189,21 +189,21 @@
         <div x-show="showDetailModal" class="fixed inset-0 bg-black bg-opacity-50 z-50" style="display: none;">
             <div class="h-full w-full bg-white flex flex-col">
                 <!-- Header -->
-                <div class="bg-white border-b px-6 py-4 flex justify-between items-center">
-                    <h3 class="text-xl font-semibold">Review Submission</h3>
+                <div class="bg-white border-b px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
+                    <h3 class="text-lg sm:text-xl font-semibold">Review Submission</h3>
                     <button @click="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl leading-none w-8 h-8 flex items-center justify-center">×</button>
                 </div>
 
-                <!-- Content Area - 2 Columns -->
-                <div class="flex-1 overflow-hidden flex">
+                <!-- Content Area - 2 Columns (responsive) -->
+                <div class="flex-1 overflow-hidden flex flex-col lg:flex-row">
                     <template x-if="selectedSubmission">
-                        <div class="flex w-full h-full">
+                        <div class="flex flex-col lg:flex-row w-full h-full">
                             <!-- Left Column - PDF Viewer -->
-                            <div class="w-1/2 bg-gray-100 border-r overflow-hidden p-6">
+                            <div class="w-full lg:w-1/2 bg-gray-100 lg:border-r overflow-hidden p-4 sm:p-6 order-2 lg:order-1 max-h-[50vh] lg:max-h-none">
                                 <div class="bg-white rounded-lg shadow-sm h-full flex flex-col">
-                                    <div class="bg-gray-800 text-white px-4 py-3 rounded-t-lg flex items-center justify-between">
-                                        <span class="text-sm font-medium">Certificate/Evidence</span>
-                                        <span class="text-xs text-gray-300" x-text="selectedSubmission.certificate"></span>
+                                    <div class="bg-gray-800 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-t-lg flex items-center justify-between">
+                                        <span class="text-xs sm:text-sm font-medium">Certificate/Evidence</span>
+                                        <span class="text-xs text-gray-300 truncate ml-2" x-text="selectedSubmission.certificate"></span>
                                     </div>
                                     <div class="flex-1 bg-gray-50 relative h-full overflow-hidden" x-data="{ loading: true }">
                                         <template x-if="selectedSubmission.file_url">
@@ -211,11 +211,11 @@
                                                 <!-- Loading spinner -->
                                                 <div x-show="loading" class="absolute inset-0 flex items-center justify-center bg-gray-50 z-10">
                                                     <div class="text-center">
-                                                        <svg class="animate-spin h-12 w-12 text-blue-600 mx-auto mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <svg class="animate-spin h-8 w-8 sm:h-12 sm:w-12 text-blue-600 mx-auto mb-2 sm:mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                         </svg>
-                                                        <p class="text-sm text-gray-600">Loading PDF...</p>
+                                                        <p class="text-xs sm:text-sm text-gray-600">Loading PDF...</p>
                                                     </div>
                                                 </div>
                                                 <!-- PDF iframe -->
@@ -230,10 +230,10 @@
                                         </template>
                                         <template x-if="!selectedSubmission.file_url">
                                             <div class="flex items-center justify-center h-full text-red-500 flex-col gap-2">
-                                                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg class="w-8 h-8 sm:w-10 sm:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                                 </svg>
-                                                <p>File PDF tidak ditemukan di database.</p>
+                                                <p class="text-xs sm:text-sm text-center px-4">File PDF tidak ditemukan di database.</p>
                                             </div>
                                         </template>
                                     </div>
@@ -241,14 +241,14 @@
                             </div>
 
                             <!-- Right Column - Form Details -->
-                            <div class="w-1/2 flex flex-col">
+                            <div class="w-full lg:w-1/2 flex flex-col order-1 lg:order-2">
                                 <!-- Scrollable Content -->
-                                <div class="flex-1 overflow-y-auto p-6">
-                                    <div class="space-y-4">
+                                <div class="flex-1 overflow-y-auto p-4 sm:p-6">
+                                    <div class="space-y-3 sm:space-y-4">
                                         <!-- Student Information -->
-                                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                            <h4 class="font-semibold text-blue-900 mb-3">Student Information</h4>
-                                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+                                            <h4 class="font-semibold text-sm sm:text-base text-blue-900 mb-2 sm:mb-3">Student Information</h4>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm">
                                                 <div>
                                                     <span class="text-gray-600 block mb-1">Student ID</span>
                                                     <span class="font-medium" x-text="selectedSubmission.studentId"></span>
@@ -270,50 +270,50 @@
 
                                         <!-- Current Main Category -->
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">Current Main Category</label>
-                                            <div class="bg-gray-50 border rounded-lg px-4 py-3 text-sm" x-text="selectedSubmission.mainCategory"></div>
+                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Current Main Category</label>
+                                            <div class="bg-gray-50 border rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm" x-text="selectedSubmission.mainCategory"></div>
                                         </div>
 
                                         <!-- Current Subcategory -->
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">Current Subcategory</label>
-                                            <div class="bg-gray-50 border rounded-lg px-4 py-3 text-sm" x-text="selectedSubmission.subcategory"></div>
+                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Current Subcategory</label>
+                                            <div class="bg-gray-50 border rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm" x-text="selectedSubmission.subcategory"></div>
                                         </div>
 
                                         <!-- Activity Title -->
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">Activity Title</label>
-                                            <div class="bg-gray-50 border rounded-lg px-4 py-3 text-sm font-medium" x-text="selectedSubmission.judul"></div>
+                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Activity Title</label>
+                                            <div class="bg-gray-50 border rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium" x-text="selectedSubmission.judul"></div>
                                         </div>
 
                                         <!-- Description -->
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                                            <div class="bg-gray-50 border rounded-lg px-4 py-3 text-sm whitespace-pre-wrap min-h-[100px]" x-text="selectedSubmission.keterangan"></div>
+                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Description</label>
+                                            <div class="bg-gray-50 border rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm whitespace-pre-wrap min-h-[80px] sm:min-h-[100px]" x-text="selectedSubmission.keterangan"></div>
                                         </div>
 
                                         <!-- Assign Category -->
-                                        <div class="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <div class="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-3 sm:p-4">
+                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                                                 Assign Main Category <span class="text-red-500">*</span>
                                             </label>
-                                            <select x-model="assignedMainCategory" @change="updateAssignedSubcategories" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-3">
+                                            <select x-model="assignedMainCategory" @change="updateAssignedSubcategories" class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-2 sm:mb-3">
                                                 <option value="">Select Main Category</option>
                                                 <template x-for="(catGroup, idx) in categoryGroups" :key="idx">
                                                     <option :value="idx" x-text="catGroup.name"></option>
                                                 </template>
                                             </select>
 
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                                                 Assign Subcategory <span class="text-red-500">*</span>
                                             </label>
-                                            <select x-model="assignedSubcategory" @change="categoryChanged = true" :disabled="assignedMainCategory === ''" class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                            <select x-model="assignedSubcategory" @change="categoryChanged = true" :disabled="assignedMainCategory === ''" class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                                 <option value="">Select Subcategory</option>
                                                 <template x-for="(subcat, subIdx) in assignedAvailableSubcategories" :key="subIdx">
                                                     <option :value="subIdx" x-text="subcat.name + ' (' + subcat.points + ' points)'"></option>
                                                 </template>
                                             </select>
-                                            <p class="text-xs text-gray-500 mt-2" x-show="assignedSubcategory !== ''">
+                                            <p class="text-xs text-gray-500 mt-1.5 sm:mt-2" x-show="assignedSubcategory !== ''">
                                                 <span class="font-medium">Points for this category:</span> 
                                                 <span class="text-blue-600 font-semibold" x-text="assignedAvailableSubcategories[assignedSubcategory]?.points || 0"></span> points
                                             </p>
@@ -322,18 +322,18 @@
                                 </div>
 
                                 <!-- Fixed Action Buttons -->
-                                <div class="border-t bg-white px-6 py-4">
-                                    <div class="flex gap-3 justify-end">
-                                        <button @click="closeModal" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition-colors">
+                                <div class="border-t bg-white px-4 sm:px-6 py-3 sm:py-4">
+                                    <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end">
+                                        <button @click="closeModal" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-xs sm:text-sm font-medium transition-colors order-4 sm:order-1">
                                             Cancel
                                         </button>
-                                        <button x-show="categoryChanged && selectedSubmission?.status !== 'Waiting'" @click="updateCategoryOnly" class="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                        <button x-show="categoryChanged && selectedSubmission?.status !== 'Waiting'" @click="updateCategoryOnly" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors order-3 sm:order-2">
                                             Update Category
                                         </button>
-                                        <button x-show="selectedSubmission?.status !== 'Rejected'" @click="showRejectModal = true" class="px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                        <button x-show="selectedSubmission?.status !== 'Rejected'" @click="showRejectModal = true" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors order-2 sm:order-3">
                                             Reject
                                         </button>
-                                        <button x-show="selectedSubmission?.status !== 'Approved'" @click="handleApprove" class="px-6 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors">
+                                        <button x-show="selectedSubmission?.status !== 'Approved'" @click="handleApprove" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors order-1 sm:order-4">
                                             Approve
                                         </button>
                                     </div>
@@ -429,16 +429,17 @@
                     <h4 class="font-semibold text-gray-700 mb-3">Submission History</h4>
                     
                     <div class="bg-white rounded-lg shadow overflow-hidden border">
-                        <table class="w-full text-sm text-left">
-                            <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
-                                <tr>
-                                    <th class="px-4 py-3">Date</th>
-                                    <th class="px-4 py-3">Title</th>
-                                    <th class="px-4 py-3">Category</th>
-                                    <th class="px-4 py-3 text-center">Status</th>
-                                    <th class="px-4 py-3 text-center">Points</th>
-                                </tr>
-                            </thead>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-[600px] w-full text-sm text-left">
+                                <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
+                                    <tr>
+                                        <th class="px-4 py-3">Date</th>
+                                        <th class="px-4 py-3">Title</th>
+                                        <th class="px-4 py-3">Category</th>
+                                        <th class="px-4 py-3 text-center">Status</th>
+                                        <th class="px-4 py-3 text-center">Points</th>
+                                    </tr>
+                                </thead>
                             <tbody class="divide-y divide-gray-200">
                                 <template x-for="sub in selectedStudent?.submissions_list" :key="sub.id">
                                     <tr class="hover:bg-gray-50">
@@ -466,7 +467,8 @@
                                     </tr>
                                 </template>
                             </tbody>
-                        </table>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -1022,16 +1024,17 @@
             <div class="flex-1 overflow-auto p-6">
                 <!-- Review Submissions Page -->
                 <div x-show="activeMenu === 'Review Submissions'">
-                    <div class="mb-6 flex justify-between items-start">
+                    <div class="mb-4 sm:mb-6 flex flex-col sm:flex-row gap-3 sm:gap-4 sm:justify-between sm:items-start">
                         <div>
-                            <h1 class="text-3xl font-bold text-gray-800 mb-2">S-Core Submission Review</h1>
-                            <p class="text-gray-600">Review and approve student activity submissions</p>
+                            <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">S-Core Submission Review</h1>
+                            <p class="text-sm sm:text-base text-gray-600">Review and approve student activity submissions</p>
                         </div>
-                        <button @click="fetchSubmissions()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button @click="fetchSubmissions()" class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center justify-center gap-2 transition-colors">
+                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                             </svg>
-                            Load New Submission
+                            <span class="hidden sm:inline">Load New Submission</span>
+                            <span class="sm:hidden">Refresh</span>
                         </button>
                     </div>
 
@@ -1065,17 +1068,18 @@
 
                     <!-- Submissions Table -->
                     <div class="bg-white rounded-lg shadow overflow-hidden">
-                        <table class="w-full">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="text-left py-3 px-4 font-semibold text-sm">Student</th>
-                                    <th class="text-left py-3 px-4 font-semibold text-sm">Main Category</th>
-                                    <th class="text-left py-3 px-4 font-semibold text-sm">Subcategory</th>
-                                    <th class="text-left py-3 px-4 font-semibold text-sm">Activity Title</th>
-                                    <th class="text-center py-3 px-4 font-semibold text-sm">Points</th>
-                                    <th class="text-left py-3 px-4 font-semibold text-sm">Submitted</th>
-                                    <th class="text-center py-3 px-4 font-semibold text-sm">Status</th>
-                                    <th class="text-center py-3 px-4 font-semibold text-sm">Action</th>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-[900px] w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm">Student</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm">Main Category</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm">Subcategory</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm">Activity Title</th>
+                                        <th class="text-center py-3 px-4 font-semibold text-sm">Points</th>
+                                        <th class="text-left py-3 px-4 font-semibold text-sm">Submitted</th>
+                                        <th class="text-center py-3 px-4 font-semibold text-sm">Status</th>
+                                        <th class="text-center py-3 px-4 font-semibold text-sm">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1114,69 +1118,70 @@
                                     </tr>
                                 </template>
                             </tbody>
-                        </table>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Statistics Page -->
                 <div x-show="activeMenu === 'Statistics'">
-                    <div class="mb-6">
-                        <h1 class="text-3xl font-bold text-gray-800 mb-2">Statistics</h1>
-                        <p class="text-gray-600">Overview of S-Core submission statistics</p>
+                    <div class="mb-4 sm:mb-6">
+                        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">Statistics</h1>
+                        <p class="text-sm sm:text-base text-gray-600">Overview of S-Core submission statistics</p>
                     </div>
 
                     <!-- Statistics Cards -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    <div class="bg-white rounded-lg shadow p-4">
-                        <div class="flex items-center justify-between">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+                    <div class="bg-white rounded-lg shadow p-3 sm:p-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                             <div>
-                                <p class="text-sm text-gray-600">Total Submissions</p>
-                                <p class="text-2xl font-bold text-gray-800" x-text="stats.total"></p>
+                                <p class="text-xs sm:text-sm text-gray-600">Total Submissions</p>
+                                <p class="text-xl sm:text-2xl font-bold text-gray-800" x-text="stats.total"></p>
                             </div>
-                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                                <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-lg shadow p-4">
-                        <div class="flex items-center justify-between">
+                    <div class="bg-white rounded-lg shadow p-3 sm:p-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                             <div>
-                                <p class="text-sm text-gray-600">Waiting Review</p>
-                                <p class="text-2xl font-bold text-yellow-600" x-text="stats.waiting"></p>
+                                <p class="text-xs sm:text-sm text-gray-600">Waiting Review</p>
+                                <p class="text-xl sm:text-2xl font-bold text-yellow-600" x-text="stats.waiting"></p>
                             </div>
-                            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-                                <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-lg shadow p-4">
-                        <div class="flex items-center justify-between">
+                    <div class="bg-white rounded-lg shadow p-3 sm:p-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                             <div>
-                                <p class="text-sm text-gray-600">Approved</p>
-                                <p class="text-2xl font-bold text-green-600" x-text="stats.approved"></p>
+                                <p class="text-xs sm:text-sm text-gray-600">Approved</p>
+                                <p class="text-xl sm:text-2xl font-bold text-green-600" x-text="stats.approved"></p>
                             </div>
-                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                                <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-lg shadow p-4">
-                        <div class="flex items-center justify-between">
+                    <div class="bg-white rounded-lg shadow p-3 sm:p-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                             <div>
-                                <p class="text-sm text-gray-600">Rejected</p>
-                                <p class="text-2xl font-bold text-red-600" x-text="stats.rejected"></p>
+                                <p class="text-xs sm:text-sm text-gray-600">Rejected</p>
+                                <p class="text-xl sm:text-2xl font-bold text-red-600" x-text="stats.rejected"></p>
                             </div>
-                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                                <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
@@ -1223,9 +1228,9 @@
 
             <!-- Students Page -->
             <div x-show="activeMenu === 'Students'">
-                <div class="mb-6">
-                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Student Management & Reports</h1>
-                    <p class="text-gray-600">Comprehensive student performance reports and S-Core tracking</p>
+                <div class="mb-4 sm:mb-6">
+                    <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">Student Management & Reports</h1>
+                    <p class="text-sm sm:text-base text-gray-600">Comprehensive student performance reports and S-Core tracking</p>
                 </div>
 
                 <!-- Filter Bar -->
@@ -1346,11 +1351,12 @@
 
                 <!-- Students Table with Hover Details -->
                 <div class="bg-white rounded-lg shadow overflow-hidden">
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="text-center py-3 px-4 font-semibold text-sm w-12">
-                                    <input type="checkbox" 
+                    <div class="overflow-x-auto">
+                        <table class="min-w-[1000px] w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="text-center py-3 px-4 font-semibold text-sm w-12">
+                                        <input type="checkbox" 
                                         @change="toggleSelectAll($event.target.checked)"
                                         :checked="selectedStudents.length > 0 && selectedStudents.length === filteredStudentsList.length"
                                         class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500">
@@ -1483,14 +1489,15 @@
                         </template>
                     </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
 
             <!-- Bulk Score Page -->
             <div x-show="activeMenu === 'Bulk Score'">
-                <div class="mb-6">
-                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Bulk S-Core Assignment</h1>
-                    <p class="text-gray-600">Create S-Core submissions for multiple students at once based on filters</p>
+                <div class="mb-4 sm:mb-6">
+                    <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">Bulk S-Core Assignment</h1>
+                    <p class="text-sm sm:text-base text-gray-600">Create S-Core submissions for multiple students at once based on filters</p>
                 </div>
 
                 <div class="bg-white rounded-lg shadow-sm p-6">
@@ -1680,33 +1687,36 @@
 
             <!-- Settings Page -->
             <div x-show="activeMenu === 'Settings'" x-data="{ settingsTab: 'profile' }">
-                <div class="mb-6">
-                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Settings</h1>
-                    <p class="text-gray-600">Configure S-Core system settings and manage user accounts</p>
+                <div class="mb-4 sm:mb-6">
+                    <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">Settings</h1>
+                    <p class="text-sm sm:text-base text-gray-600">Configure S-Core system settings and manage user accounts</p>
                 </div>
 
                 <!-- Tab Navigation -->
-                <div class="mb-6 border-b border-gray-200">
-                    <nav class="flex gap-4 overflow-x-auto">
-                        <button @click="settingsTab = 'profile'" :class="settingsTab === 'profile' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-2 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="mb-4 sm:mb-6 border-b border-gray-200">
+                    <nav class="flex gap-2 sm:gap-4 overflow-x-auto">
+                        <button @click="settingsTab = 'profile'" :class="settingsTab === 'profile' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-2 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
-                            Profile & Password
+                            <span class="hidden sm:inline">Profile & Password</span>
+                            <span class="sm:hidden">Profile</span>
                         </button>
-                        <button @click="settingsTab = 'students'" :class="settingsTab === 'students' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-2 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button @click="settingsTab = 'students'" :class="settingsTab === 'students' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-2 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
-                            Student Accounts
+                            <span class="hidden sm:inline">Student Accounts</span>
+                            <span class="sm:hidden">Students</span>
                         </button>
-                        <button @click="settingsTab = 'admins'" :class="settingsTab === 'admins' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-2 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button @click="settingsTab = 'admins'" :class="settingsTab === 'admins' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-2 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                             </svg>
-                            Admin Accounts
+                            <span class="hidden sm:inline">Admin Accounts</span>
+                            <span class="sm:hidden">Admins</span>
                         </button>
-                        <button @click="settingsTab = 'categories'" :class="settingsTab === 'categories' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-2 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2 whitespace-nowrap">
+                        <button @click="settingsTab = 'categories'" :class="settingsTab === 'categories' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-2 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                             </svg>
@@ -2633,26 +2643,26 @@
 
             <!-- Help Page -->
             <div x-show="activeMenu === 'Help'">
-                <div class="mb-6">
-                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Help & Documentation</h1>
-                    <p class="text-gray-600">Get help with using the S-Core system</p>
+                <div class="mb-4 sm:mb-6">
+                    <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-2">Help & Documentation</h1>
+                    <p class="text-sm sm:text-base text-gray-600">Get help with using the S-Core system</p>
                 </div>
 
-                <div class="space-y-6">
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="space-y-4 sm:space-y-6">
+                    <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center gap-2">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             Frequently Asked Questions
                         </h3>
-                        <div class="space-y-4">
-                            <div class="border-b pb-4">
-                                <h4 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">1</span>
-                                    How do I review a submission?
+                        <div class="space-y-3 sm:space-y-4">
+                            <div class="border-b pb-3 sm:pb-4">
+                                <h4 class="font-semibold text-sm sm:text-base text-gray-800 mb-2 flex items-start gap-2">
+                                    <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold flex-shrink-0">1</span>
+                                    <span>How do I review a submission?</span>
                                 </h4>
-                                <p class="text-sm text-gray-600 ml-7 mb-2">Click on the "Review" button in the Review Submissions page to view submission details. You can assign the correct category, preview the certificate/proof directly from Google Drive, and either approve or reject the submission. When approving, make sure to select the appropriate category and verify the suggested points.</p>
+                                <p class="text-xs sm:text-sm text-gray-600 ml-7 mb-2">Click on the "Review" button in the Review Submissions page to view submission details. You can assign the correct category, preview the certificate/proof directly from Google Drive, and either approve or reject the submission. When approving, make sure to select the appropriate category and verify the suggested points.</p>
                                 <div class="mt-2 ml-7 bg-green-50 border border-green-200 rounded p-2">
                                     <p class="text-xs text-green-800"><strong>📁 Google Drive Integration:</strong> All certificates are stored in Google Drive. You can preview PDFs directly in the browser without downloading.</p>
                                 </div>
