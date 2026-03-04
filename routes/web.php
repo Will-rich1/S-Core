@@ -37,8 +37,8 @@ Route::middleware(['auth'])->group(function () {
     // Submissions (CRUD Lengkap)
     Route::post('/submissions', [SubmissionController::class, 'store'])->name('submissions.store');
     
-    // UPDATE: Menggunakan PUT untuk edit sesuai standar RESTful & JS kita
-    Route::put('/submissions/{id}', [SubmissionController::class, 'update'])->name('submissions.update');
+    // UPDATE: DISABLED - Mahasiswa tidak bisa edit submission, hanya bisa hapus
+    // Route::put('/submissions/{id}', [SubmissionController::class, 'update'])->name('submissions.update');
     
     // DELETE: Menggunakan DELETE untuk hapus sesuai standar RESTful & JS kita
     Route::delete('/submissions/{id}', [SubmissionController::class, 'destroy'])->name('submissions.destroy');

@@ -195,11 +195,11 @@
                 </div>
 
                 <!-- Content Area - 2 Columns (responsive) -->
-                <div class="flex-1 overflow-hidden flex flex-col lg:flex-row">
+                <div class="flex-1 overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row">
                     <template x-if="selectedSubmission">
-                        <div class="flex flex-col lg:flex-row w-full h-full">
+                        <div class="flex flex-col lg:flex-row w-full lg:h-full">
                             <!-- Left Column - PDF Viewer -->
-                            <div class="w-full lg:w-1/2 bg-gray-100 lg:border-r overflow-hidden p-4 sm:p-6 order-2 lg:order-1 max-h-[50vh] lg:max-h-none">
+                            <div class="w-full lg:w-1/2 bg-gray-100 lg:border-r overflow-hidden p-4 sm:p-6 order-2 lg:order-1 h-[40vh] lg:h-auto flex-shrink-0">
                                 <div class="bg-white rounded-lg shadow-sm h-full flex flex-col">
                                     <div class="bg-gray-800 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-t-lg flex items-center justify-between">
                                         <span class="text-xs sm:text-sm font-medium">Certificate/Evidence</span>
@@ -241,9 +241,9 @@
                             </div>
 
                             <!-- Right Column - Form Details -->
-                            <div class="w-full lg:w-1/2 flex flex-col order-1 lg:order-2">
+                            <div class="w-full lg:w-1/2 flex flex-col order-1 lg:order-2 flex-shrink-0">
                                 <!-- Scrollable Content -->
-                                <div class="flex-1 overflow-y-auto p-4 sm:p-6">
+                                <div class="flex-1 lg:overflow-y-auto p-4 sm:p-6">
                                     <div class="space-y-3 sm:space-y-4">
                                         <!-- Student Information -->
                                         <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
@@ -322,7 +322,7 @@
                                 </div>
 
                                 <!-- Fixed Action Buttons -->
-                                <div class="border-t bg-white px-4 sm:px-6 py-3 sm:py-4">
+                                <div class="border-t bg-white px-4 sm:px-6 py-3 sm:py-4 flex-shrink-0">
                                     <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:justify-end">
                                         <button @click="closeModal" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-xs sm:text-sm font-medium transition-colors order-4 sm:order-1">
                                             Cancel
@@ -759,61 +759,61 @@
         <!-- Category Management Modal -->
         <div x-show="showCategoryModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[60]" style="display: none;">
             <div class="bg-white rounded-lg max-w-6xl w-full mx-4 shadow-2xl max-h-[90vh] flex flex-col">
-                <div class="flex justify-between items-center p-6 border-b">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex justify-between items-center p-4 sm:p-6 border-b">
+                    <div class="flex items-center gap-2 min-w-0 flex-1">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                         </svg>
-                        <h3 class="text-xl font-semibold text-gray-800">Category Management</h3>
-                        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">Verified</span>
+                        <h3 class="text-base sm:text-xl font-semibold text-gray-800 break-words">Category Management</h3>
+                        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold whitespace-nowrap">Verified</span>
                     </div>
-                    <button @click="closeCategoryModal" class="text-gray-500 hover:text-gray-700 text-2xl leading-none">×</button>
+                    <button @click="closeCategoryModal" class="text-gray-500 hover:text-gray-700 text-2xl leading-none flex-shrink-0 ml-2">×</button>
                 </div>
 
-                <div class="flex-1 overflow-y-auto p-6">
+                <div class="flex-1 overflow-y-auto p-4 sm:p-6">
                     <!-- Add New Main Category Section -->
-                    <div class="bg-green-50 border-2 border-green-200 rounded-lg p-4 mb-4">
-                        <h4 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-green-50 border-2 border-green-200 rounded-lg p-3 sm:p-4 mb-4">
+                        <h4 class="font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             </svg>
-                            Add New Main Category
+                            <span class="break-words">Add New Main Category</span>
                         </h4>
-                        <div class="flex gap-3">
-                            <input type="text" x-model="newMainCategory" placeholder="Main Category Name" class="flex-1 border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
-                            <button @click="addMainCategory" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <input type="text" x-model="newMainCategory" placeholder="Main Category Name" class="flex-1 border rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                            <button @click="addMainCategory" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap">
                                 Add Main Category
                             </button>
                         </div>
                     </div>
 
                     <!-- Add New Subcategory Section -->
-                    <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-6">
-                        <h4 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-3 sm:p-4 mb-6">
+                        <h4 class="font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2 text-sm sm:text-base">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             </svg>
-                            Add New Subcategory
+                            <span class="break-words">Add New Subcategory</span>
                         </h4>
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                            <select x-model="newCategory.mainCategoryIndex" class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <select x-model="newCategory.mainCategoryIndex" class="border rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">Select Main Category</option>
                                 <template x-for="(cat, idx) in categories" :key="cat.id">
                                     <option :value="idx" x-text="(idx + 1) + '. ' + cat.name"></option>
                                 </template>
                             </select>
-                            <input type="text" x-model="newCategory.name" placeholder="Subcategory Name" class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                            <input type="number" x-model="newCategory.points" placeholder="Points" class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                            <input type="text" x-model="newCategory.description" placeholder="Description" class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            <input type="text" x-model="newCategory.name" placeholder="Subcategory Name" class="border rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            <input type="number" x-model="newCategory.points" placeholder="Points" class="border rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            <input type="text" x-model="newCategory.description" placeholder="Description" class="border rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         </div>
-                        <button @click="addSubcategory" class="mt-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                        <button @click="addSubcategory" class="mt-3 w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap">
                             Add Subcategory
                         </button>
                     </div>
 
                     <!-- Categories List -->
                     <div class="space-y-4">
-                        <h4 class="font-semibold text-gray-800 mb-3">Existing Categories & Subcategories</h4>
+                        <h4 class="font-semibold text-gray-800 mb-3 text-sm sm:text-base">Existing Categories & Subcategories</h4>
                         
                         <template x-for="(cat, catIndex) in categories" :key="cat.id">
                             <div class="bg-gray-50 border-2 border-gray-300 rounded-lg p-4 mb-4">
@@ -857,42 +857,43 @@
                                     </div>
                                 </div>
                                 
-                                <div class="space-y-2 ml-4">
+                                <div class="space-y-2 ml-2 sm:ml-4">
                                     <template x-for="(subcat, subIndex) in cat.subcategories" :key="subIndex">
-                                        <div class="bg-white border border-gray-200 rounded-lg p-3 hover:border-blue-300 transition-colors">
-                                            <div class="flex items-center gap-3">
+                                        <div class="bg-white border border-gray-200 rounded-lg p-2 sm:p-3 hover:border-blue-300 transition-colors">
+                                            <div class="flex items-start gap-2 sm:gap-3">
                                                 
                                                 <template x-if="subcat.isEditing">
-                                                    <div class="flex-1 flex items-center gap-2">
-                                                        <input type="text" x-model="subcat.name" placeholder="Name" class="flex-1 border rounded px-2 py-1 text-sm">
-                                                        <input type="number" x-model="subcat.points" placeholder="Pts" class="w-16 border rounded px-2 py-1 text-sm">
-                                                        <input type="text" x-model="subcat.description" placeholder="Desc" class="flex-1 border rounded px-2 py-1 text-sm">
-                                                        <button @click="saveSubcategory(catIndex, subIndex)" class="text-green-600 hover:text-green-800"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></button>
-                                                        <button @click="cancelEditSubcategory(catIndex, subIndex)" class="text-gray-500 hover:text-gray-700"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                                                    <div class="flex-1 flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                                        <input type="text" x-model="subcat.name" placeholder="Name" class="w-full sm:flex-1 border rounded px-2 py-1 text-xs sm:text-sm">
+                                                        <input type="number" x-model="subcat.points" placeholder="Pts" class="w-full sm:w-16 border rounded px-2 py-1 text-xs sm:text-sm">
+                                                        <input type="text" x-model="subcat.description" placeholder="Desc" class="w-full sm:flex-1 border rounded px-2 py-1 text-xs sm:text-sm">
+                                                        <div class="flex gap-2 w-full sm:w-auto justify-end">
+                                                            <button @click="saveSubcategory(catIndex, subIndex)" class="text-green-600 hover:text-green-800"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></button>
+                                                            <button @click="cancelEditSubcategory(catIndex, subIndex)" class="text-gray-500 hover:text-gray-700"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                                                        </div>
                                                     </div>
                                                 </template>
                                                 
                                                 <template x-if="!subcat.isEditing">
-                                                    <div class="flex-1 flex items-center justify-between">
-                                                        <div class="flex-1">
-                                                            <h6 class="font-medium text-gray-800 text-sm">
+                                                    <div class="flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                                        <div class="flex-1 min-w-0">
+                                                            <h6 class="font-medium text-gray-800 text-xs sm:text-sm break-words">
                                                                 <span x-text="subcat.name"></span>
                                                                 <span x-show="subcat.is_active == 0 || subcat.is_active === false" class="ml-2 inline-block text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">Inactive</span>
                                                             </h6>
-                                                            <p class="text-xs text-gray-500 mt-1">
+                                                            <p class="text-xs text-gray-500 mt-1 break-words">
                                                                 Points: <span class="font-semibold text-blue-600" x-text="subcat.points"></span> | 
                                                                 <span x-text="subcat.description"></span>
                                                             </p>
                                                         </div>
-                                                        <div class="flex items-center gap-2">
+                                                        <div class="flex items-center gap-2 flex-shrink-0">
                                                             <div class="flex items-center gap-2">
                                                                 <button @click="editSubcategory(catIndex, subIndex)" class="text-blue-500 hover:text-blue-700 p-1" title="Edit Subcategory">
                                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                                                                 </button>
                                                                 <!-- show delete only when active (1) or when property missing; hide for 0/'0'/false -->
-                                                                <button x-show="subcat.is_active == 1 || typeof(subcat.is_active) === 'undefined'" @click="deleteSubcategoryPrompt(catIndex, subIndex)" class="flex items-center gap-1 text-red-500 hover:text-red-700 px-3 py-1 rounded-md text-sm bg-red-50 hover:bg-red-100" title="Delete Subcategory" aria-label="Delete Subcategory">
+                                                                <button x-show="subcat.is_active == 1 || typeof(subcat.is_active) === 'undefined'" @click="deleteSubcategoryPrompt(catIndex, subIndex)" class="flex items-center gap-1 text-red-500 hover:text-red-700 px-2 sm:px-3 py-1 rounded-md text-xs sm:text-sm bg-red-50 hover:bg-red-100" title="Delete Subcategory" aria-label="Delete Subcategory">
                                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                                                    <span class="hidden sm:inline">Hapus</span>
                                                                 </button>
                                                             </div>
                                                             <template x-if="subcat.is_active == 0 || subcat.is_active === false">
@@ -913,14 +914,14 @@
                     </div>
                 </div>
 
-                <div class="border-t p-6">
-                    <div class="flex gap-3 justify-between items-center">
-                        <label class="flex items-center gap-2 text-sm">
+                <div class="border-t p-4 sm:p-6">
+                    <div class="flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center">
+                        <label class="flex items-center gap-2 text-xs sm:text-sm">
                             <input type="checkbox" class="mr-2" x-model="showInactiveCategories" @change="loadCategories()">
-                            <span class="text-xs text-gray-600">Show inactive</span>
+                            <span class="text-xs sm:text-sm text-gray-600">Show inactive</span>
                         </label>
                         <div class="flex gap-3 justify-end">
-                            <button @click="closeCategoryModal" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium">Close</button>
+                            <button @click="closeCategoryModal" class="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-xs sm:text-sm font-medium">Close</button>
                         </div>
                     </div>
                 </div>
@@ -1867,30 +1868,35 @@
                 <!-- Student Accounts Tab -->
                 <div x-show="settingsTab === 'students'" class="space-y-6">
                     <!-- CSV Upload Form -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center gap-2">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                             </svg>
-                            Bulk Upload Student Accounts (CSV)
+                            <span class="break-words">Bulk Upload Student Accounts (CSV)</span>
                         </h3>
 
-                        <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <div class="flex justify-between items-start mb-2">
-                                <p class="text-sm text-blue-800"><strong>CSV Format Requirements:</strong></p>
-                                <a href="/sample_students.csv" download class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded flex items-center gap-1">
+                        <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-2">
+                                <p class="text-xs sm:text-sm text-blue-800"><strong>CSV Format Requirements:</strong></p>
+                                <a href="/sample_students.csv" download class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded flex items-center justify-center gap-1 whitespace-nowrap w-full sm:w-auto">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
                                     Download Sample
                                 </a>
                             </div>
-                            <p class="text-sm text-blue-700 mb-2">The CSV file must have the following columns (in order):</p>
-                            <code class="text-xs bg-blue-100 px-2 py-1 rounded block mb-2">name,email,password,student_id,major,batch_year</code>
-                            <p class="text-xs text-blue-600">Example: <code class="bg-blue-100 px-1 rounded">John Doe,john.doe@itbss.ac.id,password123,2021001,STI,2021</code></p>
-                            <div class="mt-2 pt-2 border-t border-blue-200">
+                            <p class="text-xs sm:text-sm text-blue-700 mb-2">The CSV file must have the following columns (in order):</p>
+                            <div class="bg-blue-100 rounded p-2 overflow-x-auto mb-2">
+                                <code class="text-xs whitespace-nowrap">name,email,password,student_id,major,batch_year</code>
+                            </div>
+                            <p class="text-xs text-blue-600 mb-1"><strong>Example:</strong></p>
+                            <div class="bg-blue-100 rounded p-2 overflow-x-auto">
+                                <code class="text-xs whitespace-nowrap">John Doe,john.doe@itbss.ac.id,password123,2021001,STI,2021</code>
+                            </div>
+                            <div class="mt-3 pt-3 border-t border-blue-200">
                                 <p class="text-xs text-blue-600"><strong>Notes:</strong></p>
-                                <ul class="text-xs text-blue-600 list-disc ml-4 mt-1">
+                                <ul class="text-xs text-blue-600 list-disc ml-4 mt-1 space-y-0.5">
                                     <li>Do not include a header row</li>
                                     <li>All fields are required</li>
                                     <li>Major must be: STI, BD, or KWU</li>
@@ -1902,28 +1908,28 @@
                         <form action="{{ route('students.import') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                             @csrf
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Select CSV File <span class="text-red-500">*</span></label>
-                                <input type="file" name="csv_file" accept=".csv" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Select CSV File <span class="text-red-500">*</span></label>
+                                <input type="file" name="csv_file" accept=".csv" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             </div>
 
                             <div class="flex justify-end">
-                                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                                <button type="submit" class="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center justify-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                     </svg>
-                                    Upload & Import Students
+                                    <span class="whitespace-nowrap">Upload & Import Students</span>
                                 </button>
                             </div>
                         </form>
                     </div>
 
                     <!-- Manual Add Student Form -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center gap-2">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                             </svg>
-                            Add Single Student Account
+                            <span class="break-words">Add Single Student Account</span>
                         </h3>
 
                         <form action="{{ route('students.store') }}" method="POST" class="space-y-4">
@@ -1932,32 +1938,32 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- Name -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Name <span class="text-red-500">*</span></label>
-                                    <input type="text" name="name" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter full name">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Name <span class="text-red-500">*</span></label>
+                                    <input type="text" name="name" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter full name">
                                 </div>
 
                                 <!-- Email -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Email <span class="text-red-500">*</span></label>
-                                    <input type="email" name="email" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter email address">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Email <span class="text-red-500">*</span></label>
+                                    <input type="email" name="email" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter email address">
                                 </div>
 
                                 <!-- Password -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Password <span class="text-red-500">*</span></label>
-                                    <input type="password" name="password" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter password (min 6 characters)">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Password <span class="text-red-500">*</span></label>
+                                    <input type="password" name="password" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter password (min 6 characters)">
                                 </div>
 
                                 <!-- Student ID -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Student ID <span class="text-red-500">*</span></label>
-                                    <input type="text" name="student_id" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter student ID">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Student ID <span class="text-red-500">*</span></label>
+                                    <input type="text" name="student_id" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter student ID">
                                 </div>
 
                                 <!-- Major -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Major <span class="text-red-500">*</span></label>
-                                    <select name="major" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Major <span class="text-red-500">*</span></label>
+                                    <select name="major" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                         <option value="">Select Major</option>
                                         <option value="STI">STI</option>
                                         <option value="BD">BD</option>
@@ -1967,18 +1973,18 @@
 
                                 <!-- Batch Year -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Batch Year <span class="text-red-500">*</span></label>
-                                    <input type="number" name="batch_year" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., 2022">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Batch Year <span class="text-red-500">*</span></label>
+                                    <input type="number" name="batch_year" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., 2022">
                                 </div>
                             </div>
 
                             <!-- Submit Button -->
                             <div class="flex justify-end pt-4">
-                                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                                <button type="submit" class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center justify-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                     </svg>
-                                    Add Student
+                                    <span class="whitespace-nowrap">Add Student</span>
                                 </button>
                             </div>
                         </form>
@@ -2010,16 +2016,16 @@
                     }
                 }">
                     <!-- Add Admin Form -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center gap-2">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                             </svg>
-                            Add New Admin Account
+                            <span class="break-words">Add New Admin Account</span>
                         </h3>
 
-                        <div class="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                            <p class="text-sm text-yellow-800"><strong>⚠️ Important:</strong> Admin accounts have full access to the system. Please ensure you trust the person before creating an admin account.</p>
+                        <div class="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4">
+                            <p class="text-xs sm:text-sm text-yellow-800"><strong>⚠️ Important:</strong> Admin accounts have full access to the system. Please ensure you trust the person before creating an admin account.</p>
                         </div>
 
                         <form action="{{ route('admins.store') }}" method="POST" class="space-y-4">
@@ -2028,20 +2034,20 @@
                             <div class="grid grid-cols-1 gap-4">
                                 <!-- Name -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Full Name <span class="text-red-500">*</span></label>
-                                    <input type="text" name="name" x-model="adminName" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Enter admin full name">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Full Name <span class="text-red-500">*</span></label>
+                                    <input type="text" name="name" x-model="adminName" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Enter admin full name">
                                 </div>
 
                                 <!-- Email -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Email Address <span class="text-red-500">*</span></label>
-                                    <input type="email" name="email" x-model="adminEmail" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Enter email address">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Email Address <span class="text-red-500">*</span></label>
+                                    <input type="email" name="email" x-model="adminEmail" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Enter email address">
                                 </div>
 
                                 <!-- Password -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Password <span class="text-red-500">*</span></label>
-                                    <input type="password" name="password" x-model="adminPassword" @input="checkPasswordStrength(); checkPasswordMatch()" required minlength="6" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Enter password (minimum 6 characters)">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Password <span class="text-red-500">*</span></label>
+                                    <input type="password" name="password" x-model="adminPassword" @input="checkPasswordStrength(); checkPasswordMatch()" required minlength="6" class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Enter password (minimum 6 characters)">
                                     
                                     <!-- Password Strength Indicator -->
                                     <div x-show="adminPassword.length > 0" class="mt-2">
@@ -2064,8 +2070,8 @@
 
                                 <!-- Confirm Password -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Confirm Password <span class="text-red-500">*</span></label>
-                                    <input type="password" name="password_confirmation" x-model="adminPasswordConfirm" @input="checkPasswordMatch()" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" :class="!passwordMatch ? 'border-red-500' : ''" placeholder="Re-enter password">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Confirm Password <span class="text-red-500">*</span></label>
+                                    <input type="password" name="password_confirmation" x-model="adminPasswordConfirm" @input="checkPasswordMatch()" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" :class="!passwordMatch ? 'border-red-500' : ''" placeholder="Re-enter password">
                                     
                                     <!-- Password Match Indicator -->
                                     <div x-show="adminPasswordConfirm.length > 0">
@@ -2087,11 +2093,11 @@
 
                             <!-- Submit Button -->
                             <div class="flex justify-end pt-4">
-                                <button type="submit" :disabled="!passwordMatch || adminPassword.length < 6" :class="!passwordMatch || adminPassword.length < 6 ? 'bg-gray-400 cursor-not-allowed' : 'bg-purple-500 hover:bg-purple-600'" class="text-white px-6 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                                <button type="submit" :disabled="!passwordMatch || adminPassword.length < 6" :class="!passwordMatch || adminPassword.length < 6 ? 'bg-gray-400 cursor-not-allowed' : 'bg-purple-500 hover:bg-purple-600'" class="w-full sm:w-auto text-white px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center justify-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                     </svg>
-                                    Create Admin Account
+                                    <span class="whitespace-nowrap">Create Admin Account</span>
                                 </button>
                             </div>
                         </form>
@@ -2100,15 +2106,15 @@
 
                 <!-- Category Management Tab -->
                 <div x-show="settingsTab === 'categories'" class="space-y-6">
-                                        <!-- S-Core Settings -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold mb-4">S-Core Eligibility Settings</h3>
-                        <p class="text-sm text-gray-600 mb-6">Configure the minimum requirements for students to be considered as PASSED</p>
+                    <!-- S-Core Settings -->
+                    <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">S-Core Eligibility Settings</h3>
+                        <p class="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">Configure the minimum requirements for students to be considered as PASSED</p>
                         
                         <form @submit.prevent="updateScoreSettings()" class="space-y-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                                         Minimum Points Required
                                         <span class="text-red-500">*</span>
                                     </label>
@@ -2117,14 +2123,14 @@
                                         x-model.number="scoreSettings.minPoints" 
                                         min="1" 
                                         max="1000"
-                                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         placeholder="e.g., 20"
                                         required
                                     />
                                 </div>
                                 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                                         Minimum Categories Required
                                         <span class="text-red-500">*</span>
                                     </label>
@@ -2133,72 +2139,72 @@
                                         x-model.number="scoreSettings.minCategories" 
                                         min="1" 
                                         max="10"
-                                        class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         placeholder="e.g., 5"
                                         required
                                     />
                                 </div>
                             </div>
 
-                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                                <p class="text-sm text-blue-800">
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mt-4">
+                                <p class="text-xs sm:text-sm text-blue-800">
                                     <span class="font-semibold">Info:</span> Students will be marked as PASSED only when they have at least 
                                     <span class="font-bold" x-text="scoreSettings.minPoints"></span> points AND completed 
                                     <span class="font-bold" x-text="scoreSettings.minCategories"></span> categories
                                 </p>
                             </div>
 
-                            <div class="flex justify-end gap-3 mt-6">
+                            <div class="flex flex-col sm:flex-row justify-end gap-3 mt-6">
                                 <button 
                                     type="button"
                                     @click="loadScoreSettings()" 
-                                    class="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition-colors"
+                                    class="w-full sm:w-auto px-4 sm:px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-xs sm:text-sm font-medium transition-colors"
                                 >
                                     Reset
                                 </button>
                                 <button 
                                     type="submit"
-                                    class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+                                    class="w-full sm:w-auto px-4 sm:px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors"
                                 >
                                     Save Settings
                                 </button>
                             </div>
                         </form>
                     </div>
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center gap-2">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                             </svg>
-                            Manage Categories
+                            <span class="break-words">Manage Categories</span>
                         </h3>
-                        <p class="text-sm text-gray-600 mb-4">Manage S-Core categories, rename, add/remove categories, and configure their default point values</p>
-                        <div class="flex flex-wrap gap-2 mb-4">
+                        <p class="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">Manage S-Core categories, rename, add/remove categories, and configure their default point values</p>
+                        <div class="flex flex-wrap gap-2 mb-3 sm:mb-4">
                             <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Total Categories: <span class="font-bold" x-text="categories.length"></span></span>
                         </div>
-                        <button @click="requestCategoryManagement" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                        <button @click="requestCategoryManagement" class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center justify-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
-                            Manage Categories
+                            <span class="whitespace-nowrap">Manage Categories</span>
                         </button>
                     </div>
 
                     <!-- Security PIN Management -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center gap-2">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
-                            Security PIN
+                            <span class="break-words">Security PIN</span>
                         </h3>
-                        <p class="text-sm text-gray-600 mb-6">Change the security PIN required to manage categories. PIN must be 4-6 digits.</p>
+                        <p class="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">Change the security PIN required to manage categories. PIN must be 4-6 digits.</p>
                         
                         <form @submit.prevent="updateSecurityPin()" class="space-y-4">
                             <div class="grid grid-cols-1 gap-4">
                                 <!-- Current PIN -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                                         Current PIN
                                         <span class="text-red-500">*</span>
                                     </label>
@@ -2208,7 +2214,7 @@
                                             x-model="pinData.currentPin" 
                                             maxlength="6"
                                             pattern="[0-9]{4,6}"
-                                            class="w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 pr-10 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                             placeholder="Enter current PIN"
                                             required
                                         />
@@ -2230,7 +2236,7 @@
 
                                 <!-- New PIN -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                                         New PIN
                                         <span class="text-red-500">*</span>
                                     </label>
@@ -2240,7 +2246,7 @@
                                             x-model="pinData.newPin" 
                                             maxlength="6"
                                             pattern="[0-9]{4,6}"
-                                            class="w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 pr-10 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                             placeholder="Enter new PIN (4-6 digits)"
                                             required
                                         />
@@ -2262,7 +2268,7 @@
 
                                 <!-- Confirm New PIN -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                                         Confirm New PIN
                                         <span class="text-red-500">*</span>
                                     </label>
@@ -2272,7 +2278,7 @@
                                             x-model="pinData.confirmPin" 
                                             maxlength="6"
                                             pattern="[0-9]{4,6}"
-                                            class="w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 pr-10 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                             placeholder="Re-enter new PIN"
                                             required
                                         />
@@ -2293,23 +2299,23 @@
                                 </div>
                             </div>
 
-                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-4">
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4 mt-4">
                                 <div class="flex items-start gap-2">
-                                    <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                     </svg>
-                                    <div class="text-sm text-yellow-800">
+                                    <div class="text-xs sm:text-sm text-yellow-800">
                                         <p class="font-semibold">Important:</p>
                                         <p>This PIN is required to manage categories (add, edit, delete). Make sure to remember your new PIN.</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="flex justify-end gap-3 mt-6">
+                            <div class="flex flex-col sm:flex-row justify-end gap-3 mt-6">
                                 <button 
                                     type="button"
                                     @click="resetPinForm()" 
-                                    class="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition-colors"
+                                    class="w-full sm:w-auto px-4 sm:px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-xs sm:text-sm font-medium transition-colors"
                                 >
                                     Clear
                                 </button>
@@ -2317,7 +2323,7 @@
                                     type="submit"
                                     :disabled="isPinSubmitting"
                                     :class="isPinSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'"
-                                    class="px-6 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                                    class="w-full sm:w-auto px-4 sm:px-6 py-2 bg-blue-500 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-2"
                                 >
                                     <svg x-show="!isPinSubmitting" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -2326,7 +2332,7 @@
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
-                                    <span x-text="isPinSubmitting ? 'Updating...' : 'Update PIN'"></span>
+                                    <span class="whitespace-nowrap" x-text="isPinSubmitting ? 'Updating...' : 'Update PIN'"></span>
                                 </button>
                             </div>
                         </form>
@@ -2409,30 +2415,35 @@
                 <!-- Student Accounts Tab -->
                 <div x-show="userTab === 'students'" class="space-y-6">
                     <!-- CSV Upload Form -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center gap-2">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                             </svg>
-                            Bulk Upload Student Accounts (CSV)
+                            <span class="break-words">Bulk Upload Student Accounts (CSV)</span>
                         </h3>
 
-                        <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <div class="flex justify-between items-start mb-2">
-                                <p class="text-sm text-blue-800"><strong>CSV Format Requirements:</strong></p>
-                                <a href="/sample_students.csv" download class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded flex items-center gap-1">
+                        <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-2">
+                                <p class="text-xs sm:text-sm text-blue-800"><strong>CSV Format Requirements:</strong></p>
+                                <a href="/sample_students.csv" download class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded flex items-center justify-center gap-1 whitespace-nowrap w-full sm:w-auto">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
                                     Download Sample
                                 </a>
                             </div>
-                            <p class="text-sm text-blue-700 mb-2">The CSV file must have the following columns (in order):</p>
-                            <code class="text-xs bg-blue-100 px-2 py-1 rounded block mb-2">name,email,password,student_id,major,batch_year</code>
-                            <p class="text-xs text-blue-600">Example: <code class="bg-blue-100 px-1 rounded">John Doe,john@example.com,password123,2021001,STI,2021</code></p>
-                            <div class="mt-2 pt-2 border-t border-blue-200">
+                            <p class="text-xs sm:text-sm text-blue-700 mb-2">The CSV file must have the following columns (in order):</p>
+                            <div class="bg-blue-100 rounded p-2 overflow-x-auto mb-2">
+                                <code class="text-xs whitespace-nowrap">name,email,password,student_id,major,batch_year</code>
+                            </div>
+                            <p class="text-xs text-blue-600 mb-1"><strong>Example:</strong></p>
+                            <div class="bg-blue-100 rounded p-2 overflow-x-auto">
+                                <code class="text-xs whitespace-nowrap">John Doe,john@example.com,password123,2021001,STI,2021</code>
+                            </div>
+                            <div class="mt-3 pt-3 border-t border-blue-200">
                                 <p class="text-xs text-blue-600"><strong>Notes:</strong></p>
-                                <ul class="text-xs text-blue-600 list-disc ml-4 mt-1">
+                                <ul class="text-xs text-blue-600 list-disc ml-4 mt-1 space-y-0.5">
                                     <li>Do not include a header row</li>
                                     <li>All fields are required</li>
                                     <li>Major must be: STI, BD, or KWU</li>
@@ -2444,28 +2455,28 @@
                         <form action="{{ route('students.import') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                             @csrf
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Select CSV File <span class="text-red-500">*</span></label>
-                                <input type="file" name="csv_file" accept=".csv" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Select CSV File <span class="text-red-500">*</span></label>
+                                <input type="file" name="csv_file" accept=".csv" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             </div>
 
                             <div class="flex justify-end">
-                                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                                <button type="submit" class="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center justify-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                     </svg>
-                                    Upload & Import Students
+                                    <span class="whitespace-nowrap">Upload & Import Students</span>
                                 </button>
                             </div>
                         </form>
                     </div>
 
                     <!-- Manual Add Student Form -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center gap-2">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                             </svg>
-                            Add Single Student Account
+                            <span class="break-words">Add Single Student Account</span>
                         </h3>
 
                         <form action="{{ route('students.store') }}" method="POST" class="space-y-4">
@@ -2474,32 +2485,32 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- Name -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Name <span class="text-red-500">*</span></label>
-                                    <input type="text" name="name" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter full name">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Name <span class="text-red-500">*</span></label>
+                                    <input type="text" name="name" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter full name">
                                 </div>
 
                                 <!-- Email -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Email <span class="text-red-500">*</span></label>
-                                    <input type="email" name="email" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter email address">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Email <span class="text-red-500">*</span></label>
+                                    <input type="email" name="email" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter email address">
                                 </div>
 
                                 <!-- Password -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Password <span class="text-red-500">*</span></label>
-                                    <input type="password" name="password" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter password (min 6 characters)">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Password <span class="text-red-500">*</span></label>
+                                    <input type="password" name="password" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter password (min 6 characters)">
                                 </div>
 
                                 <!-- Student ID -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Student ID <span class="text-red-500">*</span></label>
-                                    <input type="text" name="student_id" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter student ID">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Student ID <span class="text-red-500">*</span></label>
+                                    <input type="text" name="student_id" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter student ID">
                                 </div>
 
                                 <!-- Major -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Major <span class="text-red-500">*</span></label>
-                                    <select name="major" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Major <span class="text-red-500">*</span></label>
+                                    <select name="major" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                         <option value="">Select Major</option>
                                         <option value="STI">STI</option>
                                         <option value="BD">BD</option>
@@ -2509,18 +2520,18 @@
 
                                 <!-- Batch Year -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Batch Year <span class="text-red-500">*</span></label>
-                                    <input type="number" name="batch_year" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., 2022">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Batch Year <span class="text-red-500">*</span></label>
+                                    <input type="number" name="batch_year" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., 2022">
                                 </div>
                             </div>
 
                             <!-- Submit Button -->
                             <div class="flex justify-end pt-4">
-                                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                                <button type="submit" class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center justify-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                     </svg>
-                                    Add Student
+                                    <span class="whitespace-nowrap">Add Student</span>
                                 </button>
                             </div>
                         </form>
@@ -2552,16 +2563,16 @@
                     }
                 }">
                     <!-- Add Admin Form -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="bg-white rounded-lg shadow p-4 sm:p-6">
+                        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center gap-2">
+                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                             </svg>
-                            Add New Admin Account
+                            <span class="break-words">Add New Admin Account</span>
                         </h3>
 
-                        <div class="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                            <p class="text-sm text-yellow-800"><strong>⚠️ Important:</strong> Admin accounts have full access to the system. Please ensure you trust the person before creating an admin account.</p>
+                        <div class="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4">
+                            <p class="text-xs sm:text-sm text-yellow-800"><strong>⚠️ Important:</strong> Admin accounts have full access to the system. Please ensure you trust the person before creating an admin account.</p>
                         </div>
 
                         <form action="{{ route('admins.store') }}" method="POST" class="space-y-4">
@@ -2570,20 +2581,20 @@
                             <div class="grid grid-cols-1 gap-4">
                                 <!-- Name -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Full Name <span class="text-red-500">*</span></label>
-                                    <input type="text" name="name" x-model="adminName" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Enter admin full name">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Full Name <span class="text-red-500">*</span></label>
+                                    <input type="text" name="name" x-model="adminName" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Enter admin full name">
                                 </div>
 
                                 <!-- Email -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Email Address <span class="text-red-500">*</span></label>
-                                    <input type="email" name="email" x-model="adminEmail" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Enter email address">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Email Address <span class="text-red-500">*</span></label>
+                                    <input type="email" name="email" x-model="adminEmail" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Enter email address">
                                 </div>
 
                                 <!-- Password -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Password <span class="text-red-500">*</span></label>
-                                    <input type="password" name="password" x-model="adminPassword" @input="checkPasswordStrength(); checkPasswordMatch()" required minlength="6" class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Enter password (minimum 6 characters)">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Password <span class="text-red-500">*</span></label>
+                                    <input type="password" name="password" x-model="adminPassword" @input="checkPasswordStrength(); checkPasswordMatch()" required minlength="6" class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Enter password (minimum 6 characters)">
                                     
                                     <!-- Password Strength Indicator -->
                                     <div x-show="adminPassword.length > 0" class="mt-2">
@@ -2606,8 +2617,8 @@
 
                                 <!-- Confirm Password -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Confirm Password <span class="text-red-500">*</span></label>
-                                    <input type="password" name="password_confirmation" x-model="adminPasswordConfirm" @input="checkPasswordMatch()" required class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" :class="!passwordMatch ? 'border-red-500' : ''" placeholder="Re-enter password">
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Confirm Password <span class="text-red-500">*</span></label>
+                                    <input type="password" name="password_confirmation" x-model="adminPasswordConfirm" @input="checkPasswordMatch()" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500" :class="!passwordMatch ? 'border-red-500' : ''" placeholder="Re-enter password">
                                     
                                     <!-- Password Match Indicator -->
                                     <div x-show="adminPasswordConfirm.length > 0">
@@ -2629,11 +2640,11 @@
 
                             <!-- Submit Button -->
                             <div class="flex justify-end pt-4">
-                                <button type="submit" :disabled="!passwordMatch || adminPassword.length < 6" :class="!passwordMatch || adminPassword.length < 6 ? 'bg-gray-400 cursor-not-allowed' : 'bg-purple-500 hover:bg-purple-600'" class="text-white px-6 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                                <button type="submit" :disabled="!passwordMatch || adminPassword.length < 6" :class="!passwordMatch || adminPassword.length < 6 ? 'bg-gray-400 cursor-not-allowed' : 'bg-purple-500 hover:bg-purple-600'" class="w-full sm:w-auto text-white px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center justify-center gap-2">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                     </svg>
-                                    Create Admin Account
+                                    <span class="whitespace-nowrap">Create Admin Account</span>
                                 </button>
                             </div>
                         </form>
