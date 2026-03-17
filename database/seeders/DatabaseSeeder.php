@@ -81,6 +81,7 @@ class DatabaseSeeder extends Seeder
                     ['name' => 'Publikasi tulisan/karya di media massa bereputasi (online/offline) dalam Bahasa Asing', 'points' => 4, 'description' => 'Per karya'],
                     ['name' => 'Asistensi dosen/lab', 'points' => 3, 'description' => 'Per semester'],
                     ['name' => 'Tenaga pengajar sukarela', 'points' => 2, 'description' => 'Per kegiatan'],
+                    ['name' => 'Migrasi Kegiatan Ilmiah dan Penalaran', 'points' => 1, 'description' => 'Data migrasi dari CSV import'],
                 ],
             ],
             [
@@ -100,6 +101,7 @@ class DatabaseSeeder extends Seeder
                     ['name' => 'Parade budaya/seni - Tingkat kota/provinsi', 'points' => 3, 'description' => 'Per kegiatan'],
                     ['name' => 'Parade budaya/seni - Tingkat nasional', 'points' => 5, 'description' => 'Per kegiatan'],
                     ['name' => 'Parade budaya/seni - Tingkat internasional', 'points' => 8, 'description' => 'Per kegiatan'],
+                    ['name' => 'Migrasi Performance, Pengembangan, dan Perlombaan', 'points' => 1, 'description' => 'Data migrasi dari CSV import'],
                 ],
             ],
             [
@@ -112,7 +114,8 @@ class DatabaseSeeder extends Seeder
                     ['name' => 'Organisasi Kemahasiswaan - Anggota', 'points' => 1, 'description' => 'Per periode kepengurusan'],
                     ['name' => 'Organisasi di luar kampus - Pengurus Harian (Ketua, Wakil Ketua, Sekretaris, Bendahara)', 'points' => 4, 'description' => 'Per periode kepengurusan'],
                     ['name' => 'Organisasi di luar kampus - Koordinator/Anggota Seksi', 'points' => 2, 'description' => 'Per periode kepengurusan'],
-                    ['name' => 'Organisasi di luar kampus - Anggota', 'points' => 1, 'description' => 'Per periode kepengurusan'],                   
+                    ['name' => 'Organisasi di luar kampus - Anggota', 'points' => 1, 'description' => 'Per periode kepengurusan'],
+                    ['name' => 'Migrasi Kepengurusan Organisasi/Kepanitiaan', 'points' => 1, 'description' => 'Data migrasi dari CSV import'],
                 ],
             ],
             [
@@ -126,6 +129,7 @@ class DatabaseSeeder extends Seeder
                     ['name' => 'Social campaign (online/offline) pribadi', 'points' => 2, 'description' => 'Per karya'],
                     ['name' => 'Social campaign (online/offline) sebagai bagian kegiatan dari badan berputasi', 'points' => 4, 'description' => 'Per karya'],
                     ['name' => 'Mengembangkan hal bermanfaat bagi masyarakat (pembuatan aplikasi/produk) yang diakui dan digunakan oleh masyarakat', 'points' => 5, 'description' => 'Per karya'],
+                    ['name' => 'Migrasi Kegiatan Sosial Kemasyarakatan', 'points' => 1, 'description' => 'Data migrasi dari CSV import'],
                 ],
             ],
         ];

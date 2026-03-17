@@ -8,7 +8,6 @@ use App\Models\Subcategory;
 use App\Services\GoogleDriveService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class SubmissionController extends Controller
 {
@@ -101,7 +100,7 @@ class SubmissionController extends Controller
 
     /**
      * 2. Update Pengajuan (Edit Data)
-     * UPDATE: Hanya membolehkan edit jika status 'Rejected' (tidak bisa edit Waiting)
+     * UPDATE: Membolehkan edit hanya jika status 'Rejected'
      */
     public function update(Request $request, $id)
     {
@@ -109,10 +108,9 @@ class SubmissionController extends Controller
             // Cari data punya user yang sedang login
             $submission = Submission::where('student_id', Auth::id())->where('id', $id)->firstOrFail();
 
-            // Cek status: Hanya boleh edit jika 'Rejected' saja (tidak boleh edit Waiting)
-            if ($submission->status !== 'Rejected') {
-                return response()->json(['message' => 'Can only edit rejected submissions. Waiting submissions cannot be edited.'], 403);
-            }
+            // Cek status: Semua submission tidak boleh di-edit (hanya bisa di-delete)
+            // Edit functionality disabled sepenuhnya untuk keamanan
+            return response()->json(['message' => 'Submission cannot be edited. Please delete and resubmit if needed.'], 403);
 
             // Validasi (File bersifat nullable/opsional disini)
             $request->validate([
@@ -146,6 +144,7 @@ class SubmissionController extends Controller
 
             // Cek apakah ada file baru diupload
             if ($request->hasFile('certificate_file')) {
+                \Log::info('Update: File baru dikirim, akan di-upload ke Google Drive');
                 $googleDriveService = app(GoogleDriveService::class);
                 
                 // Hapus file lama dari storage jika ada
@@ -205,9 +204,22 @@ class SubmissionController extends Controller
 
             $submission->update($dataToUpdate);
 
+            \Log::info('Submission updated successfully', [
+                'submission_id' => $submission->id, 
+                'student_id' => Auth::id(),
+                'status' => $submission->status,
+                'file_updated' => $request->hasFile('certificate_file')
+            ]);
+
             return response()->json(['message' => 'Submission updated successfully!']);
 
         } catch (\Exception $e) {
+            \Log::error('Failed to update submission', [
+                'submission_id' => $id ?? 'unknown',
+                'student_id' => Auth::id(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json(['message' => 'Error updating data: ' . $e->getMessage()], 500);
         }
     }

@@ -218,8 +218,8 @@
             <div class="header-logo">SISTEM CORE ITBSS</div>
             <h1>S-CORE REPORT</h1>
             <p>Laporan Pengakuan S-Core untuk Persyaratan Skripsi</p>
-        </div>
-
+        </div>  
+        
         <!-- Student Information -->
         <div class="student-info">
             <div class="student-info-item">

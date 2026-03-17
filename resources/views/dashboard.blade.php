@@ -20,17 +20,45 @@
         }
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js?v={{ time() }}"></script>
+    <style>
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .animate-slide-up {
+            animation: slideUp 0.25s ease-out;
+        }
+        /* Force narrow sidebar on small screens */
+        @media (max-width: 666px) {
+            .sidebar-container {
+                width: 3.5rem !important; /* w-14 = 56px */
+            }
+            .sidebar-container .sidebar-text {
+                display: none !important;
+            }
+            .sidebar-container .p-4 {
+                padding: 0.5rem !important;
+            }
+            .sidebar-container img {
+                width: 2rem !important;
+                height: 2rem !important;
+            }
+            .hamburger-btn {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="flex h-screen bg-gray-100" x-data="dashboardData()" x-init="loadCategories()">
         <!-- Logout Confirmation Modal -->
         <div x-show="showLogoutModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]" style="display: none;">
             <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
-                <h3 class="text-lg font-semibold mb-4">Confirm Logout</h3>
-                <p class="text-gray-600 mb-6">Are you sure you want to logout?</p>
+                <h3 class="text-lg font-semibold mb-4">Konfirmasi Keluar</h3>
+                <p class="text-gray-600 mb-6">Apakah Anda yakin ingin keluar?</p>
                 <div class="flex gap-3 justify-end">
-                    <button @click="showLogoutModal = false" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium">No</button>
-                    <button @click="confirmLogout" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded text-sm font-medium">Yes</button>
+                    <button @click="showLogoutModal = false" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium">Tidak</button>
+                    <button @click="confirmLogout" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded text-sm font-medium">Ya</button>
                 </div>
             </div>
         </div>
@@ -39,7 +67,7 @@
         <div x-show="showAddModal" class="fixed inset-0 bg-black bg-opacity-50 z-[9999]" style="display: none;">
             <div class="h-full w-full bg-white flex flex-col">
                 <div class="bg-white border-b px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
-                    <h3 class="text-lg sm:text-xl font-semibold">Submit New S-Core</h3>
+                    <h3 class="text-lg sm:text-xl font-semibold">Ajukan S-Core Baru</h3>
                     <button @click="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl leading-none w-8 h-8 flex items-center justify-center">×</button>
                 </div>
 
@@ -50,14 +78,14 @@
                             <div class="flex-1 overflow-y-auto p-4 sm:p-6">
                                 <div class="space-y-3 sm:space-y-4">
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Student</label>
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Mahasiswa</label>
                                         <div class="bg-gray-50 border rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-700">{{ Auth::user()->name }}</div>
                                     </div>
 
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Main Category <span class="text-red-500">*</span></label>
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Kategori Utama <span class="text-red-500">*</span></label>
                                         <select x-model="formData.mainCategory" @change="updateAvailableSubcategories()" class="w-full border rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <option value="">Select Main Category</option>
+                                            <option value="">Pilih Kategori Utama</option>
                                             <template x-for="(catGroup, idx) in categoryGroups" :key="idx">
                                                 <option :value="idx" x-text="(idx + 1) + '. ' + catGroup.name"></option>
                                             </template>
@@ -65,35 +93,35 @@
                                     </div>
 
                                     <div x-show="formData.mainCategory !== ''">
-                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Subcategory <span class="text-red-500">*</span></label>
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Subkategori <span class="text-red-500">*</span></label>
                                         <select x-model="formData.subcategory" class="w-full border rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                            <option value="">Select Subcategory</option>
+                                            <option value="">Pilih Subkategori</option>
                                             <template x-for="(sub, idx) in availableSubcategories" :key="idx">
-                                                <option :value="sub.name" x-text="sub.name + ' (' + sub.points + ' pts)'"></option>
+                                                <option :value="sub.name" x-text="sub.name + ' (' + sub.points + ' poin)'"></option>
                                             </template>
                                         </select>
                                     </div>
 
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Activity Title <span class="text-red-500">*</span></label>
-                                        <input type="text" x-model="formData.activityTitle" class="w-full border rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter activity title" />
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Judul Kegiatan <span class="text-red-500">*</span></label>
+                                        <input type="text" x-model="formData.activityTitle" class="w-full border rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan judul kegiatan" />
                                     </div>
 
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Description <span class="text-red-500">*</span></label>
-                                        <textarea x-model="formData.description" rows="3" class="w-full border rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter description"></textarea>
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Deskripsi <span class="text-red-500">*</span></label>
+                                        <textarea x-model="formData.description" rows="3" class="w-full border rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan deskripsi"></textarea>
                                     </div>
 
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Activity Date <span class="text-red-500">*</span></label>
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Tanggal Kegiatan <span class="text-red-500">*</span></label>
                                         <input type="date" x-model="formData.activityDate" :max="maxDate" class="w-full border rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                                        <p class="text-xs text-gray-500 mt-1">Maximum 1 month from today</p>
+                                        <p class="text-xs text-gray-500 mt-1">Maksimal 1 bulan dari hari ini</p>
                                         <p x-show="dateValidationError" class="text-xs text-red-500 mt-1" x-text="dateValidationError"></p>
                                     </div>
 
                                     <!-- Upload Section - Appears After Date on Mobile, Hidden on Desktop (shown in left column) -->
                                     <div class="lg:hidden">
-                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Upload Certificate/Evidence <span class="text-red-500">*</span></label>
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Unggah Sertifikat/Bukti <span class="text-red-500">*</span></label>
                                         <div 
                                             class="border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center p-6 sm:p-8 hover:border-blue-400 transition-colors cursor-pointer"
                                             @dragover.prevent="dragActive = true"
@@ -105,13 +133,13 @@
                                             <svg class="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                             </svg>
-                                            <p class="text-gray-600 text-xs sm:text-sm mb-2 text-center">Drag and drop your PDF file here</p>
-                                            <p class="text-gray-400 text-xs mb-3 sm:mb-4">or</p>
+                                            <p class="text-gray-600 text-xs sm:text-sm mb-2 text-center">Seret dan lepas file PDF Anda di sini</p>
+                                            <p class="text-gray-400 text-xs mb-3 sm:mb-4">atau</p>
                                             <label class="cursor-pointer" @click.stop>
-                                                <span class="bg-blue-500 hover:bg-blue-600 text-white px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium inline-block">Browse Files</span>
+                                                <span class="bg-blue-500 hover:bg-blue-600 text-white px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium inline-block">Pilih File</span>
                                                 <input type="file" accept=".pdf" class="hidden" x-ref="fileInput" @change="handleFileSelect" />
                                             </label>
-                                            <p class="text-gray-400 text-xs mt-3 sm:mt-4">PDF only - Maximum 10MB</p>
+                                            <p class="text-gray-400 text-xs mt-3 sm:mt-4">Hanya PDF - Maksimal 10MB</p>
                                         </div>
                                         <div x-show="formData.fileName" class="mt-3 sm:mt-4 p-2.5 sm:p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
                                             <div class="flex items-center gap-2">
@@ -120,7 +148,7 @@
                                                 </svg>
                                                 <span class="text-xs sm:text-sm text-gray-700 truncate" x-text="formData.fileName"></span>
                                             </div>
-                                            <button @click="formData.fileName = ''" class="text-red-500 hover:text-red-700 flex-shrink-0">
+                                            <button @click="clearSelectedFile()" class="text-red-500 hover:text-red-700 flex-shrink-0">
                                                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                 </svg>
@@ -133,21 +161,21 @@
                             <!-- Fixed Action Buttons -->
                             <div class="border-t bg-white px-4 sm:px-6 py-3 sm:py-4">
                                 <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-end">
-                                    <button @click="closeModal" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-xs sm:text-sm font-medium transition-colors">Cancel</button>
+                                    <button @click="closeModal" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-xs sm:text-sm font-medium transition-colors">Batal</button>
                                     <button 
                                         @click="showSubmitConfirmation" 
                                         :disabled="isSubmitting"
                                         :class="isSubmitting ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'"
                                         class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-2">
                                         
-                                        <span x-show="!isSubmitting">Submit for Review</span>
+                                        <span x-show="!isSubmitting">Kirim untuk Ditinjau</span>
                                         
                                         <span x-show="isSubmitting" class="flex items-center gap-2">
                                             <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                             </svg>
-                                            Processing...
+                                            Memproses...
                                         </span>
                                     </button>
                                 </div>
@@ -157,7 +185,7 @@
                         <!-- Upload Section - Left Column on Desktop (Hidden on Mobile, shown inline after date) -->
                         <div class="w-full lg:w-1/2 bg-gray-100 lg:border-r overflow-auto p-4 sm:p-6 order-2 lg:order-1 hidden lg:block">
                             <div class="bg-white rounded-lg shadow-sm h-full flex flex-col p-4 sm:p-6">
-                                <h4 class="font-semibold text-gray-800 mb-3 sm:mb-4 text-sm sm:text-base">Upload Certificate/Evidence</h4>
+                                <h4 class="font-semibold text-gray-800 mb-3 sm:mb-4 text-sm sm:text-base">Unggah Sertifikat/Bukti</h4>
                                 <div 
                                     class="flex-1 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center p-6 sm:p-8 hover:border-blue-400 transition-colors cursor-pointer min-h-[300px]"
                                     @dragover.prevent="dragActive = true"
@@ -169,13 +197,13 @@
                                     <svg class="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                     </svg>
-                                    <p class="text-gray-600 text-xs sm:text-sm mb-2 text-center">Drag and drop your PDF file here</p>
-                                    <p class="text-gray-400 text-xs mb-3 sm:mb-4">or</p>
+                                    <p class="text-gray-600 text-xs sm:text-sm mb-2 text-center">Seret dan lepas file PDF Anda di sini</p>
+                                    <p class="text-gray-400 text-xs mb-3 sm:mb-4">atau</p>
                                     <label class="cursor-pointer" @click.stop>
-                                        <span class="bg-blue-500 hover:bg-blue-600 text-white px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium inline-block">Browse Files</span>
+                                        <span class="bg-blue-500 hover:bg-blue-600 text-white px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium inline-block">Pilih File</span>
                                         <input type="file" accept=".pdf" class="hidden" x-ref="fileInputDesktop" @change="handleFileSelect" />
                                     </label>
-                                    <p class="text-gray-400 text-xs mt-3 sm:mt-4">PDF only - Maximum 10MB</p>
+                                    <p class="text-gray-400 text-xs mt-3 sm:mt-4">Hanya PDF - Maksimal 10MB</p>
                                 </div>
                                 <div x-show="formData.fileName" class="mt-3 sm:mt-4 p-2.5 sm:p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
                                     <div class="flex items-center gap-2 min-w-0">
@@ -184,7 +212,7 @@
                                         </svg>
                                         <span class="text-xs sm:text-sm text-gray-700 truncate" x-text="formData.fileName"></span>
                                     </div>
-                                    <button @click="formData.fileName = ''" class="text-red-500 hover:text-red-700 flex-shrink-0 ml-2">
+                                    <button @click="clearSelectedFile()" class="text-red-500 hover:text-red-700 flex-shrink-0 ml-2">
                                         <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                         </svg>
@@ -206,7 +234,7 @@
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <h3 class="text-xl font-bold">Review Your Submission</h3>
+                        <h3 class="text-xl font-bold">Tinjau Pengajuan Anda</h3>
                     </div>
                     <button @click="showConfirmSubmitModal = false" class="text-white hover:text-gray-200 text-2xl leading-none w-8 h-8 flex items-center justify-center">×</button>
                 </div>
@@ -219,8 +247,8 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
                             <div>
-                                <p class="font-semibold text-yellow-800 mb-1">Please Review Carefully</p>
-                                <p class="text-sm text-yellow-700">Make sure all information is correct before submitting. You can edit rejected submissions later.</p>
+                                <p class="font-semibold text-yellow-800 mb-1">Harap Periksa dengan Teliti</p>
+                                <p class="text-sm text-yellow-700">Pastikan semua informasi sudah benar sebelum dikirim. Anda dapat memperbaiki pengajuan yang ditolak nanti.</p>
                             </div>
                         </div>
                     </div>
@@ -228,48 +256,48 @@
                     <div class="space-y-4">
                         <!-- Student -->
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Student</label>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Mahasiswa</label>
                             <p class="text-sm font-medium text-gray-800">{{ Auth::user()->name }}</p>
                         </div>
 
                         <!-- Main Category -->
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Main Category</label>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Kategori Utama</label>
                             <p class="text-sm font-medium text-gray-800" x-text="formData.mainCategory !== '' && formData.mainCategory !== null ? (formData.mainCategory + 1) + '. ' + categoryGroups[formData.mainCategory].name : '-'"></p>
                         </div>
 
                         <!-- Subcategory -->
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Subcategory</label>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Subkategori</label>
                             <p class="text-sm font-medium text-gray-800" x-text="formData.subcategory || '-'"></p>
                             <template x-if="formData.subcategory">
                                 <p class="text-xs text-blue-600 font-semibold mt-1">
-                                    Points: <span x-text="availableSubcategories.find(s => s.name === formData.subcategory)?.points || 0"></span>
+                                    Poin: <span x-text="availableSubcategories.find(s => s.name === formData.subcategory)?.points || 0"></span>
                                 </p>
                             </template>
                         </div>
 
                         <!-- Activity Title -->
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Activity Title</label>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Judul Kegiatan</label>
                             <p class="text-sm font-medium text-gray-800" x-text="formData.activityTitle || '-'"></p>
                         </div>
 
                         <!-- Description -->
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Description</label>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Deskripsi</label>
                             <p class="text-sm text-gray-800 whitespace-pre-wrap" x-text="formData.description || '-'"></p>
                         </div>
 
                         <!-- Activity Date -->
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Activity Date</label>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Tanggal Kegiatan</label>
                             <p class="text-sm font-medium text-gray-800" x-text="formData.activityDate || '-'"></p>
                         </div>
 
                         <!-- Certificate File -->
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Certificate/Evidence File</label>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">File Sertifikat/Bukti</label>
                             <div class="flex items-center gap-2">
                                 <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
@@ -290,7 +318,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
                                 </svg>
-                                Go Back to Edit
+                                Kembali Mengedit
                             </span>
                         </button>
                         <button 
@@ -364,7 +392,7 @@
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                                         </svg>
-                                                        Change PDF
+                                                        Ganti PDF
                                                     </button>
                                                 </div>
                                             </div>
@@ -374,22 +402,22 @@
                                         <template x-if="!selectedActivity || !selectedActivity.file_url || editShowUploadBox">
                                             <div class="p-6 h-full flex flex-col">
                                                 <div class="flex justify-between items-center mb-4">
-                                                    <h4 class="font-semibold text-gray-800">Update Certificate/Evidence</h4>
+                                                    <h4 class="font-semibold text-gray-800">Perbarui Sertifikat/Bukti</h4>
                                                     <button x-show="selectedActivity && selectedActivity.file_url && editShowUploadBox" @click="editShowUploadBox = false; formData.fileName = ''" class="text-gray-500 hover:text-gray-700 text-sm">
-                                                        Cancel
+                                                        Batal
                                                     </button>
                                                 </div>
                                                 <div class="flex-1 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center p-8 hover:border-blue-400 transition-colors cursor-pointer">
                                                     <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                                     </svg>
-                                                    <p class="text-gray-600 text-sm mb-2">Drag and drop your PDF file here</p>
-                                                    <p class="text-gray-400 text-xs mb-4">or</p>
+                                                    <p class="text-gray-600 text-sm mb-2">Seret dan lepas file PDF Anda di sini</p>
+                                                    <p class="text-gray-400 text-xs mb-4">atau</p>
                                                     <label class="cursor-pointer" @click.stop>
-                                                        <span class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium inline-block">Browse Files</span>
+                                                        <span class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium inline-block">Pilih File</span>
                                                         <input type="file" accept=".pdf" class="hidden" x-ref="fileInputEdit" @change="handleEditFileSelect($event)" />
                                                     </label>
-                                                    <p class="text-gray-400 text-xs mt-4">PDF only - Maximum 10MB</p>
+                                                    <p class="text-gray-400 text-xs mt-4">Hanya PDF - Maksimal 10MB</p>
                                                 </div>
                                                 <div x-show="formData.fileName" class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
                                                     <div class="flex items-center gap-2">
@@ -424,16 +452,16 @@
                                 <div class="flex-1 overflow-y-auto p-6">
                                     <div class="space-y-4">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">Student</label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Mahasiswa</label>
                                             <div class="bg-gray-50 border rounded-lg px-4 py-3 text-sm text-gray-700">
                                                 {{ $user->student_id }} - {{ $user->name }}
                                             </div>
                                         </div>
 
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">Main Category <span class="text-red-500">*</span></label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Kategori Utama <span class="text-red-500">*</span></label>
                                             <select x-model="formData.mainCategory" @change="updateAvailableSubcategories()" class="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                                <option value="">Select Main Category</option>
+                                                <option value="">Pilih Kategori Utama</option>
                                                 <template x-for="(catGroup, idx) in categoryGroups" :key="catGroup.id">
                                                     <option :value="idx" x-text="(idx + 1) + '. ' + catGroup.name"></option>
                                                 </template>
@@ -441,27 +469,27 @@
                                         </div>
 
                                         <div x-show="formData.mainCategory !== ''">
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">Subcategory <span class="text-red-500">*</span></label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Subkategori <span class="text-red-500">*</span></label>
                                             <select x-model="formData.subcategory" class="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                                <option value="">Select Subcategory</option>
+                                                <option value="">Pilih Subkategori</option>
                                                 <template x-for="(sub, idx) in availableSubcategories" :key="idx">
-                                                    <option :value="sub.name" x-text="sub.name + ' (' + sub.points + ' pts)'"></option>
+                                                    <option :value="sub.name" x-text="sub.name + ' (' + sub.points + ' poin)'"></option>
                                                 </template>
                                             </select>
                                         </div>
 
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">Activity Title <span class="text-red-500">*</span></label>
-                                            <input type="text" x-model="formData.activityTitle" class="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter activity title" />
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Judul Kegiatan <span class="text-red-500">*</span></label>
+                                            <input type="text" x-model="formData.activityTitle" class="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan judul kegiatan" />
                                         </div>
 
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">Description <span class="text-red-500">*</span></label>
-                                            <textarea x-model="formData.description" rows="4" class="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter description"></textarea>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi <span class="text-red-500">*</span></label>
+                                            <textarea x-model="formData.description" rows="4" class="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan deskripsi"></textarea>
                                         </div>
 
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">Activity Date <span class="text-red-500">*</span></label>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Kegiatan <span class="text-red-500">*</span></label>
                                             <input type="date" x-model="formData.activityDate" class="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                                         </div>
                                     </div>
@@ -470,14 +498,14 @@
                                 <!-- Fixed Action Buttons -->
                                 <div class="border-t bg-white px-6 py-4">
                                     <div class="flex gap-3 justify-end">
-                                        <button @click="closeModal" :disabled="isSubmitting" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg text-sm font-medium transition-colors">Cancel</button>
+                                        <button @click="closeModal" :disabled="isSubmitting" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-300 disabled:cursor-not-allowed rounded-lg text-sm font-medium transition-colors">Batal</button>
                                         <button @click="updateActivity" :disabled="isSubmitting" class="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                                            <span x-show="!isSubmitting">Update</span>
+                                            <span x-show="!isSubmitting">Perbarui</span>
                                             <span x-show="isSubmitting" class="flex items-center gap-2">
                                                 <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                                 </svg>
-                                                Processing...
+                                                Memproses...
                                             </span>
                                         </button>
                                     </div>
@@ -489,11 +517,100 @@
             </div>
         </div>
 
+        <!-- Mobile Detail Modal -->
+        <div x-show="showMobileDetailModal" class="fixed inset-0 bg-black bg-opacity-50 z-[9998] flex items-end justify-center" style="display: none;" @click.self="showMobileDetailModal = false; mobileDetailActivity = null">
+            <div class="bg-white w-full max-h-[85vh] rounded-t-2xl overflow-hidden flex flex-col animate-slide-up" @click.stop>
+                <!-- Handle bar -->
+                <div class="flex justify-center pt-3 pb-1">
+                    <div class="w-10 h-1 bg-gray-300 rounded-full"></div>
+                </div>
+                <!-- Header -->
+                <div class="px-4 pb-3 border-b flex justify-between items-center">
+                    <h3 class="text-base font-semibold text-gray-800">Detail Aktivitas</h3>
+                    <button @click="showMobileDetailModal = false; mobileDetailActivity = null" class="text-gray-400 hover:text-gray-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <!-- Body -->
+                <template x-if="mobileDetailActivity">
+                    <div class="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Judul Kegiatan</label>
+                            <p class="text-sm font-medium text-gray-800" x-text="mobileDetailActivity.judul"></p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Kategori Utama</label>
+                                <p class="text-sm text-gray-700" x-text="mobileDetailActivity.mainCategory"></p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Subkategori</label>
+                                <p class="text-sm text-gray-700" x-text="mobileDetailActivity.subcategory"></p>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Deskripsi</label>
+                            <p class="text-sm text-gray-700 whitespace-pre-wrap" x-text="mobileDetailActivity.keterangan"></p>
+                        </div>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Poin</label>
+                                <p class="text-sm font-semibold text-gray-800" x-text="mobileDetailActivity.point"></p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Waktu Input</label>
+                                <p class="text-xs text-gray-700" x-text="mobileDetailActivity.waktu"></p>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Status</label>
+                                <span :class="{
+                                    'bg-green-100 text-green-700': mobileDetailActivity.status === 'Approved',
+                                    'bg-yellow-100 text-yellow-700': mobileDetailActivity.status === 'Waiting',
+                                    'bg-red-100 text-red-700': mobileDetailActivity.status === 'Rejected'
+                                }" class="px-2.5 py-1 rounded-full text-xs font-semibold inline-block" x-text="translateStatus(mobileDetailActivity.status)"></span>
+                            </div>
+                        </div>
+
+                        <!-- Rejection info if rejected -->
+                        <template x-if="mobileDetailActivity.status === 'Rejected' && mobileDetailActivity.rejection_reason">
+                            <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                                <p class="text-xs font-semibold text-red-800 uppercase tracking-wide mb-1">Alasan Penolakan</p>
+                                <p class="text-sm text-red-700" x-text="mobileDetailActivity.rejection_reason"></p>
+                            </div>
+                        </template>
+
+                        <!-- Action buttons -->
+                        <div class="pt-2 flex gap-2">
+                            <template x-if="mobileDetailActivity.status === 'Waiting'">
+                                <div class="flex gap-2 w-full">
+                                    <button @click="let a = mobileDetailActivity; showMobileDetailModal = false; mobileDetailActivity = null; openDeleteModal(a);" 
+                                        class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2.5 px-4 rounded-lg text-sm font-medium flex items-center justify-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        Hapus
+                                    </button>
+                                </div>
+                            </template>
+                            <template x-if="mobileDetailActivity.status !== 'Waiting'">
+                                <button @click="let a = mobileDetailActivity; showMobileDetailModal = false; mobileDetailActivity = null; openViewModal(a);"
+                                    class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-4 rounded-lg text-sm font-medium flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                    Lihat Detail Lengkap
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
         <!-- View Activity Modal - Full Screen -->
         <div x-show="showViewModal" class="fixed inset-0 bg-black bg-opacity-50 z-[9999]" style="display: none;">
             <div class="h-full w-full bg-white flex flex-col">
-                <div class="bg-white border-b px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
-                    <h3 class="text-lg sm:text-xl font-semibold">View S-Core Submission</h3>
+                <div class="bg-white border-b px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center flex-shrink-0">
+                    <h3 class="text-lg sm:text-xl font-semibold">Lihat Pengajuan S-Core</h3>
                     <button @click="closeModal" class="text-gray-500 hover:text-gray-700 text-2xl leading-none w-8 h-8 flex items-center justify-center">×</button>
                 </div>
 
@@ -501,7 +618,7 @@
                     <template x-if="selectedActivity">
                         <div class="flex flex-col lg:flex-row w-full h-full">
                             <!-- Left Column - PDF Viewer -->
-                            <div class="w-full lg:w-1/2 bg-gray-100 lg:border-r overflow-hidden p-4 sm:p-6 order-2 lg:order-1 max-h-[50vh] lg:max-h-none">
+                            <div class="w-full lg:w-1/2 bg-gray-100 lg:border-r overflow-hidden p-4 sm:p-6 order-2 lg:order-1 max-h-[50vh] lg:max-h-none flex-shrink-0 lg:flex-shrink-1">
                                 <div class="bg-white rounded-lg shadow-sm h-full flex flex-col">
                                     <div class="bg-gray-800 text-white px-3 sm:px-4 py-2 sm:py-3 rounded-t-lg flex items-center justify-between">
                                         <span class="text-xs sm:text-sm font-medium">Certificate/Evidence</span>
@@ -541,36 +658,36 @@
                                 </div>
                             </div>
                             <!-- Right Column - Details -->
-                            <div class="w-full lg:w-1/2 flex flex-col order-1 lg:order-2">
+                            <div class="w-full lg:w-1/2 flex flex-col order-1 lg:order-2 min-h-0">
                                 <div class="flex-1 overflow-y-auto p-4 sm:p-6">
                                     <div class="space-y-3 sm:space-y-4">
                                         <div>
-                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Student</label>
+                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Mahasiswa</label>
                                             <div class="bg-gray-50 border rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-gray-700">{{ Auth::user()->name }}</div>
                                         </div>
 
                                         <div>
-                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Main Category</label>
+                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Kategori Utama</label>
                                             <div class="bg-gray-50 border rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm" x-text="selectedActivity.mainCategory"></div>
                                         </div>
 
                                         <div>
-                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Subcategory</label>
+                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Subkategori</label>
                                             <div class="bg-gray-50 border rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm" x-text="selectedActivity.subcategory"></div>
                                         </div>
 
                                         <div>
-                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Activity Title</label>
+                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Judul Kegiatan</label>
                                             <div class="bg-gray-50 border rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium" x-text="selectedActivity.judul"></div>
                                         </div>
 
                                         <div>
-                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Description</label>
+                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Deskripsi</label>
                                             <div class="bg-gray-50 border rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm whitespace-pre-wrap min-h-[80px] sm:min-h-[100px]" x-text="selectedActivity.keterangan"></div>
                                         </div>
 
                                         <div>
-                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Submission Time</label>
+                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Waktu Pengajuan</label>
                                             <div class="bg-gray-50 border rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm" x-text="selectedActivity.waktu"></div>
                                         </div>
 
@@ -581,7 +698,7 @@
                                                     'bg-green-100 text-green-700': selectedActivity.status === 'Approved',
                                                     'bg-yellow-100 text-yellow-700': selectedActivity.status === 'Waiting',
                                                     'bg-red-100 text-red-700': selectedActivity.status === 'Rejected'
-                                                }" class="px-2 sm:px-3 py-1 rounded-full text-xs font-semibold" x-text="selectedActivity.status"></span>
+                                                }" class="px-2 sm:px-3 py-1 rounded-full text-xs font-semibold" x-text="translateStatus(selectedActivity.status)"></span>
                                             </div>
                                         </div>
 
@@ -596,46 +713,41 @@
                                                     </div>
                                                     <div class="flex-1">
                                                         <h3 class="text-xs sm:text-sm font-bold text-red-800 uppercase tracking-wide mb-1">
-                                                            Submission Rejected
+                                                            Pengajuan Ditolak
                                                         </h3>
                                                         
                                                         <div class="text-xs sm:text-sm text-red-700 bg-white bg-opacity-50 p-2 sm:p-3 rounded border border-red-100 mb-2 sm:mb-3">
-                                                            <span class="font-semibold">Reason:</span>
-                                                            <span x-text="selectedActivity.rejectionReason || 'No specific reason provided.'"></span>
+                                                            <span class="font-semibold">Alasan:</span>
+                                                            <span x-text="selectedActivity.rejectionReason || 'Tidak ada alasan spesifik yang diberikan.'"></span>
                                                         </div>
-
-                                                        <button 
-                                                            @click="showViewModal = false; openEditModal(selectedActivity)" 
-                                                            class="w-full bg-red-600 hover:bg-red-700 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-bold shadow transition-colors flex items-center justify-center gap-2">
-                                                            <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                            </svg>
-                                                            Edit & Resubmit
-                                                        </button>
-                                                        <p class="text-xs text-red-500 mt-1.5 sm:mt-2 text-center">
-                                                            Click the button above to correct your data and submit again.
-                                                        </p>
                                                     </div>
                                                 </div>
                                             </div>
                                         </template>
 
                                         <div>
-                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Points</label>
+                                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Poin</label>
                                             <div class="bg-gray-50 border rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-bold" x-text="selectedActivity.point || '-'"></div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Fixed Action Button -->
-                                <div class="border-t bg-white px-4 sm:px-6 py-3 sm:py-4">
-                                    <div class="flex justify-end">
-                                        <button @click="closeModal" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-xs sm:text-sm font-medium transition-colors">Close</button>
-                                    </div>
+                            </div>
+
+                            <!-- Action Button -->
+                            <div class="order-3 lg:hidden border-t bg-white px-4 sm:px-6 py-3 sm:py-4 flex-shrink-0">
+                                <div class="flex justify-end">
+                                    <button @click="closeModal" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-xs sm:text-sm font-medium transition-colors">Tutup</button>
                                 </div>
                             </div>
                         </div>
                     </template>
+                </div>
+
+                <div class="hidden lg:block border-t bg-white px-4 sm:px-6 py-3 sm:py-4 flex-shrink-0">
+                    <div class="flex justify-end">
+                        <button @click="closeModal" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-xs sm:text-sm font-medium transition-colors">Tutup</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -644,20 +756,20 @@
         <div x-show="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[9999]" style="display: none;">
             <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-2xl">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-semibold text-red-600">Cancel Submission</h3>
+                    <h3 class="text-xl font-semibold text-red-600">Batalkan Pengajuan</h3>
                     <button @click="showDeleteModal = false" class="text-gray-500 hover:text-gray-700 text-2xl leading-none">×</button>
                 </div>
                 
                 <template x-if="selectedActivity">
                     <div>
-                        <p class="text-gray-600 mb-4">Are you sure you want to cancel this submission?</p>
+                        <p class="text-gray-600 mb-4">Apakah Anda yakin ingin membatalkan pengajuan ini?</p>
                         <div class="bg-gray-50 border rounded-lg p-3 mb-6">
                             <p class="text-sm font-medium text-gray-800" x-text="selectedActivity.judul"></p>
                             <p class="text-xs text-gray-500 mt-1"><span x-text="selectedActivity.mainCategory"></span> - <span x-text="selectedActivity.subcategory"></span></p>
                         </div>
                         <div class="flex gap-3 justify-end">
-                            <button @click="showDeleteModal = false" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium">Keep</button>
-                            <button @click="confirmDelete" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium">Cancel Submission</button>
+                            <button @click="showDeleteModal = false" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium">Tetap Simpan</button>
+                            <button @click="confirmDelete" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium">Batalkan Pengajuan</button>
                         </div>
                     </div>
                 </template>
@@ -695,25 +807,25 @@
                         </div>
                     </div>
                     <div class="flex gap-3 justify-end">
-                        <button x-show="alertHasCancel" @click="closeAlertModal(false)" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium">Cancel</button>
+                        <button x-show="alertHasCancel" @click="closeAlertModal(false)" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium">Batal</button>
                         <button @click="closeAlertModal(true)" class="px-4 py-2 rounded text-sm font-medium text-white" :class="{
                             'bg-green-500 hover:bg-green-600': alertType === 'success',
                             'bg-red-500 hover:bg-red-600': alertType === 'error',
                             'bg-yellow-500 hover:bg-yellow-600': alertType === 'warning',
                             'bg-blue-500 hover:bg-blue-600': alertType === 'info'
-                        }" x-text="alertHasCancel ? 'Confirm' : 'OK'"></button>
+                        }" x-text="alertHasCancel ? 'Konfirmasi' : 'OK'"></button>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Sidebar -->
-        <div :class="isSidebarOpen ? 'w-64' : 'w-20'" class="bg-white shadow-lg transition-all duration-300 flex flex-col h-screen">
+        <div :class="isSidebarOpen ? 'w-64' : 'w-20'" class="sidebar-container bg-white shadow-lg transition-all duration-300 flex flex-col h-screen">
             <div class="p-4 border-b flex flex-col items-center flex-shrink-0">
                 <img src="/images/logo.png" alt="Logo" class="w-12 h-12 object-contain">
-                <div x-show="isSidebarOpen" class="mt-2 text-center">
+                <div x-show="isSidebarOpen" class="sidebar-text mt-2 text-center">
                     <h2 class="text-sm font-bold text-gray-800">S-Core ITBSS</h2>
-                    <p class="text-xs text-gray-500">Sabda Setia Student Point System</p>
+                    <p class="text-xs text-gray-500">Sistem Poin Mahasiswa Sabda Setia</p>
                 </div>
             </div>
 
@@ -726,7 +838,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l9-5-9-5-9 5 9 5z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                     </svg>
-                    <span x-show="isSidebarOpen" class="text-sm" :class="activeMenu === 'Dashboard' ? 'text-blue-700 font-medium' : 'text-gray-700'">Dashboard</span>
+                    <span x-show="isSidebarOpen" class="sidebar-text text-sm" :class="activeMenu === 'Dashboard' ? 'text-blue-700 font-medium' : 'text-gray-700'">Dashboard</span>
                 </button>
                 <button @click="activeMenu = 'Settings'" class="w-full flex items-center py-3 text-left hover:bg-gray-100 transition-colors" :class="[
                     isSidebarOpen ? 'gap-3 px-4' : 'justify-center',
@@ -736,7 +848,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    <span x-show="isSidebarOpen" class="text-sm" :class="activeMenu === 'Settings' ? 'text-blue-700 font-medium' : 'text-gray-700'">Settings</span>
+                    <span x-show="isSidebarOpen" class="sidebar-text text-sm" :class="activeMenu === 'Settings' ? 'text-blue-700 font-medium' : 'text-gray-700'">Pengaturan</span>
                 </button>
                 <button @click="activeMenu = 'Help'" class="w-full flex items-center py-3 text-left hover:bg-gray-100 transition-colors" :class="[
                     isSidebarOpen ? 'gap-3 px-4' : 'justify-center',
@@ -745,7 +857,7 @@
                     <svg class="w-6 h-6" :class="activeMenu === 'Help' ? 'text-blue-500' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span x-show="isSidebarOpen" class="text-sm" :class="activeMenu === 'Help' ? 'text-blue-700 font-medium' : 'text-gray-700'">Help</span>
+                    <span x-show="isSidebarOpen" class="sidebar-text text-sm" :class="activeMenu === 'Help' ? 'text-blue-700 font-medium' : 'text-gray-700'">Bantuan</span>
                 </button>
             </nav>
 
@@ -754,7 +866,7 @@
                     <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
-                    <span x-show="isSidebarOpen" class="text-sm text-red-500">Logout</span>
+                    <span x-show="isSidebarOpen" class="sidebar-text text-sm text-red-500">Keluar</span>
                 </button>
             </div>
         </div>
@@ -762,7 +874,7 @@
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <div class="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-[100]">
-                <button @click="isSidebarOpen = !isSidebarOpen" class="p-2 hover:bg-gray-100 rounded">
+                <button @click="isSidebarOpen = !isSidebarOpen" class="hamburger-btn p-2 hover:bg-gray-100 rounded">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
@@ -792,8 +904,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                 </svg>
-                                <span class="hidden sm:inline">Add New S-Core</span>
-                                <span class="sm:hidden">Add S-Core</span>
+                                <span class="hidden sm:inline">Tambah S-Core Baru</span>
+                                <span class="sm:hidden">Tambah S-Core</span>
                             </button>
                         </div>
                     </div>
@@ -803,7 +915,7 @@
                     <div class="bg-green-500 rounded-lg shadow p-3 sm:p-4">
                         <div class="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-2">
                             <div class="flex-1">
-                                <p class="text-xs sm:text-sm text-white">Approved Points</p>
+                                <p class="text-xs sm:text-sm text-white">Poin Disetujui</p>
                                 <p class="text-xl sm:text-2xl font-bold text-white" x-text="stats.approvedPoints"></p>
                             </div>
                             <div class="w-10 h-10 sm:w-12 sm:h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center shrink-0">
@@ -817,7 +929,7 @@
                     <div class="bg-white rounded-lg shadow p-3 sm:p-4">
                         <div class="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-2">
                             <div class="flex-1">
-                                <p class="text-xs sm:text-sm text-gray-600">Waiting Review</p>
+                                <p class="text-xs sm:text-sm text-gray-600">Menunggu Tinjauan</p>
                                 <p class="text-xl sm:text-2xl font-bold text-yellow-600" x-text="stats.waiting"></p>
                             </div>
                             <div class="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-100 rounded-full flex items-center justify-center shrink-0">
@@ -831,7 +943,7 @@
                     <div class="bg-white rounded-lg shadow p-3 sm:p-4">
                         <div class="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-2">
                             <div class="flex-1">
-                                <p class="text-xs sm:text-sm text-gray-600">Approved</p>
+                                <p class="text-xs sm:text-sm text-gray-600">Disetujui</p>
                                 <p class="text-xl sm:text-2xl font-bold text-green-600" x-text="stats.approved"></p>
                             </div>
                             <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-full flex items-center justify-center shrink-0">
@@ -845,7 +957,7 @@
                     <div class="bg-white rounded-lg shadow p-3 sm:p-4">
                         <div class="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-2">
                             <div class="flex-1">
-                                <p class="text-xs sm:text-sm text-gray-600">Rejected</p>
+                                <p class="text-xs sm:text-sm text-gray-600">Ditolak</p>
                                 <p class="text-xl sm:text-2xl font-bold text-red-600" x-text="stats.rejected"></p>
                             </div>
                             <div class="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-full flex items-center justify-center shrink-0">
@@ -864,14 +976,14 @@
                             <svg class="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <h2 class="text-lg sm:text-xl font-bold text-gray-800">S-Core Report</h2>
+                            <h2 class="text-lg sm:text-xl font-bold text-gray-800">Laporan S-Core</h2>
                         </div>
-                        <span id="reportEligibilityBadge" class="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold text-gray-600 bg-gray-200">Checking...</span>
+                        <span id="reportEligibilityBadge" class="px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold text-gray-600 bg-gray-200">Memeriksa...</span>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-4">
                         <div class="bg-white rounded-lg p-3 sm:p-4">
-                            <p class="text-xs sm:text-sm text-gray-600 mb-1">Minimum Points Required</p>
+                            <p class="text-xs sm:text-sm text-gray-600 mb-1">Minimum Poin Dibutuhkan</p>
                             <div class="flex items-baseline gap-2">
                                 <span class="text-2xl sm:text-3xl font-bold" id="reportPoints">-</span>
                                 <span class="text-xs sm:text-sm text-gray-500" id="minPointsLabel">/ 20 poin</span>
@@ -882,7 +994,7 @@
                         </div>
                         
                         <div class="bg-white rounded-lg p-3 sm:p-4">
-                            <p class="text-xs sm:text-sm text-gray-600 mb-1">Categories Completed</p>
+                            <p class="text-xs sm:text-sm text-gray-600 mb-1">Kategori Selesai</p>
                             <div class="flex items-baseline gap-2">
                                 <span class="text-2xl sm:text-3xl font-bold" id="reportCategories">-</span>
                                 <span class="text-xs sm:text-sm text-gray-500" id="minCategoriesLabel">/ 6 kategori (min 5)</span>
@@ -900,21 +1012,23 @@
                         <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        Download S-Core Report
+                        Unduh Laporan S-Core
                     </button>
-                    <p id="reportMessage" class="text-xs text-center text-gray-500 mt-2">Loading eligibility status...</p>
+                    <p id="reportMessage" class="text-xs text-center text-gray-500 mt-2">Memuat status kelayakan...</p>
                 </div>
 
                 <!-- Mandatory Categories Table -->
                 <div class="bg-white rounded-lg shadow overflow-hidden mb-4 sm:mb-6" x-data="{ expandedCategories: [false, false, false, false, false, false] }">
                     <div class="p-3 sm:p-6">
-                        <h2 class="text-base sm:text-xl font-bold mb-3 sm:mb-4 text-center">Mandatory S-Core Categories</h2>
+                        <h2 class="text-base sm:text-xl font-bold mb-3 sm:mb-4 text-center">Kategori Wajib S-Core</h2>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full border-collapse min-w-[600px]">
+
+                    <!-- Desktop Table (>=1000px) -->
+                    <div class="hidden min-[1000px]:block overflow-x-auto">
+                        <table class="w-full border-collapse">
                         <thead>
                             <tr class="border-b-2 bg-gray-50">
-                                <th class="text-left py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm">Category</th>
+                                <th class="text-left py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm">Kategori</th>
                                 <th class="text-center py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm w-20 sm:w-24">Points</th>
                                 <th class="text-center py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm w-24 sm:w-32">Approved</th>
                                 <th class="text-center py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm w-24 sm:w-32">Total</th>
@@ -969,42 +1083,57 @@
                         </tbody>
                     </table>
                     </div>
+
+                    <!-- Mobile Simple List (<1000px) -->
+                    <div class="min-[1000px]:hidden">
+                        <div class="border-b bg-gray-50 px-4 py-2.5 flex items-center">
+                            <span class="flex-1 font-semibold text-xs text-gray-600 uppercase tracking-wide">Category</span>
+                            <span class="w-16 text-center font-semibold text-xs text-gray-600 uppercase tracking-wide">Total</span>
+                        </div>
+                        <template x-for="(category, index) in categoryGroups" :key="'mc-'+index">
+                            <div class="border-b px-4 py-3 flex items-center justify-between">
+                                <span class="text-sm text-gray-800 font-medium flex-1 pr-3" x-text="(index + 1) + '. ' + category.name"></span>
+                                <span class="text-sm font-bold text-blue-600 w-16 text-center" x-text="getCategoryTotal(category.subcategories, 'totalPoints')"></span>
+                            </div>
+                        </template>
+                    </div>
                 </div>
 
                 <!-- Filters -->
-                <div class="bg-white rounded-lg shadow p-3 sm:p-4 mb-4">
-                    <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 sm:gap-3">
-                        <select x-model="statusFilter" class="border rounded px-3 py-2 sm:px-4 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Status</option> <option value="Approved">Approved</option>
-                            <option value="Waiting">Waiting</option>
-                            <option value="Rejected">Rejected</option>
+                <div class="bg-white rounded-lg shadow p-3 sm:p-4 mb-4 overflow-hidden">
+                    <div class="flex flex-col min-[1000px]:flex-row flex-wrap items-stretch min-[1000px]:items-center gap-2 min-[1000px]:gap-3">
+                        <select x-model="statusFilter" class="w-full min-[1000px]:w-auto border rounded px-3 py-2 sm:px-4 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Semua Status</option> <option value="Approved">Disetujui</option>
+                            <option value="Waiting">Menunggu</option>
+                            <option value="Rejected">Ditolak</option>
                         </select>
 
-                        <select x-model="categoryFilter" class="border rounded px-3 py-2 sm:px-4 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">All Categories</option>
+                        <select x-model="categoryFilter" class="w-full min-[1000px]:w-auto border rounded px-3 py-2 sm:px-4 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Semua Kategori</option>
                             <template x-for="cat in categoryGroups" :key="cat.id">
                                 <option :value="cat.name" x-text="cat.name"></option>
                             </template>
                         </select>
 
-                        <input type="text" x-model="searchQuery" placeholder="Search title..." class="border rounded px-3 py-2 sm:px-4 text-xs sm:text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <input type="text" x-model="searchQuery" placeholder="Cari judul..." class="w-full min-[1000px]:w-auto border rounded px-3 py-2 sm:px-4 text-xs sm:text-sm min-[1000px]:flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     </div>
                 </div>
 
                 <!-- Activities Table -->
                 <div class="bg-white rounded-lg shadow overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full min-w-[900px]">
+                    <!-- Desktop Table (>=1000px) -->
+                    <div class="hidden min-[1000px]:block overflow-x-auto">
+                        <table class="w-full">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="text-left py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm">Main Category</th>
-                                    <th class="text-left py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm">Subcategory</th>
-                                    <th class="text-left py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm">Activity Title</th>
-                                    <th class="text-left py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm">Description</th>
-                                    <th class="text-center py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm">Points</th>
-                                    <th class="text-left py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm">Input Time</th>
+                                    <th class="text-left py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm">Kategori Utama</th>
+                                    <th class="text-left py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm">Subkategori</th>
+                                    <th class="text-left py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm">Judul Kegiatan</th>
+                                    <th class="text-left py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm">Deskripsi</th>
+                                    <th class="text-center py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm">Poin</th>
+                                    <th class="text-left py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm">Waktu Input</th>
                                     <th class="text-center py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm">Status</th>
-                                    <th class="text-center py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm">Action</th>
+                                    <th class="text-center py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1021,17 +1150,12 @@
                                             'bg-green-100 text-green-700': activity.status === 'Approved',
                                             'bg-yellow-100 text-yellow-700': activity.status === 'Waiting',
                                             'bg-red-100 text-red-700': activity.status === 'Rejected'
-                                        }" class="px-3 py-1 rounded-full text-xs font-semibold" x-text="activity.status"></span>
+                                        }" class="px-3 py-1 rounded-full text-xs font-semibold" x-text="translateStatus(activity.status)"></span>
                                     </td>
                                     <td class="text-center py-2 sm:py-3 px-2 sm:px-4">
                                         <template x-if="activity.status === 'Waiting'">
                                             <div class="flex justify-center gap-1 sm:gap-2">
-                                                <button @click="openEditModal(activity)" class="text-green-500 hover:text-green-700 p-1" title="Edit">
-                                                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                    </svg>
-                                                </button>
-                                                <button @click="openDeleteModal(activity)" class="text-red-500 hover:text-red-700 p-1" title="Delete">
+                                                <button @click="openDeleteModal(activity)" class="text-red-500 hover:text-red-700 p-1" title="Hapus">
                                                     <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                     </svg>
@@ -1039,7 +1163,7 @@
                                             </div>
                                         </template>
                                         <template x-if="activity.status === 'Approved'">
-                                            <button @click="openViewModal(activity)" class="text-blue-500 hover:text-blue-700 p-1" title="View">
+                                            <button @click="openViewModal(activity)" class="text-blue-500 hover:text-blue-700 p-1" title="Lihat">
                                                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -1047,7 +1171,7 @@
                                             </button>
                                         </template>
                                         <template x-if="activity.status === 'Rejected'">
-                                            <button @click="openViewModal(activity)" class="text-blue-500 hover:text-blue-700 p-1" title="View">
+                                            <button @click="openViewModal(activity)" class="text-blue-500 hover:text-blue-700 p-1" title="Lihat">
                                                 <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -1059,11 +1183,37 @@
                             </template>
                             <template x-if="filteredActivities.length === 0">
                                 <tr>
-                                    <td colspan="8" class="text-center py-8 text-gray-500 text-xs sm:text-sm">No activities found matching your filters</td>
+                                    <td colspan="8" class="text-center py-8 text-gray-500 text-xs sm:text-sm">Tidak ada aktivitas yang sesuai dengan filter Anda</td>
                                 </tr>
                             </template>
                         </tbody>
                     </table>
+                    </div>
+
+                    <!-- Mobile Card List (<1000px) -->
+                    <div class="min-[1000px]:hidden">
+                        <div class="bg-gray-50 px-4 py-2.5 border-b flex items-center">
+                            <span class="flex-1 font-semibold text-xs text-gray-600 uppercase tracking-wide">Judul Kegiatan</span>
+                            <span class="w-24 text-center font-semibold text-xs text-gray-600 uppercase tracking-wide">Status</span>
+                        </div>
+                        <template x-for="activity in filteredActivities" :key="'m-'+activity.id">
+                            <div @click="openMobileDetailModal(activity)" class="flex items-center px-4 py-3 border-b hover:bg-blue-50 cursor-pointer active:bg-blue-100 transition-colors">
+                                <div class="flex-1 min-w-0 pr-3">
+                                    <p class="text-sm font-medium text-gray-800 truncate" x-text="activity.judul"></p>
+                                    <p class="text-xs text-gray-500 mt-0.5 truncate" x-text="activity.mainCategory"></p>
+                                </div>
+                                <div class="w-24 flex-shrink-0 text-center">
+                                    <span :class="{
+                                        'bg-green-100 text-green-700': activity.status === 'Approved',
+                                        'bg-yellow-100 text-yellow-700': activity.status === 'Waiting',
+                                        'bg-red-100 text-red-700': activity.status === 'Rejected'
+                                    }" class="px-2.5 py-1 rounded-full text-xs font-semibold inline-block" x-text="translateStatus(activity.status)"></span>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="filteredActivities.length === 0">
+                            <div class="text-center py-8 text-gray-500 text-sm">Tidak ada aktivitas yang sesuai dengan filter Anda</div>
+                        </template>
                     </div>
                 </div>
                 </div>
@@ -1072,8 +1222,8 @@
                 <!-- Settings Page -->
                 <div x-show="activeMenu === 'Settings'">
                     <div class="mb-4 sm:mb-6">
-                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Settings</h1>
-                        <p class="text-sm sm:text-base text-gray-600">Manage your account settings</p>
+                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Pengaturan</h1>
+                        <p class="text-sm sm:text-base text-gray-600">Kelola pengaturan akun Anda</p>
                     </div>
 
                     <!-- Settings Sections -->
@@ -1084,16 +1234,16 @@
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
-                                Profile Information
+                                Informasi Profil
                             </h3>
 
                             <div class="space-y-3 sm:space-y-4">
                                 <div>
-                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Student ID</label>
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">NIM</label>
                                     <div class="bg-gray-50 border rounded-lg px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm text-gray-700" x-text="currentUser.student_id"></div>
                                 </div>
                                 <div>
-                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Full Name</label>
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Nama Lengkap</label>
                                     <div class="bg-gray-50 border rounded-lg px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm text-gray-700" x-text="currentUser.name"></div>
                                 </div>
                                 <div>
@@ -1102,11 +1252,11 @@
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Major</label>
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Jurusan</label>
                                         <div class="bg-gray-50 border rounded-lg px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm text-gray-700" x-text="currentUser.major"></div>
                                     </div>
                                     <div>
-                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Batch Year</label>
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Tahun Angkatan</label>
                                         <div class="bg-gray-50 border rounded-lg px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm text-gray-700" x-text="currentUser.year"></div>
                                     </div>
                                 </div>
@@ -1119,15 +1269,15 @@
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                                 </svg>
-                                Change Password
+                                Ubah Kata Sandi
                             </h3>
-                            <p class="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">Update your password to keep your account secure</p>
+                            <p class="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">Perbarui kata sandi untuk menjaga keamanan akun Anda</p>
 
                             <form @submit.prevent="updatePassword" class="space-y-3 sm:space-y-4">
                                 <div>
-                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Current Password <span class="text-red-500">*</span></label>
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Kata Sandi Saat Ini <span class="text-red-500">*</span></label>
                                     <div class="relative">
-                                        <input :type="showCurrentPassword ? 'text' : 'password'" x-model="passwordData.currentPassword" class="w-full border rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 pr-10 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter current password">
+                                        <input :type="showCurrentPassword ? 'text' : 'password'" x-model="passwordData.currentPassword" class="w-full border rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 pr-10 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan kata sandi saat ini">
                                         <button type="button" @click="showCurrentPassword = !showCurrentPassword" class="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                                             <svg x-show="!showCurrentPassword" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -1141,9 +1291,9 @@
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">New Password <span class="text-red-500">*</span></label>
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Kata Sandi Baru <span class="text-red-500">*</span></label>
                                     <div class="relative">
-                                        <input :type="showNewPassword ? 'text' : 'password'" x-model="passwordData.newPassword" class="w-full border rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 pr-10 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter new password">
+                                        <input :type="showNewPassword ? 'text' : 'password'" x-model="passwordData.newPassword" class="w-full border rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 pr-10 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan kata sandi baru">
                                         <button type="button" @click="showNewPassword = !showNewPassword" class="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                                             <svg x-show="!showNewPassword" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -1154,13 +1304,13 @@
                                             </svg>
                                         </button>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-1">Minimum 8 characters, include uppercase, lowercase, and numbers</p>
+                                    <p class="text-xs text-gray-500 mt-1">Minimal 8 karakter, termasuk huruf besar, huruf kecil, dan angka</p>
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Confirm New Password <span class="text-red-500">*</span></label>
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Konfirmasi Kata Sandi Baru <span class="text-red-500">*</span></label>
                                     <div class="relative">
-                                        <input :type="showConfirmPassword ? 'text' : 'password'" x-model="passwordData.confirmPassword" class="w-full border rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 pr-10 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Confirm new password">
+                                        <input :type="showConfirmPassword ? 'text' : 'password'" x-model="passwordData.confirmPassword" class="w-full border rounded-lg px-3 py-2 sm:px-4 sm:py-2.5 pr-10 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Konfirmasi kata sandi baru">
                                         <button type="button" @click="showConfirmPassword = !showConfirmPassword" class="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                                             <svg x-show="!showConfirmPassword" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -1175,13 +1325,13 @@
 
                                 <div class="flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-2">
                                     <button type="button" @click="passwordData = {currentPassword: '', newPassword: '', confirmPassword: ''}" class="w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-xs sm:text-sm font-medium transition-colors">
-                                        Reset
+                                        Atur Ulang
                                     </button>
                                     <button type="submit" :disabled="isSubmitting" class="w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-2.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-2">
                                         <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        <span x-text="isSubmitting ? 'Updating...' : 'Update Password'"></span>
+                                        <span x-text="isSubmitting ? 'Memperbarui...' : 'Perbarui Kata Sandi'"></span>
                                     </button>
                                 </div>
                             </form>
@@ -1193,15 +1343,15 @@
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                System Information
+                                Informasi Sistem
                             </h3>
                             <div class="space-y-2 sm:space-y-3">
                                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-gray-100">
-                                    <span class="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-0">Version:</span>
+                                    <span class="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-0">Versi:</span>
                                     <span class="text-xs sm:text-sm font-medium text-gray-800">1.0.0</span>
                                 </div>
                                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2">
-                                    <span class="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-0">Last Updated:</span>
+                                    <span class="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-0">Terakhir Diperbarui:</span>
                                     <span class="text-xs sm:text-sm font-medium text-gray-800">January 21, 2026</span>
                                 </div>
                             </div>
@@ -1212,8 +1362,8 @@
                 <!-- Help Page -->
                 <div x-show="activeMenu === 'Help'">
                     <div class="mb-4 sm:mb-6">
-                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Help & Documentation</h1>
-                    <p class="text-sm sm:text-base text-gray-600">Get help with using the S-Core system</p>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Bantuan & Dokumentasi</h1>
+                    <p class="text-sm sm:text-base text-gray-600">Dapatkan bantuan untuk menggunakan sistem S-Core</p>
                     </div>
                     
                     <!-- FAQ Section -->
@@ -1222,110 +1372,110 @@
                             <svg class="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            Frequently Asked Questions
+                            Pertanyaan yang Sering Diajukan
                         </h2>
                         
                         <div class="space-y-3 sm:space-y-4">
                             <div class="border-b pb-3 sm:pb-4">
                                 <h3 class="font-semibold text-sm sm:text-base text-gray-800 mb-2 flex items-start gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold flex-shrink-0">1</span>
-                                    <span>How do I submit a new activity?</span>
+                                    <span>Bagaimana cara mengajukan aktivitas baru?</span>
                                 </h3>
-                                <p class="text-xs sm:text-sm text-gray-600 ml-7 mb-2">Click the "Add New Activity" button in the Dashboard, fill in all required fields (category, activity title, description, activity date), upload your certificate/proof, and click Submit. Your submission will be sent for review.</p>
+                                <p class="text-xs sm:text-sm text-gray-600 ml-7 mb-2">Klik tombol "Tambah S-Core Baru" di Dashboard, isi semua kolom wajib (kategori, judul kegiatan, deskripsi, tanggal kegiatan), unggah sertifikat/bukti, lalu klik Kirim. Pengajuan Anda akan masuk ke proses peninjauan.</p>
                                 <div class="mt-2 ml-7 bg-green-50 border border-green-200 rounded p-2">
-                                    <p class="text-xs text-green-800"><strong>📁 File Storage:</strong> All uploaded files are automatically stored in Google Drive for secure and permanent storage. You can preview and download your certificates anytime.</p>
+                                    <p class="text-xs text-green-800"><strong>📁 Penyimpanan File:</strong> Semua file yang diunggah otomatis disimpan di Google Drive untuk penyimpanan yang aman dan permanen. Anda dapat melihat pratinjau dan mengunduh sertifikat kapan saja.</p>
                                 </div>
                             </div>
                             
                             <div class="border-b pb-3 sm:pb-4">
                                 <h3 class="font-semibold text-sm sm:text-base text-gray-800 mb-2 flex items-start gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold flex-shrink-0">2</span>
-                                    <span>When will my submission be reviewed?</span>
+                                    <span>Kapan pengajuan saya akan ditinjau?</span>
                                 </h3>
-                                <p class="text-xs sm:text-sm text-gray-600 ml-7 mb-2">Admin reviewers typically process submissions within 3-5 business days. You can check the status of your submission in the Activities Table on the Dashboard. Status will show as "Waiting", "Approved", or "Rejected".</p>
+                                <p class="text-xs sm:text-sm text-gray-600 ml-7 mb-2">Admin biasanya memproses pengajuan dalam 3-5 hari kerja. Anda dapat memeriksa status pengajuan pada tabel aktivitas di Dashboard. Status akan tampil sebagai "Menunggu", "Disetujui", atau "Ditolak".</p>
                                 <div class="mt-2 ml-7 bg-blue-50 border border-blue-200 rounded p-2">
-                                    <p class="text-xs text-blue-800"><strong>🕐 Timezone:</strong> All timestamps in the system use GMT+7 (Jakarta time). Your submission time will be recorded based on Indonesian time zone.</p>
+                                    <p class="text-xs text-blue-800"><strong>🕐 Zona Waktu:</strong> Semua timestamp di sistem menggunakan GMT+7 (waktu Jakarta). Waktu pengajuan Anda dicatat berdasarkan zona waktu Indonesia.</p>
                                 </div>
                             </div>
                             
                             <div class="border-b pb-3 sm:pb-4">
                                 <h3 class="font-semibold text-sm sm:text-base text-gray-800 mb-2 flex items-start gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold flex-shrink-0">3</span>
-                                    <span>How do I check my S-Core points?</span>
+                                    <span>Bagaimana cara melihat poin S-Core saya?</span>
                                 </h3>
-                                <p class="text-xs sm:text-sm text-gray-600 ml-7">Your approved S-Core points are displayed at the top of the Dashboard. You can also see detailed breakdowns in the Statistics Cards showing Total Activities, Waiting for Review, Approved, and Rejected submissions.</p>
+                                <p class="text-xs sm:text-sm text-gray-600 ml-7">Poin S-Core yang disetujui ditampilkan di bagian atas Dashboard. Anda juga dapat melihat rincian pada kartu statistik yang menampilkan total aktivitas, menunggu tinjauan, disetujui, dan ditolak.</p>
                             </div>
                             
                             <div class="border-b pb-3 sm:pb-4">
                                 <h3 class="font-semibold text-sm sm:text-base text-gray-800 mb-2 flex items-start gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold flex-shrink-0">4</span>
-                                    <span>What are Mandatory Categories?</span>
+                                    <span>Apa itu Kategori Wajib?</span>
                                 </h3>
-                                <p class="text-xs sm:text-sm text-gray-600 ml-7">Mandatory Categories are specific activity types required for graduation. Each category has a suggested minimum and you can track your achievement (Capaian) and total points earned in the Mandatory Categories Table on the Dashboard.</p>
+                                <p class="text-xs sm:text-sm text-gray-600 ml-7">Kategori Wajib adalah jenis aktivitas tertentu yang dibutuhkan untuk kelulusan. Setiap kategori memiliki minimum yang disarankan dan Anda dapat memantau capaian serta total poin pada tabel Kategori Wajib di Dashboard.</p>
                             </div>
                             
                             <div class="border-b pb-3 sm:pb-4">
                                 <h3 class="font-semibold text-sm sm:text-base text-gray-800 mb-2 flex items-start gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold flex-shrink-0">5</span>
-                                    <span>What should I do if my submission is rejected?</span>
+                                    <span>Apa yang harus saya lakukan jika pengajuan ditolak?</span>
                                 </h3>
-                                <p class="text-xs sm:text-sm text-gray-600 ml-7 mb-2">If your submission is rejected, you have several options:</p>
+                                <p class="text-xs sm:text-sm text-gray-600 ml-7 mb-2">Jika pengajuan Anda ditolak, Anda memiliki beberapa pilihan:</p>
                                 <ul class="text-xs sm:text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside">
-                                    <li><strong>View Reason:</strong> Click the "View" button to see the detailed rejection reason from the admin</li>
-                                    <li><strong>Edit & Resubmit:</strong> Fix the issues mentioned in the rejection reason and edit your submission. Once edited, it will return to "Waiting" status for re-review</li>
-                                    <li><strong>Submit New:</strong> Alternatively, you can submit a completely new activity with corrected information and proper documentation</li>
+                                    <li><strong>Lihat Alasan:</strong> Klik tombol "Lihat" untuk melihat detail alasan penolakan dari admin</li>
+                                    <li><strong>Perbaiki & Kirim Ulang:</strong> Perbaiki hal yang disebutkan pada alasan penolakan lalu kirim ulang pengajuan Anda. Setelah diperbarui, status akan kembali menjadi "Menunggu" untuk ditinjau ulang</li>
+                                    <li><strong>Ajukan Baru:</strong> Anda juga dapat mengajukan aktivitas baru dengan informasi dan dokumentasi yang benar</li>
                                 </ul>
                                 <div class="mt-2 ml-7 bg-blue-50 border border-blue-200 rounded p-2">
-                                    <p class="text-xs text-blue-800"><strong>💡 Tip:</strong> Always read the rejection reason carefully and address all issues before resubmitting to avoid another rejection.</p>
+                                    <p class="text-xs text-blue-800"><strong>💡 Tips:</strong> Selalu baca alasan penolakan dengan teliti dan pastikan semua masalah diperbaiki sebelum mengirim ulang agar tidak ditolak lagi.</p>
                                 </div>
                             </div>
                             
                             <div class="border-b pb-3 sm:pb-4">
                                 <h3 class="font-semibold text-sm sm:text-base text-gray-800 mb-2 flex items-start gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold flex-shrink-0">6</span>
-                                    <span>Can I edit or delete a submitted activity?</span>
+                                    <span>Apakah saya bisa mengubah atau menghapus aktivitas yang sudah diajukan?</span>
                                 </h3>
-                                <p class="text-xs sm:text-sm text-gray-600 ml-7 mb-2">You can edit or delete activities that are in "Waiting" or "Rejected" status. Once edited, rejected submissions will be changed back to "Waiting" status for re-review.</p>
+                                <p class="text-xs sm:text-sm text-gray-600 ml-7 mb-2">Anda dapat mengubah atau menghapus aktivitas dengan status "Menunggu" atau "Ditolak". Setelah diperbarui, pengajuan yang ditolak akan berubah kembali menjadi "Menunggu" untuk ditinjau ulang.</p>
                                 <ul class="text-xs sm:text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside mt-2">
-                                    <li><strong>Waiting Status:</strong> Edit or delete anytime before admin reviews</li>
-                                    <li><strong>Rejected Status:</strong> Edit to fix issues and resubmit (status changes back to Waiting)</li>
-                                    <li><strong>Approved Status:</strong> Cannot be edited or deleted - final</li>
+                                    <li><strong>Status Menunggu:</strong> Dapat diubah atau dihapus kapan saja sebelum admin meninjau</li>
+                                    <li><strong>Status Ditolak:</strong> Ubah untuk memperbaiki masalah lalu kirim ulang (status kembali ke Menunggu)</li>
+                                    <li><strong>Status Disetujui:</strong> Tidak dapat diubah atau dihapus (final)</li>
                                 </ul>
                                 <div class="mt-2 ml-7 bg-green-50 border border-green-200 rounded p-2">
-                                    <p class="text-xs text-green-800"><strong>💡 Tip:</strong> When editing rejected submissions, make sure to address all issues mentioned in the rejection reason to avoid another rejection.</p>
+                                    <p class="text-xs text-green-800"><strong>💡 Tips:</strong> Saat mengubah pengajuan yang ditolak, pastikan semua poin pada alasan penolakan sudah diperbaiki agar tidak ditolak lagi.</p>
                                 </div>
                             </div>
                             
                             <div class="border-b pb-3 sm:pb-4">
                                 <h3 class="font-semibold text-sm sm:text-base text-gray-800 mb-2 flex items-start gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold flex-shrink-0">7</span>
-                                    <span>What date restrictions apply to activity submissions?</span>
+                                    <span>Batasan tanggal apa yang berlaku untuk pengajuan aktivitas?</span>
                                 </h3>
-                                <p class="text-xs sm:text-sm text-gray-600 ml-7">Activity dates must follow these rules:</p>
+                                <p class="text-xs sm:text-sm text-gray-600 ml-7">Tanggal aktivitas harus mengikuti aturan berikut:</p>
                                 <ul class="text-xs sm:text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside mt-2">
-                                    <li>Activity date cannot be in the future</li>
-                                    <li>Activity date cannot be more than <strong>1 month in the past</strong> from today</li>
-                                    <li>This ensures submissions are timely and reflect recent activities</li>
+                                    <li>Tanggal aktivitas tidak boleh berada di masa depan</li>
+                                    <li>Tanggal aktivitas tidak boleh lebih dari <strong>1 bulan ke belakang</strong> dari hari ini</li>
+                                    <li>Aturan ini memastikan pengajuan tepat waktu dan mencerminkan aktivitas terbaru</li>
                                 </ul>
                                 <div class="mt-2 ml-7 bg-yellow-50 border border-yellow-200 rounded p-2">
-                                    <p class="text-xs text-yellow-800"><strong>⚠️ Important:</strong> If you have activities older than 1 month that you haven't submitted, please contact the admin for special consideration or approval.</p>
+                                    <p class="text-xs text-yellow-800"><strong>⚠️ Penting:</strong> Jika Anda memiliki aktivitas lebih lama dari 1 bulan yang belum diajukan, silakan hubungi admin untuk pertimbangan khusus atau persetujuan.</p>
                                 </div>
                             </div>
                             
                             <div class="pb-3 sm:pb-4">
                                 <h3 class="font-semibold text-sm sm:text-base text-gray-800 mb-2 flex items-start gap-2">
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold flex-shrink-0">8</span>
-                                    <span>How do I change my password?</span>
+                                    <span>Bagaimana cara mengganti kata sandi?</span>
                                 </h3>
-                                <p class="text-xs sm:text-sm text-gray-600 ml-7">Go to Settings > Change Password section. Enter your current password, then your new password twice to confirm. Your new password must be at least 8 characters long and include uppercase letters, lowercase letters, and numbers for security.</p>
+                                <p class="text-xs sm:text-sm text-gray-600 ml-7">Masuk ke Pengaturan > Ubah Kata Sandi. Masukkan kata sandi saat ini, lalu kata sandi baru dua kali untuk konfirmasi. Kata sandi baru minimal 8 karakter dan harus memuat huruf besar, huruf kecil, serta angka agar aman.</p>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Contact Support -->
                     <div class="bg-white rounded-lg shadow p-4 sm:p-6">
-                        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact Support</h3>
-                        <p class="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">Need additional help? Contact our support team.</p>
+                        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Hubungi Dukungan</h3>
+                        <p class="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">Butuh bantuan tambahan? Hubungi tim dukungan kami.</p>
                         <div class="space-y-2 text-xs sm:text-sm">
                             <div class="flex items-center gap-2">
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1362,6 +1512,7 @@
             // --- UI VARS ---
             showLogoutModal: false, showAddModal: false, showEditModal: false,
             showViewModal: false, showDeleteModal: false, showConfirmSubmitModal: false,
+            showMobileDetailModal: false, mobileDetailActivity: null,
             editShowUploadBox: false,
             editPdfLoading: true,
             pdfTimestamp: Date.now(),
@@ -1375,6 +1526,7 @@
             // --- FORM VARS ---
             dateValidationError: '',
             formData: { mainCategory: '', subcategory: '', activityTitle: '', description: '', activityDate: '', fileName: '' },
+            selectedUploadFile: null,
             availableSubcategories: [],
             dragActive: false,
             
@@ -1400,6 +1552,15 @@
             },
 
             get maxDate() { return new Date().toISOString().split('T')[0]; },
+
+            translateStatus(status) {
+                const map = {
+                    Approved: 'Disetujui',
+                    Waiting: 'Menunggu',
+                    Rejected: 'Ditolak'
+                };
+                return map[status] || status;
+            },
 
             // --- FILTER LOGIC ---
             get filteredActivities() {
@@ -1449,14 +1610,53 @@
                 const d = new Date(parts[0], parts[1]-1, parts[2]);
                 const today = new Date(); today.setHours(0,0,0,0);
                 const limit = new Date(today); limit.setMonth(limit.getMonth()-1);
-                if (d > today) { this.dateValidationError = 'Future date not allowed'; return false; }
-                if (d < limit) { this.dateValidationError = 'Date > 1 month old'; return false; }
+                if (d > today) { this.dateValidationError = 'Tanggal di masa depan tidak diperbolehkan'; return false; }
+                if (d < limit) { this.dateValidationError = 'Tanggal lebih dari 1 bulan yang lalu'; return false; }
                 this.dateValidationError = ''; return true;
             },
 
             handleFileSelect(e) { 
-                if(e.target.files[0]) {
-                    this.formData.fileName = e.target.files[0].name;
+                const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+
+                if (!file) {
+                    this.clearSelectedFile();
+                    return;
+                }
+
+                this.selectedUploadFile = file;
+                this.formData.fileName = file.name;
+            },
+
+            handleFileDrop(e) {
+                this.dragActive = false;
+
+                const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]
+                    ? e.dataTransfer.files[0]
+                    : null;
+
+                if (!file) {
+                    return;
+                }
+
+                if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+                    this.showAlert('warning', 'File Tidak Valid', 'Harap unggah file PDF saja.');
+                    return;
+                }
+
+                this.selectedUploadFile = file;
+                this.formData.fileName = file.name;
+            },
+
+            clearSelectedFile() {
+                this.selectedUploadFile = null;
+                this.formData.fileName = '';
+
+                if (this.$refs.fileInput) {
+                    this.$refs.fileInput.value = '';
+                }
+
+                if (this.$refs.fileInputDesktop) {
+                    this.$refs.fileInputDesktop.value = '';
                 }
             },
 
@@ -1506,11 +1706,11 @@
             showSubmitConfirmation() {
                 // Validate all fields
                 if (!this.formData.mainCategory && this.formData.mainCategory !== 0 || !this.formData.subcategory || !this.formData.activityTitle || !this.formData.description || !this.formData.activityDate || !this.formData.fileName) {
-                    this.showAlert('warning', 'Missing Info', 'Please fill in all required fields');
+                    this.showAlert('warning', 'Informasi Kurang', 'Harap isi semua kolom wajib');
                     return;
                 }
                 if (!this.validateActivityDate(this.formData.activityDate)) {
-                    this.showAlert('warning', 'Invalid Date', this.dateValidationError);
+                    this.showAlert('warning', 'Tanggal Tidak Valid', this.dateValidationError);
                     return;
                 }
                 
@@ -1520,6 +1720,11 @@
 
             saveActivity() {
                 if (this.isSubmitting) return;
+
+                if (!this.selectedUploadFile) {
+                    this.showAlert('warning', 'File Belum Dipilih', 'Harap pilih file PDF sebelum mengirim.');
+                    return;
+                }
 
                 // Close confirmation modal
                 this.showConfirmSubmitModal = false;
@@ -1532,11 +1737,11 @@
                 data.append('activity_date', this.formData.activityDate);
                 data.append('mainCategory', this.categoryGroups[this.formData.mainCategory].name); 
                 data.append('subcategory', this.formData.subcategory);
-                data.append('certificate_file', this.$refs.fileInput.files[0]);
+                data.append('certificate_file', this.selectedUploadFile);
                 data.append('_token', '{{ csrf_token() }}');
 
                 // Show file size in console
-                const fileSize = (this.$refs.fileInput.files[0].size / 1024 / 1024).toFixed(2);
+                const fileSize = (this.selectedUploadFile.size / 1024 / 1024).toFixed(2);
                 console.log(`Uploading file: ${fileSize} MB`);
 
                 // Create timeout controller (2 minutes)
@@ -1557,61 +1762,25 @@
                 })
                 .then((json) => {
                     const storageNote = json.storage === 'local' ? ' (Local storage)' : '';
-                    this.showAlert('success', 'Saved', 'Submission saved successfully!' + storageNote + ' Reloading...');
+                    this.showAlert('success', 'Tersimpan', 'Pengajuan berhasil disimpan!' + storageNote + ' Memuat ulang...');
                     setTimeout(() => window.location.reload(), 1500);
                 })
                 .catch(err => {
                     clearTimeout(timeoutId);
                     if (err.name === 'AbortError') {
-                        this.showAlert('error', 'Timeout', 'Upload taking too long. Try smaller file or check connection.');
+                        this.showAlert('error', 'Waktu Habis', 'Proses unggah terlalu lama. Coba file lebih kecil atau periksa koneksi.');
                     } else {
-                        this.showAlert('error', 'Failed', err.message || 'Error during submission');
+                        this.showAlert('error', 'Gagal', err.message || 'Terjadi kesalahan saat mengirim');
                     }
                     this.isSubmitting = false;
                 });
             },
 
-            // 2. OPEN EDIT MODAL
+            // 2. OPEN EDIT MODAL - DISABLED
             openEditModal(activity) {
-                this.selectedActivity = activity;
-                this.showEditModal = true;
-                
-                // Reset edit state
-                this.editShowUploadBox = false;
-                this.editPdfLoading = true;
-                this.pdfTimestamp = Date.now();
-                this.editPdfKey = 0;
-                
-                // Simpan original file URL
-                if (activity.file_url && !activity.originalFileUrl) {
-                    activity.originalFileUrl = activity.file_url;
-                }
-
-                // Inisialisasi form dengan data kosong dulu
-                this.formData = {
-                    mainCategory: '',
-                    subcategory: '', 
-                    activityTitle: activity.judul || '',
-                    description: activity.keterangan || '',
-                    activityDate: activity.waktu ? new Date(activity.waktu).toISOString().split('T')[0] : '',
-                    fileName: '' 
-                };
-
-                // Set main category dan subcategory setelah render
-                setTimeout(() => {
-                    let catIndex = this.categoryGroups.findIndex(c => c.name === activity.mainCategory);
-                    if (catIndex === -1) {
-                        console.error('Category not found:', activity.mainCategory);
-                        catIndex = 0;
-                    }
-                    this.formData.mainCategory = catIndex;
-                    this.updateAvailableSubcategories();
-                    
-                    // Set subcategory setelah availableSubcategories ter-update
-                    setTimeout(() => {
-                        this.formData.subcategory = activity.subcategory || '';
-                    }, 50);
-                }, 50);
+                // Edit functionality is disabled for all submissions
+                this.showAlert('warning', 'Edit Tidak Diizinkan', 'Fitur edit dinonaktifkan. Silakan hapus lalu kirim ulang jika perlu perubahan.');
+                return;
             },
 
             // 3. UPDATE EXISTING (Update)
@@ -1619,7 +1788,7 @@
                 if (this.isSubmitting) return;
 
                 if (this.formData.mainCategory === '' || typeof this.formData.mainCategory === 'undefined' || !this.formData.subcategory || !this.formData.activityTitle || !this.formData.description || !this.formData.activityDate) {
-                    this.showAlert('warning', 'Missing Info', 'Please fill all required fields'); 
+                    this.showAlert('warning', 'Informasi Kurang', 'Harap isi semua kolom wajib'); 
                     this.isSubmitting = false;
                     return;
                 }
@@ -1634,7 +1803,7 @@
                 
                 const catIndex = parseInt(this.formData.mainCategory);
                 if (isNaN(catIndex) || !this.categoryGroups[catIndex]) {
-                    this.showAlert('error', 'Invalid Category', 'Selected category is invalid');
+                    this.showAlert('error', 'Kategori Tidak Valid', 'Kategori yang dipilih tidak valid');
                     this.isSubmitting = false;
                     return;
                 }
@@ -1646,23 +1815,42 @@
                 if (this.$refs.fileInputEdit && this.$refs.fileInputEdit.files.length > 0) {
                     data.append('certificate_file', this.$refs.fileInputEdit.files[0]);
                     console.log('Updating with new file:', this.$refs.fileInputEdit.files[0].name);
+                } else {
+                    console.log('No new file selected - updating other fields only');
                 }
+
+                console.log('Submit update form with:', {
+                    title: this.formData.activityTitle,
+                    description: this.formData.description,
+                    activity_date: this.formData.activityDate,
+                    mainCategory: this.categoryGroups[catIndex].name,
+                    subcategory: this.formData.subcategory,
+                    hasFile: this.$refs.fileInputEdit && this.$refs.fileInputEdit.files.length > 0
+                });
 
                 fetch(`/submissions/${this.selectedActivity.id}`, { 
                     method: 'POST', 
                     headers: { 
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest'
                     }, 
                     body: data 
                 })
-                .then(async res => { const json = await res.json(); if (!res.ok) throw new Error(json.message); return json; })
+                .then(async res => { 
+                    const json = await res.json(); 
+                    if (!res.ok) {
+                        console.error('Update failed:', json.message);
+                        throw new Error(json.message);
+                    }
+                    console.log('Update successful:', json);
+                    return json;
+                })
                 .then(() => {
-                    this.showAlert('success', 'Updated', 'Activity updated successfully!');
+                    this.showAlert('success', 'Diperbarui', 'Aktivitas berhasil diperbarui!');
                     setTimeout(() => window.location.reload(), 1500);
                 })
                 .catch(err => {
-                    this.showAlert('error', 'Update Failed', err.message);
+                    this.showAlert('error', 'Pembaruan Gagal', err.message);
                     this.isSubmitting = false; 
                 });
             },
@@ -1686,11 +1874,11 @@
                 })
                 .then(async res => { const json = await res.json(); if (!res.ok) throw new Error(json.message); return json; })
                 .then(() => {
-                    this.showAlert('success', 'Deleted', 'Submission deleted.');
+                    this.showAlert('success', 'Dihapus', 'Pengajuan dihapus.');
                     setTimeout(() => window.location.reload(), 1500);
                 })
                 .catch(err => {
-                    this.showAlert('error', 'Delete Failed', err.message);
+                    this.showAlert('error', 'Gagal Menghapus', err.message);
                     this.isSubmitting = false; 
                 });
             },
@@ -1702,17 +1890,17 @@
 
                 // 2. Validasi Frontend
                 if (!this.passwordData.currentPassword || !this.passwordData.newPassword || !this.passwordData.confirmPassword) {
-                    this.showAlert('warning', 'Missing Info', 'Please fill all password fields.');
+                    this.showAlert('warning', 'Informasi Kurang', 'Harap isi semua kolom kata sandi.');
                     return;
                 }
 
                 if (this.passwordData.newPassword !== this.passwordData.confirmPassword) {
-                    this.showAlert('warning', 'Mismatch', 'New Password and Confirmation do not match.');
+                    this.showAlert('warning', 'Tidak Cocok', 'Kata sandi baru dan konfirmasi tidak cocok.');
                     return;
                 }
 
                 if (this.passwordData.newPassword.length < 8) {
-                    this.showAlert('warning', 'Weak Password', 'Password must be at least 8 characters.');
+                    this.showAlert('warning', 'Kata Sandi Lemah', 'Kata sandi minimal 8 karakter.');
                     return;
                 }
 
@@ -1735,11 +1923,11 @@
                 })
                 .then(async res => {
                     const json = await res.json();
-                    if (!res.ok) throw new Error(json.message || 'Failed to update password');
+                    if (!res.ok) throw new Error(json.message || 'Gagal memperbarui kata sandi');
                     return json;
                 })
                 .then(() => {
-                    this.showAlert('success', 'Success', 'Password updated successfully!');
+                    this.showAlert('success', 'Berhasil', 'Kata sandi berhasil diperbarui!');
                     
                     // Reset Form
                     this.passwordData = { currentPassword: '', newPassword: '', confirmPassword: '' };
@@ -1749,7 +1937,7 @@
                     this.isSubmitting = false;
                 })
                 .catch(err => {
-                    this.showAlert('error', 'Error', err.message);
+                    this.showAlert('error', 'Kesalahan', err.message);
                     this.isSubmitting = false; // Buka kunci jika error
                 });
             },
@@ -1802,10 +1990,16 @@
                 this.selectedActivity = a; 
                 this.showViewModal = true; 
             },
+
+            openMobileDetailModal(a) {
+                this.mobileDetailActivity = a;
+                this.showMobileDetailModal = true;
+            },
             
             closeModal() { 
                 this.showAddModal = false; this.showEditModal = false; this.showViewModal = false; 
-                this.showDeleteModal = false; this.selectedActivity = null; 
+                this.showDeleteModal = false; this.showMobileDetailModal = false;
+                this.selectedActivity = null; this.mobileDetailActivity = null; 
                 this.formData = { mainCategory: '', subcategory: '', activityTitle: '', description: '', activityDate: '', fileName: '' };
                 this.availableSubcategories = [];
                 // Reset edit modal state
@@ -1833,13 +2027,13 @@
                 
                 try {
                     const response = await fetch(`/student/${this.currentUser.student_id}/report/check`);
-                    if (!response.ok) throw new Error('Failed to check eligibility');
+                    if (!response.ok) throw new Error('Gagal memeriksa kelayakan');
                     
                     this.reportEligibility = await response.json();
                     this.updateReportUI();
                 } catch (error) {
                     console.error('Error checking report eligibility:', error);
-                    document.getElementById('reportMessage').textContent = '❌ Error loading eligibility status';
+                    document.getElementById('reportMessage').textContent = '❌ Gagal memuat status kelayakan';
                 } finally {
                     this.reportLoading = false;
                 }
@@ -1851,10 +2045,10 @@
                 // Update badge
                 const badge = document.getElementById('reportEligibilityBadge');
                 if (isEligible) {
-                    badge.textContent = '✅ Eligible';
+                    badge.textContent = '✅ Memenuhi Syarat';
                     badge.className = 'px-4 py-2 rounded-full text-sm font-bold text-green-700 bg-green-200';
                 } else {
-                    badge.textContent = '❌ Not Eligible';
+                    badge.textContent = '❌ Belum Memenuhi';
                     badge.className = 'px-4 py-2 rounded-full text-sm font-bold text-red-700 bg-red-200';
                 }
 
@@ -1879,14 +2073,14 @@
                 if (isEligible) {
                     btn.disabled = false;
                     btn.classList.remove('disabled:bg-gray-400', 'disabled:cursor-not-allowed');
-                    msg.textContent = '✓ You are eligible to download your report';
+                    msg.textContent = '✓ Anda memenuhi syarat untuk mengunduh laporan';
                     msg.className = 'text-xs text-center text-green-600 mt-2 font-medium';
                 } else {
                     btn.disabled = true;
                     btn.classList.add('disabled:bg-gray-400', 'disabled:cursor-not-allowed');
                     let reason = [];
-                    if (!minPointsMet) reason.push('You need at least ' + minPointsRequired + ' points');
-                    if (!minCategoriesMet) reason.push('You need to complete at least ' + minCategoriesRequired + ' categories');
+                    if (!minPointsMet) reason.push('Anda membutuhkan setidaknya ' + minPointsRequired + ' poin');
+                    if (!minCategoriesMet) reason.push('Anda perlu menyelesaikan setidaknya ' + minCategoriesRequired + ' kategori');
                     msg.textContent = '⚠ ' + reason.join(' and ');
                     msg.className = 'text-xs text-center text-red-600 mt-2';
                 }
@@ -1895,7 +2089,7 @@
             downloadSCoreReport() {
                 if (!this.reportEligibility.isEligible) {
                     const { minPointsRequired, minCategoriesRequired } = this.reportEligibility;
-                    this.showAlert('warning', 'Not Eligible', `You must have at least ${minPointsRequired} points and complete ${minCategoriesRequired} out of 6 categories`);
+                    this.showAlert('warning', 'Belum Memenuhi', `Anda harus memiliki setidaknya ${minPointsRequired} poin dan menyelesaikan ${minCategoriesRequired} dari 6 kategori`);
                     return;
                 }
 
@@ -1903,7 +2097,7 @@
                 const reportUrl = `/student/${this.currentUser.student_id}/report`;
                 window.location.href = reportUrl;
                 
-                this.showAlert('success', 'Success', 'Your S-Core report is being downloaded');
+                this.showAlert('success', 'Berhasil', 'Laporan S-Core Anda sedang diunduh');
             },
             
             getCategoryTotal(sub, f) { 

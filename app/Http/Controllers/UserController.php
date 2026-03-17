@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Submission;
+use App\Models\Category;
+use App\Models\Subcategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -137,8 +140,11 @@ class UserController extends Controller
     // 3. Import Students dari CSV
     public function importStudents(Request $request)
     {
+        // Remove execution time limit for large CSV imports (bcrypt hashing is slow)
+        set_time_limit(0);
+
         $request->validate([
-            'csv_file' => 'required|file|mimes:csv,txt|max:2048',
+            'csv_file' => 'required|file|mimes:csv,txt|max:10240',
         ]);
 
         $file = $request->file('csv_file');
@@ -149,20 +155,57 @@ class UserController extends Controller
         }
 
         $count = 0;
+        $scoreCount = 0;
         $errors = [];
         $lineNumber = 0;
 
-        while (($row = fgetcsv($handle, 1000, ',')) !== false) {
+        // Mapping CSV column index => [category_name, subcategory_name]
+        // For single-subcategory categories, use their only subcategory directly
+        // For multi-subcategory categories, use "Migrasi ..." subcategory
+        $scoreColumns = [
+            6  => ['category' => 'OrKeSS (WAJIB)', 'subcategory' => 'OrKeSS'],
+            7  => ['category' => 'Retreat (WAJIB)', 'subcategory' => 'Retreat'],
+            8  => ['category' => 'Kegiatan Ilmiah dan Penalaran', 'subcategory' => 'Migrasi Kegiatan Ilmiah dan Penalaran'],
+            9  => ['category' => 'Performance, Pengembangan, dan Perlombaan', 'subcategory' => 'Migrasi Performance, Pengembangan, dan Perlombaan'],
+            10 => ['category' => 'Kepengurusan Organisasi/Kepanitiaan', 'subcategory' => 'Migrasi Kepengurusan Organisasi/Kepanitiaan'],
+            11 => ['category' => 'Kegiatan Sosial Kemasyarakatan', 'subcategory' => 'Migrasi Kegiatan Sosial Kemasyarakatan'],
+        ];
+
+        // Pre-load category and subcategory IDs for performance
+        $categoryMap = [];
+        $subcategoryMap = [];
+        foreach ($scoreColumns as $idx => $mapping) {
+            $cat = Category::where('name', $mapping['category'])->first();
+            if ($cat) {
+                $categoryMap[$idx] = $cat->id;
+                $sub = Subcategory::where('category_id', $cat->id)
+                    ->where('name', $mapping['subcategory'])
+                    ->first();
+                if (!$sub) {
+                    // Auto-create Migrasi subcategory if it doesn't exist
+                    $sub = Subcategory::create([
+                        'category_id' => $cat->id,
+                        'name' => $mapping['subcategory'],
+                        'points' => 1,
+                        'description' => 'Data migrasi dari CSV import',
+                        'is_active' => true,
+                    ]);
+                }
+                $subcategoryMap[$idx] = $sub->id;
+            }
+        }
+
+        while (($row = fgetcsv($handle, 5000, ',')) !== false) {
             $lineNumber++;
             
-            // Skip header row if exists (optional logic, simple check if row[0] is 'name')
-            if ($lineNumber == 1 && strtolower(trim($row[0])) == 'name') {
+            // Skip header row if exists
+            if ($lineNumber == 1 && in_array(strtolower(trim($row[0])), ['name', 'nama'])) {
                 continue;
             }
 
-            // Struktur CSV: name, email, password, student_id, major, batch_year
+            // Minimum 6 columns required (user data), score columns are optional
             if (count($row) < 6) {
-                $errors[] = "Line $lineNumber: Incomplete data";
+                $errors[] = "Line $lineNumber: Incomplete data (minimum 6 columns required)";
                 continue;
             }
 
@@ -185,17 +228,57 @@ class UserController extends Controller
             }
 
             try {
-                User::create([
+                DB::beginTransaction();
+
+                $user = User::create([
                     'name'       => trim($row[0]),
                     'email'      => $email,
                     'password'   => Hash::make(trim($row[2])),
                     'role'       => 'student',
                     'student_id' => trim($row[3]),
                     'major'      => $major,
-                    'year'       => (int)trim($row[5]), // Map ke 'year'
+                    'year'       => (int)trim($row[5]),
                 ]);
                 $count++;
+
+                // Process score columns (index 6-11) if they exist
+                foreach ($scoreColumns as $colIdx => $mapping) {
+                    if (!isset($row[$colIdx]) || trim($row[$colIdx]) === '') {
+                        continue; // Skip empty scores
+                    }
+
+                    // Support both dot and comma as decimal separator (e.g. 0.6 or 0,6)
+                    $rawValue = str_replace(',', '.', trim($row[$colIdx]));
+                    $points = floatval($rawValue);
+                    if ($points <= 0) {
+                        continue;
+                    }
+
+                    if (!isset($categoryMap[$colIdx]) || !isset($subcategoryMap[$colIdx])) {
+                        $errors[] = "Line $lineNumber: Category '{$mapping['category']}' not found in database";
+                        continue;
+                    }
+
+                    Submission::create([
+                        'student_id'            => $user->id,
+                        'student_category_id'   => $categoryMap[$colIdx],
+                        'student_subcategory_id'=> $subcategoryMap[$colIdx],
+                        'assigned_category_id'  => $categoryMap[$colIdx],
+                        'assigned_subcategory_id'=> $subcategoryMap[$colIdx],
+                        'title'                 => 'Migrasi Data CSV - ' . $mapping['category'],
+                        'description'           => 'Data S-Core dimigrasikan dari CSV import oleh admin',
+                        'activity_date'         => now()->toDateString(),
+                        'status'                => 'Approved',
+                        'points_awarded'        => $points,
+                        'reviewed_by'           => Auth::id(),
+                        'reviewed_at'           => now(),
+                    ]);
+                    $scoreCount++;
+                }
+
+                DB::commit();
             } catch (\Exception $e) {
+                DB::rollBack();
                 $errors[] = "Line $lineNumber: " . $e->getMessage();
                 continue;
             }
@@ -203,9 +286,13 @@ class UserController extends Controller
 
         fclose($handle);
 
-        $message = "Successfully imported $count student(s).";
+        $message = "Successfully imported $count student(s)";
+        if ($scoreCount > 0) {
+            $message .= " with $scoreCount score submission(s)";
+        }
+        $message .= ".";
         if (count($errors) > 0) {
-            $message .= " Errors: " . implode(', ', array_slice($errors, 0, 3)) . (count($errors) > 3 ? "..." : "");
+            $message .= " Errors: " . implode(', ', array_slice($errors, 0, 5)) . (count($errors) > 5 ? "..." : "");
         }
 
         return back()->with('success', $message);
