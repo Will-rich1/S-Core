@@ -1394,7 +1394,7 @@
                                 </div>
                                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2">
                                     <span class="text-xs sm:text-sm text-gray-600 mb-1 sm:mb-0">Terakhir Diperbarui:</span>
-                                    <span class="text-xs sm:text-sm font-medium text-gray-800">January 21, 2026</span>
+                                    <span class="text-xs sm:text-sm font-medium text-gray-800">27 Maret 2026</span>
                                 </div>
                             </div>
                         </div>
@@ -1477,14 +1477,14 @@
                                     <span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold flex-shrink-0">6</span>
                                     <span>Apakah saya bisa mengubah atau menghapus aktivitas yang sudah diajukan?</span>
                                 </h3>
-                                <p class="text-xs sm:text-sm text-gray-600 ml-7 mb-2">Anda dapat mengubah atau menghapus aktivitas dengan status "Menunggu" atau "Ditolak". Setelah diperbarui, pengajuan yang ditolak akan berubah kembali menjadi "Menunggu" untuk ditinjau ulang.</p>
+                                <p class="text-xs sm:text-sm text-gray-600 ml-7 mb-2">Anda tidak dapat mengubah tetapi dapat menghapus aktivitas dengan status "Menunggu".</p>
                                 <ul class="text-xs sm:text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside mt-2">
-                                    <li><strong>Status Menunggu:</strong> Dapat diubah atau dihapus kapan saja sebelum admin meninjau</li>
-                                    <li><strong>Status Ditolak:</strong> Ubah untuk memperbaiki masalah lalu kirim ulang (status kembali ke Menunggu)</li>
+                                    <li><strong>Status Menunggu:</strong> Dapat dihapus kapan saja sebelum admin meninjau</li>
+                                    <li><strong>Status Ditolak:</strong> Lihat alasannya dan kirim ulang </li>
                                     <li><strong>Status Disetujui:</strong> Tidak dapat diubah atau dihapus (final)</li>
                                 </ul>
                                 <div class="mt-2 ml-7 bg-green-50 border border-green-200 rounded p-2">
-                                    <p class="text-xs text-green-800"><strong>💡 Tips:</strong> Saat mengubah pengajuan yang ditolak, pastikan semua poin pada alasan penolakan sudah diperbaiki agar tidak ditolak lagi.</p>
+                                    <p class="text-xs text-green-800"><strong>💡 Tips:</strong> Saat mengirim pengajuan yang ditolak, pastikan semua poin pada alasan penolakan sudah diperbaiki agar tidak ditolak lagi.</p>
                                 </div>
                             </div>
                             
@@ -1519,17 +1519,21 @@
                         <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Hubungi Dukungan</h3>
                         <p class="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">Butuh bantuan tambahan? Hubungi tim dukungan kami.</p>
                         <div class="space-y-2 text-xs sm:text-sm">
-                            <div class="flex items-center gap-2">
+                            {{-- <div class="flex items-center gap-2">
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
                                 <span class="break-all">support@itbss.ac.id</span>
-                            </div>
+                            </div> --}}
                             <div class="flex items-center gap-2">
                                 <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                                 </svg>
-                                <span>+62 21 1234 5678</span>
+                                <span>
+                                    <a href="https://wa.me/628561117855" target="_blank" class="hover:text-green-500">
+                                        628561117855
+                                    </a>
+                                </span>
                             </div>
                         </div>
                     </div>

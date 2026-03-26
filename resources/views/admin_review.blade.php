@@ -2847,7 +2847,7 @@
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Terakhir Diperbarui:</span>
-                                <span class="font-medium">January 21, 2026</span>
+                                <span class="font-medium">27 Maret 2026</span>
                             </div>
                         </div>
                     </div>
