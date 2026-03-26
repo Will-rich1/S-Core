@@ -50,7 +50,7 @@
     </style>
 </head>
 <body>
-    <div class="flex h-screen bg-gray-100" x-data="dashboardData()" x-init="loadCategories()">
+    <div class="flex h-screen bg-gray-100" x-data="dashboardData()" x-init="refreshSubmissionCategories(); loadCategories()">
         <!-- Logout Confirmation Modal -->
         <div x-show="showLogoutModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]" style="display: none;">
             <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
@@ -84,9 +84,9 @@
 
                                     <div>
                                         <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Kategori Utama <span class="text-red-500">*</span></label>
-                                        <select x-model="formData.mainCategory" @change="updateAvailableSubcategories()" class="w-full border rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <select x-model="formData.mainCategory" @change="updateAvailableSubcategoriesForSubmission()" class="w-full border rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                             <option value="">Pilih Kategori Utama</option>
-                                            <template x-for="(catGroup, idx) in categoryGroups" :key="idx">
+                                            <template x-for="(catGroup, idx) in submissionCategoryGroups" :key="catGroup.id">
                                                 <option :value="idx" x-text="(idx + 1) + '. ' + catGroup.name"></option>
                                             </template>
                                         </select>
@@ -115,7 +115,7 @@
                                     <div>
                                         <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Tanggal Kegiatan <span class="text-red-500">*</span></label>
                                         <input type="date" x-model="formData.activityDate" :max="maxDate" class="w-full border rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                                        <p class="text-xs text-gray-500 mt-1">Maksimal 1 bulan dari hari ini</p>
+                                        <p class="text-xs text-gray-500 mt-1">Maksimal 1 bulan dari tanggal kegiatan</p>
                                         <p x-show="dateValidationError" class="text-xs text-red-500 mt-1" x-text="dateValidationError"></p>
                                     </div>
 
@@ -263,7 +263,7 @@
                         <!-- Main Category -->
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
                             <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Kategori Utama</label>
-                            <p class="text-sm font-medium text-gray-800" x-text="formData.mainCategory !== '' && formData.mainCategory !== null ? (formData.mainCategory + 1) + '. ' + categoryGroups[formData.mainCategory].name : '-'"></p>
+                            <p class="text-sm font-medium text-gray-800" x-text="formData.mainCategory !== '' && formData.mainCategory !== null && submissionCategoryGroups[formData.mainCategory] ? (formData.mainCategory + 1) + '. ' + submissionCategoryGroups[formData.mainCategory].name : '-'"></p>
                         </div>
 
                         <!-- Subcategory -->
@@ -572,10 +572,17 @@
                         </div>
 
                         <!-- Rejection info if rejected -->
-                        <template x-if="mobileDetailActivity.status === 'Rejected' && mobileDetailActivity.rejection_reason">
+                        <template x-if="mobileDetailActivity.status === 'Rejected' && (mobileDetailActivity.rejectionReason || mobileDetailActivity.rejection_reason)">
                             <div class="bg-red-50 border border-red-200 rounded-lg p-3">
                                 <p class="text-xs font-semibold text-red-800 uppercase tracking-wide mb-1">Alasan Penolakan</p>
-                                <p class="text-sm text-red-700" x-text="mobileDetailActivity.rejection_reason"></p>
+                                <p class="text-sm text-red-700" x-text="mobileDetailActivity.rejectionReason || mobileDetailActivity.rejection_reason"></p>
+                            </div>
+                        </template>
+
+                        <template x-if="mobileDetailActivity.pointAdjustmentReason">
+                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                                <p class="text-xs font-semibold text-amber-800 uppercase tracking-wide mb-1">Alasan Pengurangan Poin</p>
+                                <p class="text-sm text-amber-700" x-text="mobileDetailActivity.pointAdjustmentReason"></p>
                             </div>
                         </template>
 
@@ -719,6 +726,25 @@
                                                         <div class="text-xs sm:text-sm text-red-700 bg-white bg-opacity-50 p-2 sm:p-3 rounded border border-red-100 mb-2 sm:mb-3">
                                                             <span class="font-semibold">Alasan:</span>
                                                             <span x-text="selectedActivity.rejectionReason || 'Tidak ada alasan spesifik yang diberikan.'"></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <template x-if="selectedActivity.pointAdjustmentReason">
+                                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 sm:p-4 mb-3 sm:mb-6">
+                                                <div class="flex gap-2 sm:gap-3">
+                                                    <div class="flex-shrink-0">
+                                                        <svg class="h-4 w-4 sm:h-5 sm:w-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                                                        </svg>
+                                                    </div>
+                                                    <div class="flex-1">
+                                                        <h3 class="text-xs sm:text-sm font-bold text-amber-800 uppercase tracking-wide mb-1">Poin Dikurangi Admin</h3>
+                                                        <div class="text-xs sm:text-sm text-amber-700 bg-white bg-opacity-60 p-2 sm:p-3 rounded border border-amber-100">
+                                                            <span class="font-semibold">Alasan:</span>
+                                                            <span x-text="selectedActivity.pointAdjustmentReason"></span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1035,7 +1061,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <template x-for="(category, index) in categoryGroups" :key="index">
+                            <template x-for="(category, index) in mandatoryCategoryGroups" :key="index">
                                 <tr>
                                     <td colspan="4" class="p-0">
                                         <table class="w-full">
@@ -1090,7 +1116,7 @@
                             <span class="flex-1 font-semibold text-xs text-gray-600 uppercase tracking-wide">Category</span>
                             <span class="w-16 text-center font-semibold text-xs text-gray-600 uppercase tracking-wide">Total</span>
                         </div>
-                        <template x-for="(category, index) in categoryGroups" :key="'mc-'+index">
+                        <template x-for="(category, index) in mandatoryCategoryGroups" :key="'mc-'+index">
                             <div class="border-b px-4 py-3 flex items-center justify-between">
                                 <span class="text-sm text-gray-800 font-medium flex-1 pr-3" x-text="(index + 1) + '. ' + category.name"></span>
                                 <span class="text-sm font-bold text-blue-600 w-16 text-center" x-text="getCategoryTotal(category.subcategories, 'totalPoints')"></span>
@@ -1143,7 +1169,19 @@
                                     <td class="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm" x-text="activity.subcategory"></td>
                                     <td class="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm" x-text="activity.judul"></td>
                                     <td class="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm" x-text="activity.keterangan"></td>
-                                    <td class="text-center py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm" x-text="activity.point"></td>
+                                    <td class="text-center py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">
+                                        <div class="flex flex-col items-center gap-1">
+                                            <span x-text="activity.point"></span>
+                                            <span
+                                                x-show="activity.pointAdjustmentReason"
+                                                class="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700"
+                                                :title="activity.pointAdjustmentReason"
+                                                style="display: none;"
+                                            >
+                                                Ada alasan
+                                            </span>
+                                        </div>
+                                    </td>
                                     <td class="py-2 sm:py-3 px-2 sm:px-4 text-xs" x-text="activity.waktu"></td>
                                     <td class="text-center py-2 sm:py-3 px-2 sm:px-4">
                                         <span :class="{
@@ -1250,10 +1288,14 @@
                                     <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Email</label>
                                     <div class="bg-gray-50 border rounded-lg px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm text-gray-700" x-text="currentUser.email"></div>
                                 </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                                     <div>
                                         <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Jurusan</label>
                                         <div class="bg-gray-50 border rounded-lg px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm text-gray-700" x-text="currentUser.major"></div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Semester</label>
+                                        <div class="bg-gray-50 border rounded-lg px-3 py-2 sm:px-4 sm:py-3 text-xs sm:text-sm text-gray-700" x-text="currentUser.semester ? 'Semester ' + currentUser.semester : '-'" ></div>
                                     </div>
                                     <div>
                                         <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Tahun Angkatan</label>
@@ -1507,6 +1549,7 @@
             currentUser: @json($user), // <--- TAMBAHKAN INI (Data Profil Asli)
             activities: @json($activities), 
             categoryGroups: @json($categoryGroups),
+            submissionCategoryGroups: [],
             stats: @json($stats),
 
             // --- UI VARS ---
@@ -1577,6 +1620,69 @@
                 });
             },
 
+            get mandatoryCategoryGroups() {
+                const migrationByCategory = new Map();
+                const excludedMigrationCategories = ['orkess', 'retreat'];
+
+                this.activities.forEach(activity => {
+                    if (activity.status !== 'Approved') {
+                        return;
+                    }
+
+                    const title = String(activity.judul || '').trim().toLowerCase();
+                    const subcategory = String(activity.subcategory || '').trim().toLowerCase();
+                    const isMigration = title.startsWith('migrasi data csv') || subcategory.startsWith('migrasi');
+
+                    if (!isMigration) {
+                        return;
+                    }
+
+                    const categoryName = String(activity.mainCategory || '').trim();
+                    if (!categoryName) {
+                        return;
+                    }
+
+                    const current = Number(migrationByCategory.get(categoryName) || 0);
+                    const points = Number(activity.point || 0);
+                    migrationByCategory.set(categoryName, current + (Number.isFinite(points) ? points : 0));
+                });
+
+                return this.categoryGroups.map(category => {
+                    const normalizedCategoryName = String(category.name || '').trim();
+                    const normalizedKey = normalizedCategoryName.toLowerCase().replace(/\s+/g, '');
+                    const isExcludedCategory = excludedMigrationCategories.some(keyword => normalizedKey.includes(keyword));
+                    const migrationPoints = Number(migrationByCategory.get(normalizedCategoryName) || 0);
+                    const subcategories = (category.subcategories || []).map(sub => ({ ...sub }));
+
+                    if (!isExcludedCategory && migrationPoints > 0) {
+                        const migrationIndex = subcategories.findIndex(sub =>
+                            String(sub.name || '').trim().toLowerCase() === 'migrasi'
+                        );
+
+                        if (migrationIndex >= 0) {
+                            subcategories[migrationIndex].points = Number(migrationPoints.toFixed(2));
+                            subcategories[migrationIndex].approvedCount = 1;
+                            if (!subcategories[migrationIndex].description) {
+                                subcategories[migrationIndex].description = 'Subkategori otomatis untuk data migrasi lama';
+                            }
+                        } else {
+                            subcategories.unshift({
+                                id: `migration-${category.id}`,
+                                name: 'Migrasi',
+                                points: Number(migrationPoints.toFixed(2)),
+                                approvedCount: 1,
+                                description: 'Subkategori otomatis untuk data migrasi lama'
+                            });
+                        }
+                    }
+
+                    return {
+                        ...category,
+                        subcategories
+                    };
+                });
+            },
+
             // --- HELPER FUNCTIONS ---
             updateAvailableSubcategories() {
                 if (this.formData.mainCategory !== '') {
@@ -1588,6 +1694,47 @@
                 }
             },
 
+            updateAvailableSubcategoriesForSubmission() {
+                if (this.formData.mainCategory !== '') {
+                    const idx = parseInt(this.formData.mainCategory);
+                    if (this.submissionCategoryGroups[idx]) {
+                        this.availableSubcategories = this.submissionCategoryGroups[idx].subcategories;
+                    }
+                    this.formData.subcategory = '';
+                } else {
+                    this.availableSubcategories = [];
+                    this.formData.subcategory = '';
+                }
+            },
+
+            isMandatoryCategory(category) {
+                if (Object.prototype.hasOwnProperty.call(category, 'is_mandatory')) {
+                    return !!category.is_mandatory;
+                }
+
+                const name = (category?.name || '').toLowerCase();
+                return name.includes('orkess') || name.includes('retreat');
+            },
+
+            refreshSubmissionCategories() {
+                this.submissionCategoryGroups = this.categoryGroups.filter(cat => {
+                    if (this.isMandatoryCategory(cat)) {
+                        return false;
+                    }
+
+                    return !(cat.is_quota_full === true || cat.is_quota_full === 1 || cat.is_quota_full === '1');
+                });
+
+                if (this.formData.mainCategory !== '') {
+                    const idx = parseInt(this.formData.mainCategory);
+                    if (!this.submissionCategoryGroups[idx]) {
+                        this.formData.mainCategory = '';
+                        this.formData.subcategory = '';
+                        this.availableSubcategories = [];
+                    }
+                }
+            },
+
             // Load categories dari API (Real-time sync)
             async loadCategories() {
                 try {
@@ -1595,6 +1742,7 @@
                     if (!response.ok) throw new Error('Failed to fetch categories');
                     
                     this.categoryGroups = await response.json();
+                    this.refreshSubmissionCategories();
                 } catch (error) {
                     console.error('Error loading categories:', error);
                     // Fallback: categoryGroups tetap menggunakan data awal dari server
@@ -1735,7 +1883,7 @@
                 data.append('title', this.formData.activityTitle);
                 data.append('description', this.formData.description);
                 data.append('activity_date', this.formData.activityDate);
-                data.append('mainCategory', this.categoryGroups[this.formData.mainCategory].name); 
+                data.append('mainCategory', this.submissionCategoryGroups[this.formData.mainCategory].name); 
                 data.append('subcategory', this.formData.subcategory);
                 data.append('certificate_file', this.selectedUploadFile);
                 data.append('_token', '{{ csrf_token() }}');

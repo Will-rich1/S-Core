@@ -306,7 +306,7 @@
         <div class="signature-section">
             <p style="font-size: 11px; margin-bottom: 5px;">Disetujui oleh,</p>
             <div style="margin-top: 60px;">
-                <p style="font-size: 11px; font-weight: bold; margin-bottom: 2px;">William Sandy, Phd</p>
+                <p style="font-size: 11px; font-weight: bold; margin-bottom: 2px;">William Sandy</p>
                 <p style="font-size: 10px; color: #666;">Wakil Rektor Bidang Akademik dan</p>
                 <p style="font-size: 10px; color: #666;">Kemahasiswaan</p>
             </div>

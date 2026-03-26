@@ -268,6 +268,7 @@ class UserController extends Controller
                         'title'                 => 'Migrasi Data CSV - ' . $mapping['category'],
                         'description'           => 'Data S-Core dimigrasikan dari CSV import oleh admin',
                         'activity_date'         => now()->toDateString(),
+                        'semester_cycle'        => max(0, (int) ($user->semester_offset ?? 0)),
                         'status'                => 'Approved',
                         'points_awarded'        => $points,
                         'reviewed_by'           => Auth::id(),
@@ -325,6 +326,46 @@ class UserController extends Controller
         } catch (\Exception $e) {
             Log::error('Error deleting students: '.$e->getMessage());
             return response()->json(['message' => 'Failed to delete'], 500);
+        }
+    }
+
+    public function promoteSemester(Request $request)
+    {
+        if (!Auth::user() || Auth::user()->role !== 'admin') {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        try {
+            $affected = User::where('role', 'student')->increment('semester_offset', 1);
+
+            return response()->json([
+                'message' => 'Semester semua mahasiswa berhasil dinaikkan +1.',
+                'affected_count' => $affected,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error promoting semester: ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal menaikkan semester.'], 500);
+        }
+    }
+
+    public function demoteSemester(Request $request)
+    {
+        if (!Auth::user() || Auth::user()->role !== 'admin') {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        try {
+            $affected = User::where('role', 'student')
+                ->where('semester_offset', '>', 0)
+                ->decrement('semester_offset', 1);
+
+            return response()->json([
+                'message' => 'Semester mahasiswa berhasil diturunkan -1.',
+                'affected_count' => $affected,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error demoting semester: ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal menurunkan semester.'], 500);
         }
     }
 }

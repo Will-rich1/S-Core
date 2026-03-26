@@ -3,46 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Submission;
 use App\Helpers\SCoreHelper;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class SCoreReportController extends Controller
 {
-    /**
-     * Download S-Core Report (Admin or Student themselves)
-     */
-    public function downloadReport($student_id)
+    private function buildReportData($student_id)
     {
         $student = User::where('student_id', $student_id)->firstOrFail();
-        
-        // Authorization: hanya admin atau student sendiri yang bisa download
+
+        // Authorization: hanya admin atau student sendiri yang bisa akses report
         if (Auth::user()->role !== 'admin' && Auth::user()->student_id !== $student_id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+            abort(403, 'Unauthorized');
         }
 
-        // Check eligibility
-        $eligibility = SCoreHelper::checkSCoreEligibility($student->id);
-        
         // Allow admin to bypass eligibility check, but reject for students who don't meet requirements
+        $eligibility = SCoreHelper::checkSCoreEligibility($student->id);
         if (!$eligibility['isEligible'] && Auth::user()->role !== 'admin') {
-            return response()->json([
-                'message' => 'Student does not meet S-Core requirements',
-                'details' => [
-                    'points' => $eligibility['totalPoints'],
-                    'pointsMet' => $eligibility['minPointsMet'],
-                    'categories' => $eligibility['completedCategories'],
-                    'categoriesMet' => $eligibility['minCategoriesMet']
-                ]
-            ], 422);
+            abort(422, 'Student does not meet S-Core requirements');
         }
 
-        // Get student data and category breakdown
         $categoryBreakdown = SCoreHelper::getCategoryBreakdown($student->id);
-        
-        $data = [
+
+        return [
             'student' => $student,
             'totalPoints' => $eligibility['totalPoints'],
             'completedCategories' => $eligibility['completedCategories'],
@@ -54,13 +38,34 @@ class SCoreReportController extends Controller
             'generatedDate' => now()->format('d M Y'),
             'generatedTime' => now()->format('H:i')
         ];
+    }
+
+    /**
+     * View S-Core Report in browser tab (inline PDF)
+     */
+    public function viewReport($student_id)
+    {
+        $data = $this->buildReportData($student_id);
+
+        $pdf = Pdf::loadView('reports.score-report', $data)
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->stream('S-Core-Report-' . $data['student']->student_id . '.pdf');
+    }
+
+    /**
+     * Download S-Core Report (Admin or Student themselves)
+     */
+    public function downloadReport($student_id)
+    {
+        $data = $this->buildReportData($student_id);
 
         // Generate PDF with proper settings
         $pdf = Pdf::loadView('reports.score-report', $data)
             ->setPaper('a4', 'portrait');
         
         // Download file
-        return $pdf->download('S-Core-Report-' . $student->student_id . '-' . now()->format('YmdHis') . '.pdf');
+        return $pdf->download('S-Core-Report-' . $data['student']->student_id . '-' . now()->format('YmdHis') . '.pdf');
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Subcategory;
+use App\Models\Submission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -38,13 +39,29 @@ class CategoryController extends Controller
     // Special endpoint untuk student dashboard dengan calculation submission count
     public function studentCategories()
     {
+        $currentSemesterCycle = max(0, (int) (Auth::user()->semester_offset ?? 0));
+
+        $currentSemesterCounts = Submission::query()
+            ->select('student_category_id', DB::raw('COUNT(*) as total'))
+            ->where('student_id', Auth::id())
+            ->where('semester_cycle', $currentSemesterCycle)
+            ->whereIn('status', ['Waiting', 'Approved'])
+            ->groupBy('student_category_id')
+            ->pluck('total', 'student_category_id');
+
         $rawCategories = Category::with('subcategories')
             ->where('is_active', true)
             ->orderBy('display_order')
             ->get();
 
         // Only include active subcategories for students
-        $categoryGroups = $rawCategories->map(function($cat) {
+        $categoryGroups = $rawCategories->map(function($cat) use ($currentSemesterCounts) {
+            $maxPerSemester = $cat->max_submissions_per_semester !== null
+                ? (int) $cat->max_submissions_per_semester
+                : null;
+            $usedThisSemester = (int) ($currentSemesterCounts[$cat->id] ?? 0);
+            $isQuotaFull = $maxPerSemester !== null && $usedThisSemester >= $maxPerSemester;
+
             $activeSubs = $cat->subcategories->filter(function ($sub) {
                 return ($sub->is_active == 1 || $sub->is_active === true || $sub->is_active === '1');
             })->values();
@@ -52,6 +69,9 @@ class CategoryController extends Controller
             return [
                 'id' => $cat->id,
                 'name' => $cat->name,
+                'max_submissions_per_semester' => $maxPerSemester,
+                'used_this_semester' => $usedThisSemester,
+                'is_quota_full' => $isQuotaFull,
                 'subcategories' => $activeSubs->map(function($sub) {
                     return [
                         'id' => $sub->id,
@@ -65,7 +85,7 @@ class CategoryController extends Controller
                     ];
                 })
             ];
-        });
+        })->values();
 
         return response()->json($categoryGroups);
     }
@@ -106,7 +126,13 @@ class CategoryController extends Controller
     // 1. Simpan Main Category Baru (Gunakan yang VERSI BARU ini)
     public function store(Request $request)
     {
-        $request->validate(['name' => 'required|string|max:255']);
+        $maxPerSemester = $this->normalizeMaxSubmissionsPerSemester($request->input('max_submissions_per_semester'));
+
+        $request->merge(['max_submissions_per_semester' => $maxPerSemester]);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'max_submissions_per_semester' => 'nullable|integer|min:1|max:10'
+        ]);
         
         // Auto-increment display_order
         $maxOrder = Category::max('display_order') ?? 0;
@@ -114,7 +140,8 @@ class CategoryController extends Controller
         $category = Category::create([
             'name' => $request->name,
             'is_active' => true,
-            'display_order' => $maxOrder + 1
+            'display_order' => $maxOrder + 1,
+            'max_submissions_per_semester' => $request->max_submissions_per_semester,
         ]);
 
         // PENTING: Siapkan relasi subcategories kosong agar struktur JSON konsisten
@@ -130,9 +157,19 @@ class CategoryController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate(['name' => 'required|string|max:255']);
+        $maxPerSemester = $this->normalizeMaxSubmissionsPerSemester($request->input('max_submissions_per_semester'));
+
+        $request->merge(['max_submissions_per_semester' => $maxPerSemester]);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'max_submissions_per_semester' => 'nullable|integer|min:1|max:10'
+        ]);
+
         $category = Category::findOrFail($id);
-        $category->update(['name' => $request->name]);
+        $category->update([
+            'name' => $request->name,
+            'max_submissions_per_semester' => $request->max_submissions_per_semester,
+        ]);
 
         return response()->json(['message' => 'Category updated successfully!']);
     }
@@ -258,5 +295,14 @@ class CategoryController extends Controller
             'created_at' => $now,
             'updated_at' => $now
         ]);
+    }
+
+    private function normalizeMaxSubmissionsPerSemester($value): ?int
+    {
+        if ($value === null || $value === '' || $value === 'none') {
+            return null;
+        }
+
+        return (int) $value;
     }
 }

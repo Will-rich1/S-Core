@@ -27,6 +27,8 @@ class SubmissionController extends Controller
         ]);
 
         try {
+            $currentSemesterCycle = max(0, (int) (Auth::user()->semester_offset ?? 0));
+
             // 2. Cari ID Kategori & Subkategori berdasarkan NAMA
             $category = Category::where('name', $request->mainCategory)->first();
             
@@ -44,6 +46,18 @@ class SubmissionController extends Controller
                 if (!$subcategory) {
                     return response()->json(['message' => 'Subcategory not found.'], 422);
                 }
+            }
+
+            $quotaCheck = $this->checkCategorySemesterQuota(Auth::id(), $category, $currentSemesterCycle);
+            if (!$quotaCheck['allowed']) {
+                return response()->json([
+                    'message' => sprintf(
+                        'Kuota kategori "%s" untuk semester aktif sudah penuh (%d/%d). Pilih kategori utama lain.',
+                        $category->name,
+                        $quotaCheck['used'],
+                        $quotaCheck['max']
+                    )
+                ], 422);
             }
 
             // 3. Upload File ke Google Drive with student_id for filename
@@ -72,6 +86,7 @@ class SubmissionController extends Controller
                 'title'                  => $request->title,
                 'description'            => $request->description,
                 'activity_date'          => $request->activity_date,
+                'semester_cycle'         => $currentSemesterCycle,
                 'certificate_path'       => $uploadResult['path'],
                 'certificate_url'        => $uploadResult['url'] ?? null,
                 'certificate_original_name' => $request->file('certificate_file')->getClientOriginalName(),
@@ -294,6 +309,28 @@ class SubmissionController extends Controller
         }
     }
 
+    private function checkCategorySemesterQuota(int $studentId, Category $category, int $semesterCycle): array
+    {
+        $maxPerSemester = $category->max_submissions_per_semester;
+
+        if ($maxPerSemester === null) {
+            return ['allowed' => true, 'used' => 0, 'max' => null];
+        }
+
+        $usedThisSemester = Submission::query()
+            ->where('student_id', $studentId)
+            ->where('student_category_id', $category->id)
+            ->where('semester_cycle', max(0, $semesterCycle))
+            ->whereIn('status', ['Waiting', 'Approved'])
+            ->count();
+
+        return [
+            'allowed' => $usedThisSemester < (int) $maxPerSemester,
+            'used' => $usedThisSemester,
+            'max' => (int) $maxPerSemester,
+        ];
+    }
+
     /**
      * 4. Approve Pengajuan (Admin)
      */
@@ -498,6 +535,77 @@ class SubmissionController extends Controller
 
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error updating data: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * 8. Kurangi / atur poin pengajuan oleh Admin (mendukung desimal)
+     */
+    public function adjustPoints(Request $request, $id)
+    {
+        $submission = Submission::findOrFail($id);
+
+        if ($submission->status !== 'Approved') {
+            return response()->json([
+                'message' => 'Poin hanya bisa diubah untuk pengajuan yang sudah Disetujui.'
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'points_awarded' => 'required|numeric|min:0|max:999999.99',
+            'points_adjustment_reason' => 'required|string|min:3|max:1000',
+        ]);
+
+        $submission->update([
+            'points_awarded' => round((float) $validated['points_awarded'], 2),
+            'points_adjustment_reason' => trim($validated['points_adjustment_reason']),
+            'reviewed_by' => Auth::id(),
+            'reviewed_at' => now(),
+        ]);
+
+        return response()->json([
+            'message' => 'Poin S-Core berhasil diperbarui.',
+            'points_awarded' => $submission->points_awarded,
+            'points_adjustment_reason' => $submission->points_adjustment_reason,
+        ]);
+    }
+
+    /**
+     * 9. Hapus pengajuan oleh Admin
+     */
+    public function adminDestroy($id)
+    {
+        try {
+            $submission = Submission::findOrFail($id);
+
+            if ($submission->certificate_path) {
+                try {
+                    $googleDriveService = app(GoogleDriveService::class);
+
+                    if ($submission->storage_type === 'google' || strlen((string) $submission->certificate_path) > 20) {
+                        $deleted = $googleDriveService->permanentlyDeleteFile($submission->certificate_path);
+
+                        if (!$deleted) {
+                            $googleDriveService->deleteFile($submission->certificate_path, $submission->storage_type ?? 'google');
+                        }
+                    } else {
+                        $googleDriveService->deleteFile($submission->certificate_path, $submission->storage_type ?? 'google');
+                    }
+                } catch (\Throwable $fileError) {
+                    \Log::warning('Admin delete: gagal hapus file sertifikat', [
+                        'submission_id' => $submission->id,
+                        'error' => $fileError->getMessage(),
+                    ]);
+                }
+            }
+
+            $submission->delete();
+
+            return response()->json([
+                'message' => 'Data S-Core berhasil dihapus oleh admin.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Gagal menghapus data: ' . $e->getMessage()], 500);
         }
     }
 }

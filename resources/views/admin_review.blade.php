@@ -446,6 +446,7 @@
                         <p class="text-sm text-gray-500">
                             ID: <span x-text="selectedStudent?.id"></span> | 
                             Jurusan: <span x-text="selectedStudent?.major"></span> | 
+                            Semester: <span x-text="selectedStudent?.semester ? 'Semester ' + selectedStudent?.semester : '-' "></span> | 
                             Angkatan: <span x-text="selectedStudent?.year"></span>
                         </p>
                     </div>
@@ -471,55 +472,150 @@
                     </div>
 
                     <h4 class="font-semibold text-gray-700 mb-3">Riwayat Pengajuan</h4>
-                    
+
+                    <div class="bg-white rounded-lg shadow p-4 mb-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <select x-model="studentDetailStatusFilter" class="border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Semua Status</option>
+                                <option value="Approved">Disetujui</option>
+                                <option value="Waiting">Menunggu</option>
+                                <option value="Rejected">Ditolak</option>
+                            </select>
+
+                            <select x-model="studentDetailCategoryFilter" class="border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Semua Kategori</option>
+                                <template x-for="cat in selectedStudentCategories" :key="cat">
+                                    <option :value="cat" x-text="cat"></option>
+                                </template>
+                            </select>
+
+                            <input type="text" x-model="studentDetailSearchQuery" placeholder="Cari judul..." class="border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        </div>
+                    </div>
+
                     <div class="bg-white rounded-lg shadow overflow-hidden border">
                         <div class="overflow-x-auto">
-                            <table class="min-w-[600px] w-full text-sm text-left">
-                                <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
+                            <table class="min-w-[980px] w-full text-sm text-left">
+                                <thead class="bg-gray-100 text-gray-600 text-xs uppercase">
                                     <tr>
-                                        <th class="px-4 py-3">Tanggal</th>
-                                        <th class="px-4 py-3">Judul</th>
-                                        <th class="px-4 py-3">Kategori</th>
-                                        <th class="px-4 py-3 text-center">Status</th>
+                                        <th class="px-4 py-3">Kategori Utama</th>
+                                        <th class="px-4 py-3">Subkategori</th>
+                                        <th class="px-4 py-3">Judul Kegiatan</th>
+                                        <th class="px-4 py-3">Deskripsi</th>
                                         <th class="px-4 py-3 text-center">Poin</th>
+                                        <th class="px-4 py-3">Waktu Input</th>
+                                        <th class="px-4 py-3 text-center">Status</th>
+                                        <th class="px-4 py-3 text-center">Aksi</th>
                                     </tr>
                                 </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                <template x-for="sub in selectedStudent?.submissions_list" :key="sub.id">
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="px-4 py-3 whitespace-nowrap" x-text="sub.date"></td>
-                                        <td class="px-4 py-3 font-medium text-gray-800" x-text="sub.title"></td>
-                                        <td class="px-4 py-3 text-gray-600">
-                                            <div x-text="sub.category" class="font-semibold text-xs"></div>
-                                            <div x-text="sub.subcategory" class="text-xs"></div>
-                                        </td>
-                                        <td class="px-4 py-3 text-center">
-                                            <span :class="{
-                                                'bg-green-100 text-green-700': sub.status === 'Approved',
-                                                'bg-yellow-100 text-yellow-700': sub.status === 'Waiting',
-                                                'bg-red-100 text-red-700': sub.status === 'Rejected'
-                                            }" class="px-2 py-1 rounded-full text-xs font-semibold" x-text="translateStatus(sub.status)"></span>
-                                        </td>
-                                        <td class="px-4 py-3 text-center font-bold" 
-                                            :class="sub.status === 'Approved' ? 'text-green-600' : 'text-gray-400'" 
-                                            x-text="sub.points || '-'"></td>
-                                    </tr>
-                                </template>
-                                <template x-if="!selectedStudent?.submissions_list?.length">
-                                    <tr>
-                                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">Tidak ada pengajuan ditemukan untuk mahasiswa ini.</td>
-                                    </tr>
-                                </template>
-                            </tbody>
+                                <tbody class="divide-y divide-gray-200">
+                                    <template x-for="sub in filteredSelectedStudentSubmissions" :key="sub.id">
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-4 py-3" x-text="sub.mainCategory"></td>
+                                            <td class="px-4 py-3" x-text="sub.subcategory"></td>
+                                            <td class="px-4 py-3 font-medium text-gray-800" x-text="sub.title"></td>
+                                            <td class="px-4 py-3 text-gray-600" x-text="sub.description"></td>
+                                            <td class="px-4 py-3 text-center">
+                                                <div class="flex flex-col items-center gap-1">
+                                                    <span x-text="sub.points || '-'"></span>
+                                                    <span
+                                                        x-show="sub.pointAdjustmentReason"
+                                                        class="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700"
+                                                        :title="sub.pointAdjustmentReason"
+                                                        style="display: none;"
+                                                    >
+                                                        Ada alasan
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-3 text-xs text-gray-700" x-text="sub.waktu"></td>
+                                            <td class="px-4 py-3 text-center">
+                                                <span :class="{
+                                                    'bg-green-100 text-green-700': sub.status === 'Approved',
+                                                    'bg-yellow-100 text-yellow-700': sub.status === 'Waiting',
+                                                    'bg-red-100 text-red-700': sub.status === 'Rejected'
+                                                }" class="px-2 py-1 rounded-full text-xs font-semibold" x-text="translateStatus(sub.status)"></span>
+                                            </td>
+                                            <td class="px-4 py-3 text-center">
+                                                <div class="flex items-center justify-center gap-2">
+                                                    <button @click="openStudentSubmissionPreview(sub)" class="text-blue-500 hover:text-blue-700 p-1" title="Preview">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                        </svg>
+                                                    </button>
+                                                    <button @click="reduceSubmissionPoints(sub)" class="text-amber-600 hover:text-amber-700 p-1" title="Kurangi Poin">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20 12H4" />
+                                                        </svg>
+                                                    </button>
+                                                    <button @click="deleteStudentSubmission(sub)" class="text-red-600 hover:text-red-700 p-1" title="Hapus S-Core">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </template>
+
+                                    <template x-if="filteredSelectedStudentSubmissions.length === 0">
+                                        <tr>
+                                            <td colspan="8" class="px-4 py-8 text-center text-gray-500">Tidak ada aktivitas yang sesuai dengan filter Anda.</td>
+                                        </tr>
+                                    </template>
+                                </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
 
                 <div class="bg-white border-t px-6 py-4 flex justify-end gap-3 items-center">
+                    <button @click="viewStudentReport()" class="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white rounded text-sm font-medium">Lihat Report</button>
                     <button @click="downloadStudentReport()" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded text-sm font-medium">Unduh Laporan</button>
                     <button @click="resetStudentPassword()" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded text-sm font-medium">Reset Kata Sandi</button>
                     <button @click="showStudentDetailModal = false" class="px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium">Tutup</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Adjust Points Modal -->
+        <div x-show="showAdjustPointsModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[105]" style="display: none;">
+            <div @click.away="closeAdjustPointsModal()" class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold mb-1 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+                        </svg>
+                        Kurangi / Ubah Poin S-Core
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-4" x-text="adjustPointForm.title ? 'Kegiatan: ' + adjustPointForm.title : ''"></p>
+
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Poin Saat Ini</label>
+                                <input type="text" :value="adjustPointForm.currentPoints" disabled class="w-full border rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-600" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Poin Baru <span class="text-red-500">*</span></label>
+                                <input type="text" x-model="adjustPointForm.nextPoints" placeholder="Contoh: 7.5 atau 7,5" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Alasan Pengurangan Poin <span class="text-red-500">*</span></label>
+                            <textarea x-model="adjustPointForm.reason" rows="4" placeholder="Tulis alasan pengurangan poin agar mahasiswa bisa melihatnya..." class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+                            <p class="text-xs text-gray-500 mt-1">Alasan ini akan terlihat oleh mahasiswa.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 justify-end mt-6">
+                        <button @click="closeAdjustPointsModal()" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium">Batal</button>
+                        <button @click="submitAdjustedPoints()" :disabled="isAdjustingPoints" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white rounded-lg text-sm font-medium">
+                            <span x-text="isAdjustingPoints ? 'Menyimpan...' : 'Simpan Perubahan'"></span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -900,6 +996,30 @@
                                         </template>
                                     </div>
                                 </div>
+
+                                <div class="mb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                    <div class="text-xs text-gray-600">
+                                        Maksimum submit per semester:
+                                        <span class="font-semibold text-gray-800" x-text="getCategorySemesterLimitLabel(cat)"></span>
+                                    </div>
+
+                                    <div class="flex items-center gap-2">
+                                        <select x-model="cat.max_submissions_per_semester" class="border rounded-lg px-2.5 py-1.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+                                            <option value="none">Tidak Ada</option>
+                                            <template x-for="limit in [1,2,3,4,5,6,7,8,9,10]" :key="'inline-limit-' + cat.id + '-' + limit">
+                                                <option :value="String(limit)" x-text="limit"></option>
+                                            </template>
+                                        </select>
+                                        <button
+                                            @click="updateCategorySemesterLimit(catIndex)"
+                                            :disabled="cat.isSavingLimit"
+                                            class="px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-white bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                        >
+                                            <span x-show="!cat.isSavingLimit">Simpan Limit</span>
+                                            <span x-show="cat.isSavingLimit">Menyimpan...</span>
+                                        </button>
+                                    </div>
+                                </div>
                                 
                                 <div class="space-y-2 ml-2 sm:ml-4">
                                     <template x-for="(subcat, subIndex) in cat.subcategories" :key="subIndex">
@@ -1086,28 +1206,28 @@
                     <!-- Filters -->
                     <div class="bg-white rounded-lg shadow p-4 mb-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                            <select x-model="statusFilter" class="border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <select x-model="statusFilter" @change="submissionsPagination.currentPage = 1" class="border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">Semua Status</option>
                                 <option value="Waiting">Menunggu</option>
                                 <option value="Approved">Disetujui</option>
                                 <option value="Rejected">Ditolak</option>
                             </select>
 
-                            <select x-model="categoryFilter" class="border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <select x-model="categoryFilter" @change="submissionsPagination.currentPage = 1" class="border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">Semua Kategori</option>
                                 <template x-for="cat in categories" :key="cat.id">
                                     <option :value="cat.name" x-text="cat.name.length > 30 ? cat.name.substring(0, 30) + '...' : cat.name"></option>
                                 </template>
                             </select>
 
-                            <select x-model="studentFilter" class="border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <select x-model="studentFilter" @change="submissionsPagination.currentPage = 1" class="border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">Semua Mahasiswa</option>
                                 <template x-for="student in uniqueStudents" :key="student">
                                     <option :value="student" x-text="student"></option>
                                 </template>
                             </select>
 
-                            <input type="text" x-model="searchQuery" placeholder="Cari pengajuan..." class="border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            <input type="text" x-model="searchQuery" @input="submissionsPagination.currentPage = 1" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Cari pengajuan..." class="border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         </div>
                     </div>
 
@@ -1128,7 +1248,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <template x-for="submission in filteredSubmissions" :key="submission.id">
+                                <template x-for="submission in paginatedSubmissions" :key="submission.id">
                                     <tr class="border-b hover:bg-gray-50">
                                         <td class="py-3 px-4">
                                             <div class="text-sm">
@@ -1169,7 +1289,7 @@
 
                     <!-- Submissions List - Mobile (<1000px) -->
                     <div class="min-[1000px]:hidden space-y-2">
-                        <template x-for="submission in filteredSubmissions" :key="submission.id">
+                        <template x-for="submission in paginatedSubmissions" :key="submission.id">
                             <div @click="openMobileDetail(submission)" class="bg-white rounded-lg shadow p-3 flex items-center justify-between cursor-pointer active:bg-gray-50 transition-colors">
                                 <div class="flex-1 min-w-0 mr-3">
                                     <div class="font-medium text-sm truncate" x-text="submission.studentName"></div>
@@ -1185,6 +1305,28 @@
                         <template x-if="filteredSubmissions.length === 0">
                             <div class="bg-white rounded-lg shadow p-6 text-center text-gray-500 text-sm">Tidak ada pengajuan yang sesuai dengan filter Anda</div>
                         </template>
+                    </div>
+
+                    <div class="border-t px-4 py-3 mt-3 bg-white rounded-lg shadow flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <p class="text-sm text-gray-600" x-text="`Halaman ${submissionsPagination.currentPage} dari ${reviewLastPage}`"></p>
+                        <div class="flex gap-2 justify-end">
+                            <button
+                                @click="goToSubmissionPage(submissionsPagination.currentPage - 1)"
+                                :disabled="submissionsPagination.currentPage <= 1"
+                                :class="submissionsPagination.currentPage <= 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white hover:bg-gray-100 text-gray-700 border'"
+                                class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                            >
+                                Kiri
+                            </button>
+                            <button
+                                @click="goToSubmissionPage(submissionsPagination.currentPage + 1)"
+                                :disabled="submissionsPagination.currentPage >= reviewLastPage"
+                                :class="submissionsPagination.currentPage >= reviewLastPage ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'"
+                                class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                            >
+                                Kanan
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Mobile Detail Bottom Sheet -->
@@ -1368,45 +1510,87 @@
 
                 <!-- Filter Bar -->
                 <div class="bg-white rounded-lg shadow p-4 mb-4">
-                    <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
-                        <input type="text" x-model="studentSearchQuery" placeholder="Cari berdasarkan nama atau NIM..." class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                        <div class="md:col-span-3 flex gap-2">
+                            <input type="text" x-model="studentSearchQuery" @input="onStudentSearchInput()" @keydown.enter.prevent="applyStudentFilters()" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Cari berdasarkan nama atau NIM..." class="flex-1 border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            <button @click="applyStudentFilters()" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium">Cari</button>
+                        </div>
                         
-                        <select x-model="majorFilter" class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select x-model="majorFilter" @change="applyStudentFilters()" class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 md:col-span-2">
                             <option value="">Semua Jurusan</option>
                             <option value="STI">STI</option>
                             <option value="BD">BD</option>
                             <option value="KWU">KWU</option>
                         </select>
                         
-                        <div class="grid grid-cols-2 gap-2">
-                            <select x-model="yearFilterMode" @change="if(yearFilterMode === 'all') yearFilter = ''" class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <div class="grid grid-cols-2 gap-2 md:col-span-3">
+                            <select x-model="yearFilterMode" @change="onYearFilterModeChange()" class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="all">Semua Angkatan</option>
                                 <option value="specific">Angkatan Tertentu</option>
                             </select>
-                            <input 
-                                type="number" 
+                            <select 
                                 x-model="yearFilter" 
+                                @change="$nextTick(() => applyStudentFilters())"
                                 :disabled="yearFilterMode === 'all'"
                                 :class="yearFilterMode === 'all' ? 'bg-gray-100 cursor-not-allowed' : ''"
-                                placeholder="Masukkan angkatan" 
                                 class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                min="2020"
-                                max="2030"
-                            />
+                            >
+                                <option value="" :selected="String(yearFilter ?? '').trim() === ''">Pilih angkatan</option>
+                                <template x-for="year in availableStudentYears" :key="`year-option-${year}`">
+                                    <option :value="String(year)" :selected="String(yearFilter ?? '').trim() === String(year).trim()" x-text="year"></option>
+                                </template>
+                            </select>
                         </div>
                         
-                        <select x-model="statusPassFilter" class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <select x-model="statusPassFilter" class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 md:col-span-2">
                             <option value="">Semua Status</option>
-                            <option value="pass">Lulus (&gt;= 20 poin)</option>
-                            <option value="fail">Belum Lulus (&lt; 20 poin)</option>
+                            <option value="pass">Lulus</option>
+                            <option value="fail">Belum Lulus</option>
                         </select>
                         
-                        <button @click="exportReport" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2">
+                        <button @click="exportReport" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 md:col-span-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             Ekspor Laporan
                         </button>
+                    </div>
+
+                    <div class="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t pt-3">
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <span>Tampilkan</span>
+                            <select x-model.number="studentsPagination.perPage" @change="changeStudentsPerPage" class="border rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option :value="25">25</option>
+                                <option :value="50">50</option>
+                                <option :value="100">100</option>
+                                <option :value="250">250</option>
+                                <option :value="500">500</option>
+                            </select>
+                            <span>mahasiswa per halaman</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button
+                                @click="demoteAllStudentsSemester()"
+                                :disabled="isDemotingSemester"
+                                class="bg-rose-500 hover:bg-rose-600 disabled:bg-rose-300 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                                <span x-text="isDemotingSemester ? 'Memproses...' : 'Semester Turun'"></span>
+                            </button>
+                            <button
+                                @click="promoteAllStudentsSemester()"
+                                :disabled="isPromotingSemester"
+                                class="bg-indigo-500 hover:bg-indigo-600 disabled:bg-indigo-300 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                </svg>
+                                <span x-text="isPromotingSemester ? 'Memproses...' : 'Semester Naik'"></span>
+                            </button>
+                            <p class="text-sm text-gray-500" x-text="`Menampilkan ${studentsPagination.from} - ${studentsPagination.to} dari ${studentsPagination.total} mahasiswa`"></p>
+                        </div>
                     </div>
                     
                     <!-- Delete Selected Button -->
@@ -1429,7 +1613,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm text-gray-600">Total Mahasiswa</p>
-                                <p class="text-2xl font-bold text-gray-800" x-text="filteredStudentsList.length"></p>
+                                <p class="text-2xl font-bold text-gray-800" x-text="studentsPagination.total"></p>
                             </div>
                             <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                                 <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1480,11 +1664,13 @@
                             </div>
                         </div>
                     </div>
+
                 </div>
 
                 <!-- Students Table with Hover Details -->
                 <div class="bg-white rounded-lg shadow overflow-hidden">
-                    <div class="overflow-x-auto">
+                    <!-- Desktop Table -->
+                    <div class="hidden lg:block overflow-x-auto">
                         <table class="min-w-[1000px] w-full">
                             <thead class="bg-gray-50">
                                 <tr>
@@ -1496,8 +1682,9 @@
                                 </th>
                                 <th class="text-left py-3 px-4 font-semibold text-sm">NIM</th>
                                 <th class="text-left py-3 px-4 font-semibold text-sm">Nama</th>
-                                <th class="text-center py-3 px-4 font-semibold text-sm">Jurusan</th>
-                                <th class="text-center py-3 px-4 font-semibold text-sm">Angkatan</th>
+                                    <th class="text-center py-3 px-4 font-semibold text-sm">Jurusan</th>
+                                    <th class="text-center py-3 px-4 font-semibold text-sm">Semester</th>
+                                    <th class="text-center py-3 px-4 font-semibold text-sm">Angkatan</th>
                                 <th class="text-center py-3 px-4 font-semibold text-sm">Total Poin</th>
                                 <th class="text-center py-3 px-4 font-semibold text-sm">Status</th>
                                 <th class="text-center py-3 px-4 font-semibold text-sm">Tertunda</th>
@@ -1516,7 +1703,6 @@
                                 </td>
                                 <td class="py-3 px-4 text-sm" x-text="student.id"></td>
                                 <td class="py-3 px-4 text-sm font-medium" x-text="student.name"></td>
-                                
                                 <td class="text-center py-3 px-4">
                                     <span class="px-2 py-1 rounded-full text-xs font-semibold" 
                                         :class="{
@@ -1527,7 +1713,8 @@
                                         x-text="student.major">
                                     </span>
                                 </td>
-                                
+
+                                <td class="text-center py-3 px-4 text-sm font-medium" x-text="student.semester ? 'Semester ' + student.semester : '-'"></td>
                                 <td class="text-center py-3 px-4 text-sm" x-text="student.year"></td>
                                 
                                 <td class="text-center py-3 px-4 text-sm">
@@ -1608,6 +1795,7 @@
                                 
                                 <td class="text-center py-3 px-4">
                                     <div class="flex gap-2 justify-center">
+                                        <button @click="openStudentScoreReport(student)" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1 rounded text-xs font-medium">Lihat Report</button>
                                         <button @click="viewStudentDetail(student)" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium">Lihat Detail</button>
                                         <button @click="deleteStudent(student.id)" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs font-medium">Hapus</button>
                                     </div>
@@ -1622,6 +1810,179 @@
                         </template>
                     </tbody>
                     </table>
+                    </div>
+
+                    <!-- Mobile Compact List -->
+                    <div class="lg:hidden">
+                        <div class="grid grid-cols-[36px_1fr_86px] gap-2 items-center px-3 py-2 border-b bg-gray-50 text-[11px] font-semibold uppercase tracking-wide text-gray-600">
+                            <div class="flex justify-center">
+                                <input type="checkbox"
+                                    @change="toggleSelectAll($event.target.checked)"
+                                    :checked="selectedStudents.length > 0 && selectedStudents.length === filteredStudentsList.length"
+                                    class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <span>Nama</span>
+                            <span class="text-center">Status</span>
+                        </div>
+
+                        <template x-for="student in filteredStudentsList" :key="'mobile-student-' + student.id">
+                            <div
+                                class="grid grid-cols-[36px_1fr_86px] gap-2 items-center px-3 py-2.5 border-b cursor-pointer transition-colors"
+                                :class="selectedStudent?.id === student.id ? 'bg-blue-50' : 'hover:bg-gray-50'"
+                                @click="openMobileStudentDetail(student)"
+                            >
+                                <div class="flex justify-center" @click.stop>
+                                    <input
+                                        type="checkbox"
+                                        :value="student.id"
+                                        @change="handleStudentCheckboxToggle(student, $event.target.checked)"
+                                        :checked="selectedStudents.includes(student.id)"
+                                        class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                                    >
+                                </div>
+
+                                <div class="min-w-0">
+                                    <p class="text-sm font-semibold text-gray-800 truncate" x-text="student.name"></p>
+                                    <p class="text-[11px] text-gray-500 mt-0.5">NIM: <span x-text="student.id"></span></p>
+                                </div>
+
+                                <div class="text-center">
+                                    <span
+                                        :class="isStudentPassed(student) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+                                        class="px-2 py-0.5 rounded-full text-[10px] font-semibold inline-block"
+                                        x-text="isStudentPassed(student) ? 'LULUS' : 'BELUM LULUS'"
+                                    ></span>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template x-if="filteredStudentsList.length === 0">
+                            <div class="text-center py-8 text-gray-500 text-sm">Tidak ada mahasiswa yang sesuai dengan filter Anda</div>
+                        </template>
+
+                        <!-- Mobile Student Detail Bottom Sheet -->
+                        <div x-show="showMobileStudentDetailModal" class="fixed inset-0 z-[70]" style="display: none;">
+                            <div class="absolute inset-0 bg-black bg-opacity-50" @click="closeMobileStudentDetail()"></div>
+                            <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[82vh] overflow-y-auto animate-slide-up">
+                                <div class="sticky top-0 bg-white border-b px-4 py-3 flex justify-between items-center rounded-t-2xl z-10">
+                                    <h3 class="font-semibold text-base">Detail Mahasiswa</h3>
+                                    <button @click="closeMobileStudentDetail()" class="text-gray-400 hover:text-gray-600 text-xl leading-none w-8 h-8 flex items-center justify-center">&times;</button>
+                                </div>
+
+                                <template x-if="mobileStudentDetail">
+                                    <div class="p-4 space-y-3">
+                                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                            <div class="flex items-start justify-between gap-3">
+                                                <div class="min-w-0">
+                                                    <p class="text-sm font-semibold text-gray-800 truncate" x-text="mobileStudentDetail.name"></p>
+                                                    <p class="text-xs text-gray-500">NIM: <span x-text="mobileStudentDetail.id"></span></p>
+                                                </div>
+                                                <span
+                                                    :class="isStudentPassed(mobileStudentDetail) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+                                                    class="px-2 py-0.5 rounded-full text-[10px] font-semibold shrink-0"
+                                                    x-text="isStudentPassed(mobileStudentDetail) ? 'LULUS' : 'BELUM LULUS'"
+                                                ></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-2 text-xs">
+                                            <div class="bg-gray-50 rounded p-2">
+                                                <p class="text-gray-500">Jurusan</p>
+                                                <p class="font-semibold text-gray-800 mt-0.5" x-text="mobileStudentDetail.major || '-'"></p>
+                                            </div>
+                                            <div class="bg-gray-50 rounded p-2">
+                                                <p class="text-gray-500">Semester</p>
+                                                <p class="font-semibold text-gray-800 mt-0.5" x-text="mobileStudentDetail.semester ? 'Semester ' + mobileStudentDetail.semester : '-'"></p>
+                                            </div>
+                                            <div class="bg-gray-50 rounded p-2">
+                                                <p class="text-gray-500">Angkatan</p>
+                                                <p class="font-semibold text-gray-800 mt-0.5" x-text="mobileStudentDetail.year || '-'"></p>
+                                            </div>
+                                            <div class="bg-gray-50 rounded p-2">
+                                                <p class="text-gray-500">Total Poin</p>
+                                                <p class="font-semibold text-gray-800 mt-0.5" x-text="mobileStudentDetail.approvedPoints ?? 0"></p>
+                                            </div>
+                                            <div class="bg-gray-50 rounded p-2">
+                                                <p class="text-gray-500">Tertunda</p>
+                                                <p class="font-semibold text-gray-800 mt-0.5" x-text="mobileStudentDetail.pending ?? 0"></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <button
+                                                @click="openStudentScoreReport(mobileStudentDetail)"
+                                                class="bg-emerald-500 hover:bg-emerald-600 text-white py-2.5 rounded text-sm font-medium"
+                                            >
+                                                Lihat Report
+                                            </button>
+                                            <button
+                                                @click="let s = mobileStudentDetail; closeMobileStudentDetail(); viewStudentDetail(s);"
+                                                class="bg-blue-500 hover:bg-blue-600 text-white py-2.5 rounded text-sm font-medium"
+                                            >
+                                                Lihat Detail
+                                            </button>
+                                            <button
+                                                @click="let s = mobileStudentDetail; closeMobileStudentDetail(); deleteStudent(s.id);"
+                                                class="bg-red-500 hover:bg-red-600 text-white py-2.5 rounded text-sm font-medium"
+                                            >
+                                                Hapus
+                                            </button>
+                                        </div>
+
+                                        <div>
+                                            <p class="text-xs font-semibold text-gray-700 mb-2">Riwayat Pengajuan</p>
+                                            <div class="space-y-2 max-h-56 overflow-y-auto pr-1">
+                                                <template x-for="sub in mobileStudentDetail.submissions_list" :key="'mobile-sub-' + sub.id">
+                                                    <div class="border rounded p-2 bg-gray-50">
+                                                        <p class="text-xs font-medium text-gray-800 truncate" x-text="sub.title"></p>
+                                                        <p class="text-[11px] text-gray-500 mt-0.5" x-text="sub.date"></p>
+                                                        <p class="text-[11px] text-gray-600 mt-0.5 truncate" x-text="sub.category + ' • ' + sub.subcategory"></p>
+                                                        <div class="flex items-center justify-between mt-1">
+                                                            <span
+                                                                :class="{
+                                                                    'bg-green-100 text-green-700': sub.status === 'Approved',
+                                                                    'bg-yellow-100 text-yellow-700': sub.status === 'Waiting',
+                                                                    'bg-red-100 text-red-700': sub.status === 'Rejected'
+                                                                }"
+                                                                class="px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                                                                x-text="translateStatus(sub.status)"
+                                                            ></span>
+                                                            <span class="text-[11px] font-semibold text-gray-700" x-text="sub.points || '-'"></span>
+                                                        </div>
+                                                    </div>
+                                                </template>
+
+                                                <template x-if="!mobileStudentDetail.submissions_list?.length">
+                                                    <div class="text-xs text-gray-500 text-center py-3">Belum ada riwayat pengajuan.</div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t px-4 py-3 mt-3 bg-white rounded-lg shadow flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <p class="text-sm text-gray-600" x-text="`Halaman ${studentsPagination.currentPage} dari ${studentsPagination.lastPage || 1}`"></p>
+                    <div class="flex gap-2 justify-end">
+                        <button
+                            @click="goToStudentsPage(studentsPagination.currentPage - 1)"
+                            :disabled="studentsPagination.currentPage <= 1"
+                            :class="studentsPagination.currentPage <= 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white hover:bg-gray-100 text-gray-700 border'"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                        >
+                            Kiri
+                        </button>
+                        <button
+                            @click="goToStudentsPage(studentsPagination.currentPage + 1)"
+                            :disabled="studentsPagination.currentPage >= studentsPagination.lastPage"
+                            :class="studentsPagination.currentPage >= studentsPagination.lastPage ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                        >
+                            Kanan
+                        </button>
                     </div>
                 </div>
             </div>
@@ -2982,6 +3343,9 @@
         categoryGroups: [], 
         
         students: @json($students),     
+        studentYears: @json($availableStudentYears),
+        studentsFilters: @json($studentsFilters ?? []),
+        studentsPagination: @json($studentsPagination),
         studentStats: @json($studentStats), 
         
         // Bulk Score Data
@@ -3010,6 +3374,8 @@
         showAlertModal: false,
         showMobileDetailModal: false,
         mobileDetailSubmission: null,
+        showMobileStudentDetailModal: false,
+        mobileStudentDetail: null,
         
         alertType: 'info',
         alertTitle: '',
@@ -3058,6 +3424,7 @@
         assignedAvailableSubcategories: [],
         
         newMainCategory: '',
+        newMainCategoryMaxPerSemester: 'none',
         newCategory: { mainCategoryIndex: '', name: '', points: '', description: '' },
         showInactiveCategories: false,
         
@@ -3066,16 +3433,23 @@
         categoryFilter: '',      
         studentFilter: '',       
         searchQuery: '',         
+        submissionsPagination: {
+            currentPage: 1,
+            perPage: 25,
+        },
         
         // Filter Student Management
-        studentSearchQuery: '',
-        majorFilter: '',
-        yearFilterMode: 'all', // 'all' or 'specific'
-        yearFilter: '',
+        studentSearchQuery: @json($studentsFilters['studentSearch'] ?? ''),
+        majorFilter: @json($studentsFilters['majorFilter'] ?? ''),
+        yearFilterMode: @json($studentsFilters['yearFilterMode'] ?? 'all'), // 'all' or 'specific'
+        yearFilter: @json($studentsFilters['yearFilter'] ?? ''),
         statusPassFilter: '',    
         
         showStudentDetailModal: false, 
         selectedStudent: null,
+        studentDetailSearchQuery: '',
+        studentDetailStatusFilter: '',
+        studentDetailCategoryFilter: '',
         
         // Selected Students for Deletion
         selectedStudents: [],
@@ -3085,6 +3459,19 @@
         resetPasswordInput: '',
         showResetPasswordVisible: false,
         resetPasswordError: '',
+        studentSearchDebounceTimer: null,
+        isPromotingSemester: false,
+        isDemotingSemester: false,
+
+        showAdjustPointsModal: false,
+        isAdjustingPoints: false,
+        adjustPointForm: {
+            submissionId: null,
+            title: '',
+            currentPoints: 0,
+            nextPoints: '',
+            reason: ''
+        },
         
         // Tabs
         userTab: 'students',
@@ -3123,6 +3510,40 @@
         //  Fungsi ini berjalan otomatis saat halaman dimuat
         // ============================================================
         async init() {
+            const queryParams = new URLSearchParams(window.location.search);
+            const menuFromQuery = queryParams.get('menu');
+            const validMenus = ['Review Submissions', 'Students', 'Bulk Score', 'Settings', 'Help', 'Statistics'];
+            if (menuFromQuery && validMenus.includes(menuFromQuery)) {
+                this.activeMenu = menuFromQuery;
+            }
+
+            // Normalize selected year type so <select x-model> always binds correctly.
+            this.yearFilter = String(this.yearFilter ?? '').trim();
+            this.yearFilterMode = (this.yearFilterMode === 'specific') ? 'specific' : 'all';
+
+            // If a year is already present, force specific mode so the select value stays visible.
+            if ((this.yearFilter || '').trim() !== '') {
+                this.yearFilterMode = 'specific';
+            }
+
+            // Sync from URL as fallback so selected filters are reflected on first render.
+            const queryYearMode = queryParams.get('year_mode');
+            const queryYear = queryParams.get('year_filter');
+            const querySearch = queryParams.get('student_search');
+
+            if (queryYearMode) {
+                this.yearFilterMode = queryYearMode;
+            }
+            if (queryYear !== null) {
+                this.yearFilter = String(queryYear).trim();
+            }
+            if ((this.yearFilter || '').trim() !== '') {
+                this.yearFilterMode = 'specific';
+            }
+            if ((this.studentSearchQuery || '') === '' && querySearch) {
+                this.studentSearchQuery = querySearch;
+            }
+
             // LOAD CATEGORIES dari API (Real-time)
             await this.loadCategories();
             // LOAD S-CORE SETTINGS
@@ -3130,8 +3551,32 @@
         },
 
         fetchSubmissions() {
-            // Reload halaman untuk mendapatkan data submission terbaru
-            window.location.reload();
+            // Force full reload with cache-busting query so data benar-benar fresh
+            const url = new URL(window.location.href);
+            url.searchParams.set('menu', 'Review Submissions');
+            url.searchParams.set('_refresh', Date.now().toString());
+            window.location.href = url.toString();
+        },
+
+        normalizeCategorySemesterLimitValue(value) {
+            if (value === null || typeof value === 'undefined' || value === '' || value === 'none') {
+                return 'none';
+            }
+            return String(value);
+        },
+
+        parseCategorySemesterLimitValue(value) {
+            if (value === null || typeof value === 'undefined' || value === '' || value === 'none') {
+                return null;
+            }
+
+            const parsed = parseInt(value, 10);
+            return Number.isNaN(parsed) ? null : parsed;
+        },
+
+        getCategorySemesterLimitLabel(category) {
+            const value = this.normalizeCategorySemesterLimitValue(category.max_submissions_per_semester);
+            return value === 'none' ? 'Tidak Ada' : value;
         },
 
         async loadCategories() {
@@ -3145,7 +3590,9 @@
                 // Transform dan tambahkan isEditing flag
                 fetchedCategories = fetchedCategories.map(cat => ({
                     ...cat,
+                    max_submissions_per_semester: this.normalizeCategorySemesterLimitValue(cat.max_submissions_per_semester),
                     isEditing: false,
+                    isSavingLimit: false,
                     subcategories: (cat.subcategories || []).map(sub => ({
                         ...sub,
                         isEditing: false
@@ -3161,7 +3608,9 @@
                 // Fallback: gunakan data awal jika API gagal
                 this.categories = this.categories.map(cat => ({
                     ...cat,
+                    max_submissions_per_semester: this.normalizeCategorySemesterLimitValue(cat.max_submissions_per_semester),
                     isEditing: false,
+                    isSavingLimit: false,
                     subcategories: (cat.subcategories || []).map(sub => ({
                         ...sub,
                         isEditing: false
@@ -3458,10 +3907,35 @@
         // ============================================================
         
         // --- HELPER METHODS ---
+        getStudentMinCategories(student) {
+            const defaultMinCategories = parseInt(this.scoreSettings.minCategories || 0, 10);
+            const yearValue = (student?.year ?? '').toString().trim();
+            const yearDigits = yearValue.replace(/\D/g, '');
+            let entryYear = null;
+
+            if (yearDigits.length >= 4) {
+                entryYear = parseInt(yearDigits.slice(0, 4), 10);
+            } else if (yearDigits.length === 2) {
+                entryYear = 2000 + parseInt(yearDigits, 10);
+            } else {
+                const nimDigits = (student?.id ?? '').toString().replace(/\D/g, '');
+                if (nimDigits.length >= 2) {
+                    entryYear = 2000 + parseInt(nimDigits.slice(0, 2), 10);
+                }
+            }
+
+            if (entryYear === 2022) {
+                return 4;
+            }
+
+            return defaultMinCategories;
+        },
+
         isStudentPassed(student) {
-            // Student passes if they have >= min points AND >= min categories (from dynamic settings)
+            // Student passes if they have >= min points AND >= min categories (2022 override: 4 categories)
             const hasMinPoints = student.approvedPoints >= this.scoreSettings.minPoints;
-            const hasMinCategories = Object.keys(student.categoryBreakdown).length >= this.scoreSettings.minCategories;
+            const studentMinCategories = this.getStudentMinCategories(student);
+            const hasMinCategories = Object.keys(student.categoryBreakdown).length >= studentMinCategories;
             return hasMinPoints && hasMinCategories;
         },
 
@@ -3499,6 +3973,18 @@
             });
         },
 
+        get reviewLastPage() {
+            const totalItems = this.filteredSubmissions.length;
+            return Math.max(1, Math.ceil(totalItems / this.submissionsPagination.perPage));
+        },
+
+        get paginatedSubmissions() {
+            const page = Math.min(this.submissionsPagination.currentPage, this.reviewLastPage);
+            const start = (page - 1) * this.submissionsPagination.perPage;
+            const end = start + this.submissionsPagination.perPage;
+            return this.filteredSubmissions.slice(start, end);
+        },
+
         // Filter Logic Student Tab
         get filteredStudentsList() {
             return this.students.filter(student => {
@@ -3521,11 +4007,62 @@
             });
         },
 
+        get availableStudentYears() {
+            const sourceYears = (this.studentYears && this.studentYears.length > 0)
+                ? this.studentYears
+                : this.students
+                .map(student => student.year)
+                .filter(year => year !== null && year !== undefined && year !== '');
+
+            return [...new Set(sourceYears)]
+                .map(year => Number(year))
+                .filter(year => Number.isFinite(year))
+                .sort((a, b) => b - a)
+                .map(year => String(year));
+        },
+
+        get selectedStudentCategories() {
+            if (!this.selectedStudent || !this.selectedStudent.submissions_list) {
+                return [];
+            }
+
+            return [...new Set(this.selectedStudent.submissions_list.map(sub => sub.mainCategory).filter(Boolean))];
+        },
+
+        get filteredSelectedStudentSubmissions() {
+            if (!this.selectedStudent || !this.selectedStudent.submissions_list) {
+                return [];
+            }
+
+            return this.selectedStudent.submissions_list.filter(sub => {
+                const search = (this.studentDetailSearchQuery || '').toLowerCase();
+                const matchesSearch = search === '' ||
+                    (sub.title && sub.title.toLowerCase().includes(search)) ||
+                    (sub.description && sub.description.toLowerCase().includes(search));
+
+                const matchesStatus = this.studentDetailStatusFilter === '' || sub.status === this.studentDetailStatusFilter;
+                const matchesCategory = this.studentDetailCategoryFilter === '' || sub.mainCategory === this.studentDetailCategoryFilter;
+
+                return matchesSearch && matchesStatus && matchesCategory;
+            });
+        },
+
         // --- FUNGSI UTAMA (Review, Approve, Reject) ---
 
         openMobileDetail(submission) {
             this.mobileDetailSubmission = submission;
             this.showMobileDetailModal = true;
+        },
+
+        openMobileStudentDetail(student) {
+            this.selectedStudent = student;
+            this.mobileStudentDetail = student;
+            this.showMobileStudentDetailModal = true;
+        },
+
+        closeMobileStudentDetail() {
+            this.showMobileStudentDetailModal = false;
+            this.mobileStudentDetail = null;
         },
 
         viewDetail(submission) {
@@ -3653,7 +4190,179 @@
 
         viewStudentDetail(student) {
             this.selectedStudent = student;
+            this.studentDetailSearchQuery = '';
+            this.studentDetailStatusFilter = '';
+            this.studentDetailCategoryFilter = '';
             this.showStudentDetailModal = true;
+        },
+
+        openStudentScoreReport(student) {
+            if (!student || !student.id) {
+                this.showAlert('warning', 'Data Tidak Lengkap', 'ID mahasiswa tidak ditemukan untuk membuka report.');
+                return;
+            }
+
+            const reportViewUrl = `/student/${student.id}/report/view`;
+            window.open(reportViewUrl, '_blank', 'noopener,noreferrer');
+        },
+
+        viewStudentReport() {
+            if (!this.selectedStudent || !this.selectedStudent.id) return;
+            this.openStudentScoreReport(this.selectedStudent);
+        },
+
+        openStudentSubmissionPreview(submission) {
+            if (!this.selectedStudent || !submission) {
+                return;
+            }
+
+            this.showStudentDetailModal = false;
+
+            this.viewDetail({
+                id: submission.id,
+                studentId: this.selectedStudent.id,
+                studentName: this.selectedStudent.name,
+                mainCategory: submission.mainCategory,
+                subcategory: submission.subcategory,
+                judul: submission.title,
+                keterangan: submission.description,
+                point: submission.points,
+                suggestedPoint: submission.points || 0,
+                waktu: submission.waktu,
+                activityDate: submission.activityDate,
+                submittedDate: submission.submittedDate,
+                status: submission.status,
+                certificate: submission.certificate,
+                file_url: submission.file_url,
+                certificate_path: submission.certificate_path,
+            });
+        },
+
+        async reduceSubmissionPoints(submission) {
+            if (!submission || !submission.id) {
+                this.showAlert('warning', 'Data Tidak Lengkap', 'Submission tidak valid.');
+                return;
+            }
+
+            if (submission.status !== 'Approved') {
+                this.showAlert('warning', 'Tidak Bisa Diubah', 'Poin hanya bisa diubah untuk status Disetujui.');
+                return;
+            }
+
+            const currentPoints = Number(submission.points ?? 0);
+
+            this.adjustPointForm = {
+                submissionId: submission.id,
+                title: submission.title || '-',
+                currentPoints: currentPoints,
+                nextPoints: String(currentPoints),
+                reason: submission.pointAdjustmentReason || ''
+            };
+            this.showAdjustPointsModal = true;
+        },
+
+        closeAdjustPointsModal() {
+            this.showAdjustPointsModal = false;
+            this.isAdjustingPoints = false;
+            this.adjustPointForm = {
+                submissionId: null,
+                title: '',
+                currentPoints: 0,
+                nextPoints: '',
+                reason: ''
+            };
+        },
+
+        async submitAdjustedPoints() {
+            if (!this.adjustPointForm.submissionId) {
+                this.showAlert('warning', 'Data Tidak Lengkap', 'Submission tidak valid.');
+                return;
+            }
+
+            const normalizedInput = String(this.adjustPointForm.nextPoints || '').trim().replace(',', '.');
+            if (normalizedInput === '') {
+                this.showAlert('warning', 'Input Kosong', 'Poin tidak boleh kosong.');
+                return;
+            }
+
+            const nextPoints = Number(normalizedInput);
+            if (!Number.isFinite(nextPoints) || nextPoints < 0) {
+                this.showAlert('warning', 'Input Tidak Valid', 'Masukkan angka valid minimal 0.');
+                return;
+            }
+
+            const reason = String(this.adjustPointForm.reason || '').trim();
+            if (reason.length < 3) {
+                this.showAlert('warning', 'Alasan Kurang Jelas', 'Alasan minimal 3 karakter.');
+                return;
+            }
+
+            this.isAdjustingPoints = true;
+
+            try {
+                const response = await fetch(`/admin/submissions/${this.adjustPointForm.submissionId}/adjust-points`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        points_awarded: nextPoints,
+                        points_adjustment_reason: reason
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Gagal mengubah poin S-Core.');
+                }
+
+                this.closeAdjustPointsModal();
+                this.showAlert('success', 'Poin Diperbarui', 'Poin S-Core berhasil diperbarui. Memuat ulang...');
+                setTimeout(() => window.location.reload(), 1000);
+            } catch (error) {
+                console.error(error);
+                this.showAlert('error', 'Gagal', error.message || 'Terjadi kesalahan saat mengubah poin.');
+            } finally {
+                this.isAdjustingPoints = false;
+            }
+        },
+
+        async deleteStudentSubmission(submission) {
+            if (!submission || !submission.id) {
+                this.showAlert('warning', 'Data Tidak Lengkap', 'Submission tidak valid.');
+                return;
+            }
+
+            this.showAlert(
+                'warning',
+                'Konfirmasi Hapus S-Core',
+                `Yakin ingin menghapus kegiatan "${submission.title || '-'}"?\n\nTindakan ini tidak dapat dibatalkan.`,
+                true,
+                async () => {
+                    try {
+                        const response = await fetch(`/admin/submissions/${submission.id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            }
+                        });
+
+                        const data = await response.json();
+                        if (!response.ok) {
+                            throw new Error(data.message || 'Gagal menghapus data S-Core.');
+                        }
+
+                        this.showAlert('success', 'Berhasil Dihapus', 'Data S-Core berhasil dihapus. Memuat ulang...');
+                        setTimeout(() => window.location.reload(), 1000);
+                    } catch (error) {
+                        console.error(error);
+                        this.showAlert('error', 'Gagal', error.message || 'Terjadi kesalahan saat menghapus data.');
+                    }
+                }
+            );
         },
 
         // Admin: reset selected student's password - Open modal
@@ -3796,12 +4505,136 @@
             document.body.removeChild(link);
         },
 
+        changeStudentsPerPage() {
+            this.goToStudentsPage(1, true);
+        },
+
+        goToSubmissionPage(targetPage) {
+            const requestedPage = Number(targetPage);
+            if (!Number.isFinite(requestedPage)) {
+                return;
+            }
+            const page = Math.max(1, Math.min(requestedPage, this.reviewLastPage));
+            this.submissionsPagination.currentPage = page;
+        },
+
+        onYearFilterModeChange() {
+            if (this.yearFilterMode === 'all') {
+                this.yearFilter = '';
+                this.applyStudentFilters();
+            }
+        },
+
+        onStudentSearchInput() {
+            if (this.studentSearchDebounceTimer) {
+                clearTimeout(this.studentSearchDebounceTimer);
+            }
+
+            // Debounce to avoid page reload on every keystroke.
+            this.studentSearchDebounceTimer = setTimeout(() => {
+                this.applyStudentFilters();
+            }, 450);
+        },
+
+        applyStudentFilters() {
+            const params = new URLSearchParams(window.location.search);
+            params.set('students_page', '1');
+            params.set('students_per_page', this.studentsPagination.perPage || 25);
+            params.set('menu', 'Students');
+
+            const normalizedSearch = (this.studentSearchQuery || '').trim();
+            if (normalizedSearch !== '') {
+                params.set('student_search', normalizedSearch);
+            } else {
+                params.delete('student_search');
+            }
+
+            if ((this.majorFilter || '') !== '') {
+                params.set('major_filter', this.majorFilter);
+            } else {
+                params.delete('major_filter');
+            }
+
+            const normalizedYear = String(this.yearFilter ?? '').trim();
+            const effectiveYearMode = normalizedYear !== '' ? 'specific' : (this.yearFilterMode || 'all');
+
+            this.yearFilter = normalizedYear;
+            this.yearFilterMode = effectiveYearMode;
+            params.set('year_mode', effectiveYearMode);
+
+            if (effectiveYearMode === 'specific' && normalizedYear !== '') {
+                params.set('year_filter', normalizedYear);
+            } else {
+                params.delete('year_filter');
+            }
+
+            const nextQuery = params.toString();
+            const currentQuery = window.location.search.replace(/^\?/, '');
+
+            if (nextQuery === currentQuery) {
+                return;
+            }
+
+            window.location.search = nextQuery;
+        },
+
+        goToStudentsPage(targetPage, forceReload = false) {
+            const maxPage = this.studentsPagination.lastPage || 1;
+            const page = Math.max(1, Math.min(targetPage, maxPage));
+
+            if (!forceReload && page === this.studentsPagination.currentPage) {
+                return;
+            }
+
+            const params = new URLSearchParams(window.location.search);
+            params.set('students_page', page);
+            params.set('students_per_page', this.studentsPagination.perPage || 25);
+            params.set('menu', 'Students');
+
+            const normalizedSearch = (this.studentSearchQuery || '').trim();
+            if (normalizedSearch !== '') {
+                params.set('student_search', normalizedSearch);
+            } else {
+                params.delete('student_search');
+            }
+
+            if ((this.majorFilter || '') !== '') {
+                params.set('major_filter', this.majorFilter);
+            } else {
+                params.delete('major_filter');
+            }
+
+            const normalizedYear = String(this.yearFilter ?? '').trim();
+            params.set('year_mode', this.yearFilterMode || 'all');
+            if ((this.yearFilterMode || 'all') === 'specific' && normalizedYear !== '') {
+                params.set('year_filter', normalizedYear);
+            } else {
+                params.delete('year_filter');
+            }
+
+            window.location.search = params.toString();
+        },
+
         // Toggle select all students
         toggleSelectAll(checked) {
             if (checked) {
                 this.selectedStudents = this.filteredStudentsList.map(s => s.id);
+                if (!this.selectedStudent && this.filteredStudentsList.length > 0) {
+                    this.selectedStudent = this.filteredStudentsList[0];
+                }
             } else {
                 this.selectedStudents = [];
+                this.selectedStudent = null;
+            }
+        },
+
+        handleStudentCheckboxToggle(student, checked) {
+            this.toggleStudentSelection(student.id, checked);
+
+            if (checked) {
+                this.selectedStudent = student;
+            } else if (this.selectedStudent && this.selectedStudent.id === student.id) {
+                this.selectedStudent = null;
             }
         },
 
@@ -3833,6 +4666,86 @@
             this.showAlert('warning', 'Konfirmasi Hapus Massal', `Apakah Anda yakin ingin menghapus ${this.selectedStudents.length} mahasiswa? Tindakan ini tidak dapat dibatalkan.`, true, () => {
                 this.performDeleteStudents([...this.selectedStudents]);
             });
+        },
+
+        promoteAllStudentsSemester() {
+            this.showAlert(
+                'warning',
+                'Konfirmasi Semester Naik',
+                'Apakah Anda yakin ingin menaikkan semester semua mahasiswa?\n\nSetiap mahasiswa akan bertambah +1 semester.',
+                true,
+                () => this.performPromoteSemester()
+            );
+        },
+
+        demoteAllStudentsSemester() {
+            this.showAlert(
+                'warning',
+                'Konfirmasi Semester Turun',
+                'Apakah Anda yakin ingin menurunkan semester mahasiswa -1?\n\nSemester akan dikurangi satu tingkat untuk data yang pernah dinaikkan.',
+                true,
+                () => this.performDemoteSemester()
+            );
+        },
+
+        async performPromoteSemester() {
+            if (this.isPromotingSemester) {
+                return;
+            }
+
+            this.isPromotingSemester = true;
+            try {
+                const response = await fetch('/admin/students/promote-semester', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Gagal menaikkan semester.');
+                }
+
+                this.showAlert('success', 'Berhasil', 'Semester semua mahasiswa berhasil dinaikkan. Memuat ulang...');
+                setTimeout(() => window.location.reload(), 1200);
+            } catch (error) {
+                console.error('Error promoting semester:', error);
+                this.showAlert('error', 'Gagal', error.message || 'Terjadi kesalahan saat menaikkan semester.');
+            } finally {
+                this.isPromotingSemester = false;
+            }
+        },
+
+        async performDemoteSemester() {
+            if (this.isDemotingSemester) {
+                return;
+            }
+
+            this.isDemotingSemester = true;
+            try {
+                const response = await fetch('/admin/students/demote-semester', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Gagal menurunkan semester.');
+                }
+
+                this.showAlert('success', 'Berhasil', 'Semester mahasiswa berhasil diturunkan. Memuat ulang...');
+                setTimeout(() => window.location.reload(), 1200);
+            } catch (error) {
+                console.error('Error demoting semester:', error);
+                this.showAlert('error', 'Gagal', error.message || 'Terjadi kesalahan saat menurunkan semester.');
+            } finally {
+                this.isDemotingSemester = false;
+            }
         },
 
         // Perform actual deletion
@@ -3893,6 +4806,8 @@
             this.showApproveModal = false;
             this.showMobileDetailModal = false;
             this.mobileDetailSubmission = null;
+            this.showMobileStudentDetailModal = false;
+            this.mobileStudentDetail = null;
             this.selectedSubmission = null;
             this.rejectReason = '';
             this.rejectReasonType = '';
@@ -3962,7 +4877,10 @@
             fetch('{{ route("categories.store") }}', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                body: JSON.stringify({ name: this.newMainCategory })
+                body: JSON.stringify({
+                    name: this.newMainCategory,
+                    max_submissions_per_semester: this.parseCategorySemesterLimitValue(this.newMainCategoryMaxPerSemester)
+                })
             })
             .then(async res => {
                 const json = await res.json();
@@ -3972,6 +4890,7 @@
             .then(json => {
                 // Reload categories dari API untuk ensure sinkronisasi
                 this.newMainCategory = '';
+                this.newMainCategoryMaxPerSemester = 'none';
                 this.showAlert('success', 'Tersimpan', 'Kategori berhasil ditambahkan. Memuat ulang...');
                 this.loadCategories();
             })
@@ -3986,7 +4905,10 @@
             fetch(`/admin/categories/${cat.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                body: JSON.stringify({ name: cat.name })
+                body: JSON.stringify({
+                    name: cat.name,
+                    max_submissions_per_semester: this.parseCategorySemesterLimitValue(cat.max_submissions_per_semester)
+                })
             })
             .then(res => res.ok ? res.json() : Promise.reject(res))
             .then(() => {
@@ -3996,6 +4918,29 @@
                 this.loadCategories();
             })
             .catch(() => this.showAlert('error', 'Kesalahan', 'Gagal memperbarui kategori'));
+        },
+
+        updateCategorySemesterLimit(index) {
+            const cat = this.categories[index];
+            cat.isSavingLimit = true;
+
+            fetch(`/admin/categories/${cat.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                body: JSON.stringify({
+                    name: cat.name,
+                    max_submissions_per_semester: this.parseCategorySemesterLimitValue(cat.max_submissions_per_semester)
+                })
+            })
+            .then(res => res.ok ? res.json() : Promise.reject(res))
+            .then(() => {
+                this.showAlert('success', 'Diperbarui', `Maksimum submit per semester untuk ${cat.name} berhasil diperbarui.`);
+                this.loadCategories();
+            })
+            .catch(() => this.showAlert('error', 'Kesalahan', 'Gagal memperbarui maksimum submit per semester'))
+            .finally(() => {
+                cat.isSavingLimit = false;
+            });
         },
 
         // 3. DELETE MAIN CATEGORY - Open Modal

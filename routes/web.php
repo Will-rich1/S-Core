@@ -57,6 +57,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/submissions/{id}/approve', [SubmissionController::class, 'approve'])->name('admin.approve');
     Route::post('/admin/submissions/{id}/reject', [SubmissionController::class, 'reject'])->name('admin.reject');
     Route::post('/admin/submissions/{id}/update-category', [SubmissionController::class, 'updateCategory'])->name('admin.submissions.update-category');
+    Route::post('/admin/submissions/{id}/adjust-points', [SubmissionController::class, 'adjustPoints'])->name('admin.submissions.adjust-points');
+    Route::delete('/admin/submissions/{id}', [SubmissionController::class, 'adminDestroy'])->name('admin.submissions.destroy');
     Route::put('/admin/submissions/{id}/edit', [SubmissionController::class, 'adminEdit'])->name('admin.submissions.edit');
     Route::post('/admin/submissions/{id}/admin-edit', [SubmissionController::class, 'adminEdit'])->name('admin.submissions.admin-edit');
 
@@ -65,6 +67,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/students/import', [UserController::class, 'importStudents'])->name('students.import');
     Route::post('/admins/store', [UserController::class, 'storeAdmin'])->name('admins.store');
     Route::post('/admin/students/delete', [UserController::class, 'deleteStudents'])->name('students.delete');
+    Route::post('/admin/students/promote-semester', [UserController::class, 'promoteSemester'])->name('students.promote-semester');
+    Route::post('/admin/students/demote-semester', [UserController::class, 'demoteSemester'])->name('students.demote-semester');
     // Admin: reset user password
     Route::post('/admin/users/{id}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
 
@@ -101,6 +105,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/reset-pin', [SettingsController::class, 'resetPin'])->name('admin.reset-pin');
 
     // --- S-CORE REPORT ROUTES ---
+    Route::get('/student/{student_id}/report/view', [SCoreReportController::class, 'viewReport'])->name('student.report.view');
     Route::get('/student/{student_id}/report', [SCoreReportController::class, 'downloadReport'])->name('student.report.download');
     Route::get('/student/{student_id}/report/check', [SCoreReportController::class, 'checkEligibility'])->name('student.report.check');
     Route::get('/student/{student_id}/status', [SCoreReportController::class, 'getStatus'])->name('student.status');
