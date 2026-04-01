@@ -320,10 +320,23 @@
                                             <div class="bg-gray-50 border rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm whitespace-pre-wrap min-h-[80px] sm:min-h-[100px]" x-text="selectedSubmission.keterangan"></div>
                                         </div>
 
-                                        <!-- Assign Category -->
-                                        <div class="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-3 sm:p-4">
+                                        <div class="bg-gray-50 border rounded-lg p-3 sm:p-4">
+                                            <label class="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700">
+                                                <input
+                                                    type="checkbox"
+                                                    x-model="isCategoryCorrectionEnabled"
+                                                    @change="if(!isCategoryCorrectionEnabled){ categoryChanged = false; }"
+                                                    class="rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                                                >
+                                                Perbaiki kategori/subkategori (opsional)
+                                            </label>
+                                            <p class="text-xs text-gray-500 mt-1">Aktifkan hanya jika kategori atau subkategori mahasiswa salah.</p>
+                                        </div>
+
+                                        <!-- Assign Category (Optional) -->
+                                        <div x-show="isCategoryCorrectionEnabled" class="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-3 sm:p-4" style="display: none;">
                                             <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
-                                                Tetapkan Kategori Utama <span class="text-red-500">*</span>
+                                                Tetapkan Kategori Utama
                                             </label>
                                             <select x-model="assignedMainCategory" @change="updateAssignedSubcategories" class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-2 sm:mb-3">
                                                 <option value="">Pilih Kategori Utama</option>
@@ -333,7 +346,7 @@
                                             </select>
 
                                             <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
-                                                Tetapkan Subkategori <span class="text-red-500">*</span>
+                                                Tetapkan Subkategori
                                             </label>
                                             <select x-model="assignedSubcategory" @change="categoryChanged = true" :disabled="assignedMainCategory === ''" class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                                 <option value="">Pilih Subkategori</option>
@@ -354,7 +367,7 @@
                                         <button @click="closeModal" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-xs sm:text-sm font-medium transition-colors order-4 sm:order-1">
                                             Batal
                                         </button>
-                                        <button x-show="categoryChanged && selectedSubmission?.status !== 'Waiting'" @click="updateCategoryOnly" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors order-3 sm:order-2">
+                                        <button x-show="isCategoryCorrectionEnabled && categoryChanged && selectedSubmission?.status !== 'Waiting'" @click="updateCategoryOnly" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors order-3 sm:order-2">
                                             Update Category
                                         </button>
                                         <button x-show="selectedSubmission?.status !== 'Rejected'" @click="showRejectModal = true" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors order-2 sm:order-3">
@@ -375,7 +388,7 @@
                                     <button x-show="selectedSubmission?.status !== 'Rejected'" @click="showRejectModal = true" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors order-2 sm:order-3">
                                         Reject
                                     </button>
-                                    <button x-show="categoryChanged && selectedSubmission?.status !== 'Waiting'" @click="updateCategoryOnly" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors order-3 sm:order-2">
+                                    <button x-show="isCategoryCorrectionEnabled && categoryChanged && selectedSubmission?.status !== 'Waiting'" @click="updateCategoryOnly" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors order-3 sm:order-2">
                                         Update Category
                                     </button>
                                     <button @click="closeModal" class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-xs sm:text-sm font-medium transition-colors order-4 sm:order-1">
@@ -437,6 +450,23 @@
             </div>
         </div>
 
+        <!-- Auto-next toast -->
+        <div
+            x-show="showQueueToast"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 translate-y-2"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 translate-y-2"
+            class="fixed bottom-6 right-6 z-[120]"
+            style="display: none;"
+        >
+            <div class="bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg text-sm font-medium">
+                <span x-text="queueToastMessage"></span>
+            </div>
+        </div>
+
         <!-- view s-core mahasiswa modal -->
         <div x-show="showStudentDetailModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[80]" style="display: none;">
             <div class="bg-white rounded-lg max-w-4xl w-full mx-4 shadow-2xl h-[80vh] flex flex-col">
@@ -461,13 +491,48 @@
                         </div>
                         <div class="bg-white p-4 rounded border shadow-sm text-center">
                             <p class="text-xs text-gray-500">Status</p>
-                            <span :class="isStudentPassed(selectedStudent) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="px-2 py-1 rounded-full text-xs font-bold mt-1 inline-block">
-                                <span x-text="isStudentPassed(selectedStudent) ? 'LULUS' : 'BELUM LULUS'"></span>
+                            <span :class="getStudentStatusClass(selectedStudent)" class="px-2 py-1 rounded-full text-xs font-bold mt-1 inline-block">
+                                <span x-text="getStudentFinalStatus(selectedStudent)"></span>
                             </span>
                         </div>
                         <div class="bg-white p-4 rounded border shadow-sm text-center">
                             <p class="text-xs text-gray-500">Pengajuan</p>
                             <p class="text-xl font-bold text-blue-600" x-text="selectedStudent?.totalSubmissions"></p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow border p-4 mb-6">
+                        <p class="text-sm font-semibold text-gray-800 mb-3">Status Akademik Mahasiswa</p>
+                        <div class="flex flex-wrap gap-4 items-center">
+                            <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                                <input
+                                    type="checkbox"
+                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    :checked="studentAcademicStatusDraft === 'on_leave'"
+                                    @change="studentAcademicStatusDraft = $event.target.checked ? 'on_leave' : 'active'"
+                                >
+                                Cuti
+                            </label>
+                            <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                                <input
+                                    type="checkbox"
+                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    :checked="studentAcademicStatusDraft === 'graduated'"
+                                    @change="studentAcademicStatusDraft = $event.target.checked ? 'graduated' : 'active'"
+                                >
+                                Lulus
+                            </label>
+                            <span class="text-xs text-gray-500">Jika dua checkbox tidak dicentang, status dianggap Aktif.</span>
+                        </div>
+                        <div class="mt-3 flex items-center gap-3">
+                            <button
+                                @click="saveStudentAcademicStatus"
+                                :disabled="isUpdatingAcademicStatus"
+                                class="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white rounded text-xs font-medium"
+                            >
+                                <span x-text="isUpdatingAcademicStatus ? 'Menyimpan...' : 'Simpan Status Akademik'"></span>
+                            </button>
+                            <span class="text-xs text-gray-600">Status saat ini: <strong x-text="getStudentFinalStatus(selectedStudent)"></strong></span>
                         </div>
                     </div>
 
@@ -1220,10 +1285,10 @@
                                 </template>
                             </select>
 
-                            <select x-model="studentFilter" @change="submissionsPagination.currentPage = 1" class="border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">Semua Mahasiswa</option>
-                                <template x-for="student in uniqueStudents" :key="student">
-                                    <option :value="student" x-text="student"></option>
+                            <select x-model="submissionYearFilter" @change="submissionsPagination.currentPage = 1" class="border rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Semua Angkatan</option>
+                                <template x-for="year in availableReviewYears" :key="`review-year-${year}`">
+                                    <option :value="String(year)" x-text="year"></option>
                                 </template>
                             </select>
 
@@ -1544,8 +1609,8 @@
                         
                         <select x-model="statusPassFilter" class="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 md:col-span-2">
                             <option value="">Semua Status</option>
-                            <option value="pass">Lulus</option>
-                            <option value="fail">Belum Lulus</option>
+                            <option value="met">Memenuhi</option>
+                            <option value="not_met">Belum Memenuhi</option>
                         </select>
                         
                         <button @click="exportReport" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 md:col-span-2">
@@ -1554,6 +1619,13 @@
                             </svg>
                             Ekspor Laporan
                         </button>
+
+                        <a href="{{ route('admin.master-data') }}" target="_blank" rel="noopener noreferrer" class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 md:col-span-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Master Data
+                        </a>
                     </div>
 
                     <div class="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t pt-3">
@@ -1594,16 +1666,47 @@
                     </div>
                     
                     <!-- Delete Selected Button -->
-                    <div x-show="selectedStudents.length > 0" class="mt-3 flex items-center justify-between bg-red-50 border border-red-200 rounded-lg p-3">
+                    <div x-show="selectedStudents.length > 0" class="mt-3 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 bg-red-50 border border-red-200 rounded-lg p-3">
                         <span class="text-sm text-red-700 font-medium">
                             <span x-text="selectedStudents.length"></span> mahasiswa dipilih
                         </span>
-                        <button @click="deleteSelectedStudents" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                            Hapus Terpilih
-                        </button>
+
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                            <div class="flex flex-wrap items-center gap-4 bg-white border border-red-100 rounded-lg px-3 py-2">
+                                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                                    <input
+                                        type="checkbox"
+                                        class="rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                                        :checked="bulkAcademicStatusDraft === 'on_leave'"
+                                        @change="setBulkAcademicStatus('on_leave', $event.target.checked)"
+                                    >
+                                    Cuti
+                                </label>
+                                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                                    <input
+                                        type="checkbox"
+                                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        :checked="bulkAcademicStatusDraft === 'graduated'"
+                                        @change="setBulkAcademicStatus('graduated', $event.target.checked)"
+                                    >
+                                    Lulus
+                                </label>
+                                <button
+                                    @click="applyBulkAcademicStatus()"
+                                    :disabled="isUpdatingBulkAcademicStatus"
+                                    class="bg-slate-700 hover:bg-slate-800 disabled:bg-slate-400 text-white px-3 py-1.5 rounded text-xs font-medium"
+                                >
+                                    <span x-text="isUpdatingBulkAcademicStatus ? 'Menyimpan...' : 'Terapkan Status'"></span>
+                                </button>
+                            </div>
+
+                            <button @click="deleteSelectedStudents" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                Hapus Terpilih
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -1627,7 +1730,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm text-gray-600">Memenuhi Syarat</p>
-                                <p class="text-2xl font-bold text-green-600" x-text="studentStats.passed"></p>
+                                <p class="text-2xl font-bold text-green-600" x-text="studentStats.met"></p>
                             </div>
                             <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                                 <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1640,8 +1743,8 @@
                     <div class="bg-white rounded-lg shadow p-4">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm text-gray-600">Belum Lulus</p>
-                                <p class="text-2xl font-bold text-red-600" x-text="studentStats.failed"></p>
+                                <p class="text-sm text-gray-600">Belum Memenuhi</p>
+                                <p class="text-2xl font-bold text-red-600" x-text="studentStats.notMet"></p>
                             </div>
                             <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
                                 <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1740,8 +1843,8 @@
                                         <div class="mb-3 pb-3 border-b border-gray-200">
                                             <div class="flex items-center justify-between mb-2">
                                                 <h4 class="font-bold text-gray-800" x-text="student.name"></h4>
-                                                <span :class="isStudentPassed(student) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="px-2 py-1 rounded-full text-xs font-semibold">
-                                                    <span x-text="isStudentPassed(student) ? 'LULUS' : 'BELUM LULUS'"></span>
+                                                <span :class="getStudentStatusClass(student)" class="px-2 py-1 rounded-full text-xs font-semibold">
+                                                    <span x-text="getStudentFinalStatus(student)"></span>
                                                 </span>
                                             </div>
                                             <p class="text-xs text-gray-600" x-text="student.id"></p>
@@ -1755,7 +1858,7 @@
                                             <div class="w-full bg-gray-200 rounded-full h-2">
                                                 <div class="h-2 rounded-full transition-all" :class="student.approvedPoints >= 20 ? 'bg-green-500' : 'bg-red-500'" :style="`width: ${Math.min((student.approvedPoints / 20) * 100, 100)}%`"></div>
                                             </div>
-                                            <p class="text-xs text-gray-500 mt-1" x-text="`${Math.max(20 - student.approvedPoints, 0)} poin lagi untuk lulus`"></p>
+                                            <p class="text-xs text-gray-500 mt-1" x-text="`${Math.max(scoreSettings.minPoints - student.approvedPoints, 0)} poin lagi untuk memenuhi`"></p>
                                         </div>
                                         
                                         <div class="space-y-2">
@@ -1786,8 +1889,8 @@
                                 </td>
 
                                 <td class="text-center py-3 px-4">
-                                    <span :class="isStudentPassed(student) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="px-3 py-1 rounded-full text-xs font-semibold">
-                                        <span x-text="isStudentPassed(student) ? 'LULUS' : 'BELUM LULUS'"></span>
+                                    <span :class="getStudentStatusClass(student)" class="px-3 py-1 rounded-full text-xs font-semibold">
+                                        <span x-text="getStudentFinalStatus(student)"></span>
                                     </span>
                                 </td>
 
@@ -1848,9 +1951,9 @@
 
                                 <div class="text-center">
                                     <span
-                                        :class="isStudentPassed(student) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+                                        :class="getStudentStatusClass(student)"
                                         class="px-2 py-0.5 rounded-full text-[10px] font-semibold inline-block"
-                                        x-text="isStudentPassed(student) ? 'LULUS' : 'BELUM LULUS'"
+                                        x-text="getStudentFinalStatus(student)"
                                     ></span>
                                 </div>
                             </div>
@@ -1878,9 +1981,9 @@
                                                     <p class="text-xs text-gray-500">NIM: <span x-text="mobileStudentDetail.id"></span></p>
                                                 </div>
                                                 <span
-                                                    :class="isStudentPassed(mobileStudentDetail) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+                                                    :class="getStudentStatusClass(mobileStudentDetail)"
                                                     class="px-2 py-0.5 rounded-full text-[10px] font-semibold shrink-0"
-                                                    x-text="isStudentPassed(mobileStudentDetail) ? 'LULUS' : 'BELUM LULUS'"
+                                                    x-text="getStudentFinalStatus(mobileStudentDetail)"
                                                 ></span>
                                             </div>
                                         </div>
@@ -3372,6 +3475,8 @@
         showDeleteConfirmModal: false,
         showApproveModal: false,
         showAlertModal: false,
+        showQueueToast: false,
+        queueToastMessage: '',
         showMobileDetailModal: false,
         mobileDetailSubmission: null,
         showMobileStudentDetailModal: false,
@@ -3417,6 +3522,7 @@
         rejectReason: '',
         rejectReasonType: '',
         categoryChangeReason: '',
+        isCategoryCorrectionEnabled: false,
         categoryChanged: false,
         
         assignedMainCategory: '',
@@ -3431,7 +3537,7 @@
         // --- VARIABLE FILTER ---
         statusFilter: 'Waiting', 
         categoryFilter: '',      
-        studentFilter: '',       
+        submissionYearFilter: '',
         searchQuery: '',         
         submissionsPagination: {
             currentPage: 1,
@@ -3447,6 +3553,8 @@
         
         showStudentDetailModal: false, 
         selectedStudent: null,
+        studentAcademicStatusDraft: 'active',
+        isUpdatingAcademicStatus: false,
         studentDetailSearchQuery: '',
         studentDetailStatusFilter: '',
         studentDetailCategoryFilter: '',
@@ -3462,6 +3570,8 @@
         studentSearchDebounceTimer: null,
         isPromotingSemester: false,
         isDemotingSemester: false,
+        bulkAcademicStatusDraft: 'active',
+        isUpdatingBulkAcademicStatus: false,
 
         showAdjustPointsModal: false,
         isAdjustingPoints: false,
@@ -3939,6 +4049,25 @@
             return hasMinPoints && hasMinCategories;
         },
 
+        getStudentFinalStatus(student) {
+            if (!student) return '-';
+
+            const academicStatus = student.academicStatus || 'active';
+            if (academicStatus === 'on_leave') return 'Cuti';
+            if (academicStatus === 'graduated') return 'Lulus';
+
+            return this.isStudentPassed(student) ? 'Memenuhi' : 'Belum Memenuhi';
+        },
+
+        getStudentStatusClass(student) {
+            const label = this.getStudentFinalStatus(student);
+            if (label === 'Memenuhi') return 'bg-green-100 text-green-700';
+            if (label === 'Belum Memenuhi') return 'bg-red-100 text-red-700';
+            if (label === 'Lulus') return 'bg-blue-100 text-blue-700';
+            if (label === 'Cuti') return 'bg-amber-100 text-amber-700';
+            return 'bg-gray-100 text-gray-700';
+        },
+
         translateStatus(status) {
             if (status === 'Approved') return 'Disetujui';
             if (status === 'Waiting') return 'Menunggu';
@@ -3953,8 +4082,17 @@
             return this.categories.map(c => c.name).sort();
         },
 
-        get uniqueStudents() {
-            return [...new Set(this.submissions.map(s => `${s.studentId} - ${s.studentName}`))];
+        get availableReviewYears() {
+            return [...new Set(
+                this.submissions
+                    .filter(s => (s.academicStatus || 'active') === 'active')
+                    .map(s => String(s.year || '').trim())
+                    .filter(Boolean)
+            )]
+                .map(year => Number(year))
+                .filter(year => Number.isFinite(year))
+                .sort((a, b) => b - a)
+                .map(year => String(year));
         },
 
         // Filter Logic Review Tab
@@ -3967,9 +4105,10 @@
                 
                 const matchesStatus = this.statusFilter === '' || submission.status === this.statusFilter;
                 const matchesCategory = this.categoryFilter === '' || submission.mainCategory === this.categoryFilter;
-                const matchesStudent = this.studentFilter === '' || `${submission.studentId} - ${submission.studentName}` === this.studentFilter;
+                const matchesYear = this.submissionYearFilter === '' || String(submission.year || '').trim() === String(this.submissionYearFilter).trim();
+                const isVisibleAcademicStatus = (submission.academicStatus || 'active') === 'active';
                 
-                return matchesSearch && matchesStatus && matchesCategory && matchesStudent;
+                return matchesSearch && matchesStatus && matchesCategory && matchesYear && isVisibleAcademicStatus;
             });
         },
 
@@ -3988,6 +4127,11 @@
         // Filter Logic Student Tab
         get filteredStudentsList() {
             return this.students.filter(student => {
+                const finalStatus = this.getStudentFinalStatus(student);
+                if (finalStatus === 'Lulus' || finalStatus === 'Cuti') {
+                    return false;
+                }
+
                 const searchLower = this.studentSearchQuery.toLowerCase();
                 const matchesSearch = student.name.toLowerCase().includes(searchLower) || 
                                       student.id.toString().includes(searchLower);
@@ -3997,10 +4141,10 @@
                 const matchesYear = this.yearFilterMode === 'all' || this.yearFilter === '' || student.year == this.yearFilter;
 
                 let matchesStatus = true;
-                if (this.statusPassFilter === 'pass') {
-                    matchesStatus = this.isStudentPassed(student);
-                } else if (this.statusPassFilter === 'fail') {
-                    matchesStatus = !this.isStudentPassed(student);
+                if (this.statusPassFilter === 'met') {
+                    matchesStatus = finalStatus === 'Memenuhi';
+                } else if (this.statusPassFilter === 'not_met') {
+                    matchesStatus = finalStatus === 'Belum Memenuhi';
                 }
 
                 return matchesSearch && matchesMajor && matchesYear && matchesStatus;
@@ -4011,8 +4155,12 @@
             const sourceYears = (this.studentYears && this.studentYears.length > 0)
                 ? this.studentYears
                 : this.students
-                .map(student => student.year)
-                .filter(year => year !== null && year !== undefined && year !== '');
+                    .filter(student => {
+                        const status = this.getStudentFinalStatus(student);
+                        return status !== 'Lulus' && status !== 'Cuti';
+                    })
+                    .map(student => student.year)
+                    .filter(year => year !== null && year !== undefined && year !== '');
 
             return [...new Set(sourceYears)]
                 .map(year => Number(year))
@@ -4067,6 +4215,8 @@
 
         viewDetail(submission) {
             this.selectedSubmission = submission;
+            this.isCategoryCorrectionEnabled = false;
+            this.categoryChanged = false;
             this.assignedMainCategory = '';
             this.assignedSubcategory = '';
             this.assignedAvailableSubcategories = [];
@@ -4099,23 +4249,84 @@
             }
         },
 
+        applyLocalSubmissionReviewResult(submissionId, updates = {}) {
+            this.submissions = this.submissions.map((submission) => {
+                if (submission.id !== submissionId) {
+                    return submission;
+                }
+
+                return {
+                    ...submission,
+                    ...updates,
+                };
+            });
+
+            if (this.selectedSubmission && this.selectedSubmission.id === submissionId) {
+                this.selectedSubmission = {
+                    ...this.selectedSubmission,
+                    ...updates,
+                };
+            }
+        },
+
+        showAutoNextToast(message) {
+            this.queueToastMessage = message;
+            this.showQueueToast = true;
+
+            setTimeout(() => {
+                this.showQueueToast = false;
+            }, 1400);
+        },
+
+        getNextWaitingSubmission(currentSubmissionId = null) {
+            const waitingQueue = this.filteredSubmissions
+                .filter((submission) => submission.status === 'Waiting' && submission.id !== currentSubmissionId);
+
+            return waitingQueue.length > 0 ? waitingQueue[0] : null;
+        },
+
+        moveToNextWaitingSubmission(currentSubmissionId = null) {
+            const nextSubmission = this.getNextWaitingSubmission(currentSubmissionId);
+
+            if (nextSubmission) {
+                this.showAutoNextToast('Berhasil disimpan. Lanjut ke submission Waiting berikutnya.');
+                this.viewDetail(nextSubmission);
+                return;
+            }
+
+            this.closeModal();
+            this.showAlert('success', 'Selesai', 'Tidak ada lagi pengajuan Waiting pada daftar ini.');
+        },
+
         handleApprove() {
-            if (this.assignedMainCategory === '' || this.assignedSubcategory === '') {
+            if (this.isCategoryCorrectionEnabled && (this.assignedMainCategory === '' || this.assignedSubcategory === '')) {
                 this.showAlert('warning', 'Tidak Lengkap', 'Harap periksa atau pilih Kategori dan Subkategori yang benar.');
                 return;
             }
 
-            const mainCat = this.categories[this.assignedMainCategory];
-            const subCat = mainCat.subcategories[this.assignedSubcategory];
+            if (this.isCategoryCorrectionEnabled) {
+                const mainCat = this.categories[this.assignedMainCategory];
+                const subCat = mainCat.subcategories[this.assignedSubcategory];
 
-            this.approveModalMainCategory = mainCat.name;
-            this.approveModalSubcategory = subCat.name;
-            this.approveModalPoints = subCat.points;
+                this.approveModalMainCategory = mainCat.name;
+                this.approveModalSubcategory = subCat.name;
+                this.approveModalPoints = subCat.points;
+            } else {
+                this.approveModalMainCategory = this.selectedSubmission?.mainCategory || '-';
+                this.approveModalSubcategory = this.selectedSubmission?.subcategory || '-';
+                const defaultPoints = this.selectedSubmission?.suggestedPoint ?? this.selectedSubmission?.point ?? 0;
+                this.approveModalPoints = Number(defaultPoints) || 0;
+            }
             
             this.showApproveModal = true;
         },
 
         async updateCategoryOnly() {
+            if (!this.isCategoryCorrectionEnabled) {
+                this.showAlert('warning', 'Mode Perbaikan Nonaktif', 'Aktifkan checkbox Perbaiki terlebih dahulu.');
+                return;
+            }
+
             if (this.assignedMainCategory === '' || this.assignedSubcategory === '') {
                 this.showAlert('warning', 'Tidak Lengkap', 'Harap pilih Kategori Utama dan Subkategori.');
                 return;
@@ -4155,9 +4366,23 @@
         },
 
         confirmApprove() {
-            const mainCat = this.categories[this.assignedMainCategory];
-            const subCat = mainCat.subcategories[this.assignedSubcategory];
+            const currentSubmissionId = this.selectedSubmission?.id;
             const url = `/admin/submissions/${this.selectedSubmission.id}/approve`;
+
+            let payload = {
+                points: Number(this.approveModalPoints) || 0
+            };
+
+            const approvedCategoryName = this.approveModalMainCategory;
+            const approvedSubcategoryName = this.approveModalSubcategory;
+            const approvedPoints = Number(this.approveModalPoints) || 0;
+
+            if (this.isCategoryCorrectionEnabled) {
+                const mainCat = this.categories[this.assignedMainCategory];
+                const subCat = mainCat.subcategories[this.assignedSubcategory];
+                payload.assigned_subcategory_id = subCat.id;
+                payload.points = Number(subCat.points) || 0;
+            }
             
             fetch(url, {
                 method: 'POST',
@@ -4166,17 +4391,18 @@
                     'Accept': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
-                body: JSON.stringify({
-                    assigned_subcategory_id: subCat.id, 
-                    points: subCat.points
-                })
+                body: JSON.stringify(payload)
             })
             .then(async response => {
                 if (response.ok) {
                     this.showApproveModal = false;
-                    this.showAlert('success', 'Disetujui', 'Pengajuan berhasil disetujui. Halaman akan dimuat ulang.');
-                    setTimeout(() => window.location.reload(), 1500);
-                    this.closeModal();
+                    this.applyLocalSubmissionReviewResult(currentSubmissionId, {
+                        status: 'Approved',
+                        mainCategory: approvedCategoryName,
+                        subcategory: approvedSubcategoryName,
+                        point: approvedPoints,
+                    });
+                    this.moveToNextWaitingSubmission(currentSubmissionId);
                 } else {
                     const data = await response.json();
                     throw new Error(data.message || 'Gagal menyetujui pengajuan');
@@ -4189,11 +4415,70 @@
         },
 
         viewStudentDetail(student) {
-            this.selectedStudent = student;
-            this.studentDetailSearchQuery = '';
-            this.studentDetailStatusFilter = '';
-            this.studentDetailCategoryFilter = '';
-            this.showStudentDetailModal = true;
+            if (!student || !student.id) {
+                this.showAlert('warning', 'Data Tidak Lengkap', 'Data mahasiswa tidak valid.');
+                return;
+            }
+
+            const detailUrl = `/admin/students/${student.id}/detail`;
+            window.open(detailUrl, '_blank', 'noopener,noreferrer');
+        },
+
+        async saveStudentAcademicStatus() {
+            if (!this.selectedStudent || !this.selectedStudent.id) {
+                this.showAlert('warning', 'Data Tidak Lengkap', 'Mahasiswa tidak ditemukan.');
+                return;
+            }
+
+            if (this.isUpdatingAcademicStatus) {
+                return;
+            }
+
+            this.isUpdatingAcademicStatus = true;
+
+            try {
+                const response = await fetch(`/admin/students/${this.selectedStudent.id}/academic-status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        academic_status: this.studentAcademicStatusDraft
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Gagal memperbarui status akademik.');
+                }
+
+                const newStatus = data.academic_status || this.studentAcademicStatusDraft;
+                this.selectedStudent.academicStatus = newStatus;
+
+                this.students = this.students.map((student) => {
+                    if (student.id === this.selectedStudent.id) {
+                        return {
+                            ...student,
+                            academicStatus: newStatus,
+                        };
+                    }
+
+                    return student;
+                });
+
+                if (this.mobileStudentDetail && this.mobileStudentDetail.id === this.selectedStudent.id) {
+                    this.mobileStudentDetail.academicStatus = newStatus;
+                }
+
+                this.showAlert('success', 'Berhasil', 'Status akademik mahasiswa berhasil diperbarui.');
+            } catch (error) {
+                console.error(error);
+                this.showAlert('error', 'Gagal', error.message || 'Terjadi kesalahan saat memperbarui status akademik.');
+            } finally {
+                this.isUpdatingAcademicStatus = false;
+            }
         },
 
         openStudentScoreReport(student) {
@@ -4439,6 +4724,8 @@
                 return;
             }
 
+            const currentSubmissionId = this.selectedSubmission?.id;
+
             const url = `/admin/submissions/${this.selectedSubmission.id}/reject`;
 
             fetch(url, {
@@ -4459,9 +4746,10 @@
             })
             .then(data => {
                 this.showRejectModal = false;
-                this.showAlert('success', 'Ditolak', 'Pengajuan berhasil ditolak.');
-                setTimeout(() => window.location.reload(), 1500);
-                this.closeModal();
+                this.applyLocalSubmissionReviewResult(currentSubmissionId, {
+                    status: 'Rejected',
+                });
+                this.moveToNextWaitingSubmission(currentSubmissionId);
             })
             .catch(error => {
                 console.error('Reject Error:', error);
@@ -4492,7 +4780,7 @@
             csvContent += "NIM,Nama,Jurusan,Angkatan,Total Poin,Status,Pengajuan Tertunda\n"; 
             
             data.forEach(row => {
-                let status = row.approvedPoints >= 20 ? "Lulus" : "Belum Lulus";
+                const status = this.getStudentFinalStatus(row);
                 csvContent += `${row.id},"${row.name}",${row.major},${row.year},${row.approvedPoints},${status},${row.pending}\n`;
             });
 
@@ -4666,6 +4954,82 @@
             this.showAlert('warning', 'Konfirmasi Hapus Massal', `Apakah Anda yakin ingin menghapus ${this.selectedStudents.length} mahasiswa? Tindakan ini tidak dapat dibatalkan.`, true, () => {
                 this.performDeleteStudents([...this.selectedStudents]);
             });
+        },
+
+        setBulkAcademicStatus(status, checked) {
+            if (checked) {
+                this.bulkAcademicStatusDraft = status;
+                return;
+            }
+
+            if (this.bulkAcademicStatusDraft === status) {
+                this.bulkAcademicStatusDraft = 'active';
+            }
+        },
+
+        async applyBulkAcademicStatus() {
+            if (this.selectedStudents.length === 0) {
+                this.showAlert('warning', 'Tidak Ada Pilihan', 'Pilih minimal satu mahasiswa dahulu.');
+                return;
+            }
+
+            if (this.isUpdatingBulkAcademicStatus) {
+                return;
+            }
+
+            const targetLabel = this.bulkAcademicStatusDraft === 'on_leave'
+                ? 'Cuti'
+                : this.bulkAcademicStatusDraft === 'graduated'
+                    ? 'Lulus'
+                    : 'Aktif';
+
+            this.isUpdatingBulkAcademicStatus = true;
+
+            try {
+                const response = await fetch('/admin/students/academic-status/bulk', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        student_ids: this.selectedStudents,
+                        academic_status: this.bulkAcademicStatusDraft
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Gagal memperbarui status mahasiswa terpilih.');
+                }
+
+                this.students = this.students.map((student) => {
+                    if (!this.selectedStudents.includes(student.id)) {
+                        return student;
+                    }
+
+                    return {
+                        ...student,
+                        academicStatus: this.bulkAcademicStatusDraft,
+                    };
+                });
+
+                if (this.selectedStudent && this.selectedStudents.includes(this.selectedStudent.id)) {
+                    this.selectedStudent.academicStatus = this.bulkAcademicStatusDraft;
+                }
+
+                if (this.mobileStudentDetail && this.selectedStudents.includes(this.mobileStudentDetail.id)) {
+                    this.mobileStudentDetail.academicStatus = this.bulkAcademicStatusDraft;
+                }
+
+                this.showAlert('success', 'Berhasil', `Status ${targetLabel} berhasil diterapkan ke mahasiswa terpilih.`);
+            } catch (error) {
+                console.error(error);
+                this.showAlert('error', 'Gagal', error.message || 'Terjadi kesalahan saat update status massal.');
+            } finally {
+                this.isUpdatingBulkAcademicStatus = false;
+            }
         },
 
         promoteAllStudentsSemester() {

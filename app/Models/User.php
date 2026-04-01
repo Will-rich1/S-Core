@@ -19,6 +19,7 @@ class User extends Authenticatable
         'major',
         'year',
         'semester_offset',
+        'academic_status',
         'shift',
     ];
 

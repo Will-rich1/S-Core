@@ -546,9 +546,12 @@ class SubmissionController extends Controller
         $submission = Submission::findOrFail($id);
 
         if ($submission->status !== 'Approved') {
-            return response()->json([
-                'message' => 'Poin hanya bisa diubah untuk pengajuan yang sudah Disetujui.'
-            ], 422);
+            $message = 'Poin hanya bisa diubah untuk pengajuan yang sudah Disetujui.';
+            if (!($request->expectsJson() || $request->wantsJson())) {
+                return redirect()->back()->with('error', $message);
+            }
+
+            return response()->json(['message' => $message], 422);
         }
 
         $validated = $request->validate([
@@ -562,6 +565,10 @@ class SubmissionController extends Controller
             'reviewed_by' => Auth::id(),
             'reviewed_at' => now(),
         ]);
+
+        if (!($request->expectsJson() || $request->wantsJson())) {
+            return redirect()->back()->with('success', 'Poin S-Core berhasil diperbarui.');
+        }
 
         return response()->json([
             'message' => 'Poin S-Core berhasil diperbarui.',
@@ -601,10 +608,18 @@ class SubmissionController extends Controller
 
             $submission->delete();
 
+            if (!request()->expectsJson() && !request()->wantsJson()) {
+                return redirect()->back()->with('success', 'Data S-Core berhasil dihapus oleh admin.');
+            }
+
             return response()->json([
                 'message' => 'Data S-Core berhasil dihapus oleh admin.'
             ]);
         } catch (\Exception $e) {
+            if (!request()->expectsJson() && !request()->wantsJson()) {
+                return redirect()->back()->with('error', 'Gagal menghapus data: ' . $e->getMessage());
+            }
+
             return response()->json(['message' => 'Gagal menghapus data: ' . $e->getMessage()], 500);
         }
     }

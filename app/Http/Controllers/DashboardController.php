@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\GoogleDriveService;
 use Carbon\Carbon;
 use App\Helpers\SCoreHelper;
+use Illuminate\Support\Facades\Schema;
 
 class DashboardController extends Controller
 {
@@ -36,17 +37,24 @@ class DashboardController extends Controller
             return null;
         }
 
-        $currentYear = (int) now()->year;
-        $currentMonth = (int) now()->month;
         $batchYear = (int) $year;
+        $now = now()->copy()->startOfDay();
+        $entryDate = Carbon::create($batchYear, 9, 1, 0, 0, 0, config('app.timezone'))->startOfDay();
 
-        // Perhitungan berdasarkan kalender akademik Indonesia:
-        // Agustus-Desember = semester ganjil, Januari-Juli = semester genap.
-        // Contoh Maret 2026: 2022->8, 2023->6, 2024->4, 2025->2.
-        if ($currentMonth >= 8) {
-            $semester = (($currentYear - $batchYear) * 2) + 1;
-        } else {
-            $semester = (($currentYear - $batchYear) * 2);
+        // Semester naik otomatis setiap 1 Maret dan 1 September.
+        $semester = 1;
+        if ($now->greaterThanOrEqualTo($entryDate)) {
+            $cursor = $entryDate->copy();
+            while (true) {
+                $nextBoundary = $cursor->copy()->addMonths(6)->startOfDay(); // 1 Sep <-> 1 Mar
+
+                if ($nextBoundary->greaterThan($now)) {
+                    break;
+                }
+
+                $semester++;
+                $cursor = $nextBoundary;
+            }
         }
 
         return max(1, $semester + max(0, $semesterOffset));
@@ -201,10 +209,11 @@ class DashboardController extends Controller
 
         // 2. Ambil SEMUA Submission untuk direview (Tab Review)
         $googleDriveService = app(GoogleDriveService::class);
+        $hasAcademicStatusColumn = Schema::hasColumn('users', 'academic_status');
         $submissions = Submission::with(['student', 'category', 'subcategory'])
             ->orderBy('created_at', 'desc')
             ->get()
-            ->map(function ($item) use ($googleDriveService) {
+            ->map(function ($item) use ($googleDriveService, $hasAcademicStatusColumn) {
                 $year = $this->resolveStudentYear($item->student->year ?? null, $item->student->student_id ?? null);
 
                 // Generate viewing URL
@@ -223,6 +232,11 @@ class DashboardController extends Controller
                     'studentName'   => $item->student->name ?? 'Unknown',
                     'major'         => $item->student->major ?? '-',
                     'year'          => $year, 
+                    'academicStatus'=> $hasAcademicStatusColumn
+                        ? (in_array($item->student->academic_status ?? 'active', ['active', 'on_leave', 'graduated'], true)
+                            ? $item->student->academic_status
+                            : 'active')
+                        : 'active',
                     
                     'mainCategory'  => $item->category->name ?? '-',
                     'subcategory'   => $item->subcategory->name ?? '-',
@@ -260,7 +274,16 @@ class DashboardController extends Controller
             $studentsPage = 1;
         }
 
+        $minPoints = SCoreHelper::getMinPointsRequired();
+        $minCategories = SCoreHelper::getMinCategoriesRequired();
+
         $studentsQuery = User::where('role', 'student');
+        if ($hasAcademicStatusColumn) {
+            $studentsQuery->where(function ($q) {
+                $q->where('academic_status', 'active')
+                    ->orWhereNull('academic_status');
+            });
+        }
 
         if ($studentSearch !== '') {
             $studentsQuery->where(function ($q) use ($studentSearch) {
@@ -292,7 +315,7 @@ class DashboardController extends Controller
             ->paginate($studentsPerPage, ['*'], 'students_page', $studentsPage);
 
         $students = $studentsPaginator->getCollection()
-            ->map(function ($student) use ($googleDriveService) {
+            ->map(function ($student) use ($googleDriveService, $minPoints, $minCategories, $hasAcademicStatusColumn) {
                 // Ambil hanya yang Approved untuk perhitungan poin total
                 $approvedSubmissions = $student->submissions->where('status', 'Approved');
                 
@@ -315,17 +338,35 @@ class DashboardController extends Controller
                     $categoryBreakdown[$catId]['points'] += $sub->points_awarded;
                 }
 
+                $studentMinCategories = SCoreHelper::getMinCategoriesRequiredForYear($year, $student->student_id, $minCategories);
+                $approvedPoints = $approvedSubmissions->sum('points_awarded');
+                $requirementsMet = ($approvedPoints >= $minPoints) && (count($categoryBreakdown) >= $studentMinCategories);
+
+                $academicStatus = $hasAcademicStatusColumn
+                    ? (in_array($student->academic_status, ['active', 'on_leave', 'graduated'], true)
+                        ? $student->academic_status
+                        : 'active')
+                    : 'active';
+
+                $finalStatus = match ($academicStatus) {
+                    'on_leave' => 'Cuti',
+                    'graduated' => 'Lulus',
+                    default => $requirementsMet ? 'Memenuhi' : 'Belum Memenuhi',
+                };
+
                 return [
                     'id'               => $student->student_id, 
                     'name'             => $student->name,
                     'major'            => $student->major ?? '-', 
                     'semester'         => $semester,
                     'year'             => $year, 
-                    'approvedPoints'   => $approvedSubmissions->sum('points_awarded'),
+                    'approvedPoints'   => $approvedPoints,
                     'approvedCount'    => $approvedSubmissions->count(),
                     'pending'          => $student->submissions->where('status', 'Waiting')->count(),
                     'totalSubmissions' => $student->submissions->count(),
                     'categoryBreakdown'=> $categoryBreakdown, 
+                    'academicStatus'   => $academicStatus,
+                    'finalStatus'      => $finalStatus,
 
                     // DATA UNTUK MODAL VIEW DETAILS (HISTORY)
                     'submissions_list' => $student->submissions->map(function($sub) use ($googleDriveService) {
@@ -361,8 +402,16 @@ class DashboardController extends Controller
             })
             ->values();
 
-        // Ambil daftar angkatan global dari SELURUH data mahasiswa (bukan hanya halaman aktif).
-        $availableStudentYears = User::where('role', 'student')
+        // Ambil daftar angkatan untuk mahasiswa aktif saja.
+        $availableStudentYearsQuery = User::where('role', 'student');
+        if ($hasAcademicStatusColumn) {
+            $availableStudentYearsQuery->where(function ($q) {
+                $q->where('academic_status', 'active')
+                    ->orWhereNull('academic_status');
+            });
+        }
+
+        $availableStudentYears = $availableStudentYearsQuery
             ->get(['year', 'student_id'])
             ->map(function ($student) {
                 return $this->resolveStudentYear($student->year, $student->student_id);
@@ -389,19 +438,12 @@ class DashboardController extends Controller
             'yearFilter' => $yearFilter,
         ];
 
-        // 4. Statistik Khusus Tab Student (Target Lulus: Points dan Kategori dari Settings)
-        $minPoints = SCoreHelper::getMinPointsRequired();
-        $minCategories = SCoreHelper::getMinCategoriesRequired();
-        
+        // 4. Statistik Khusus Tab Student
         $studentStats = [
-            'passed'  => $students->filter(function($s) use ($minPoints, $minCategories) {
-                $studentMinCategories = SCoreHelper::getMinCategoriesRequiredForYear($s['year'] ?? null, $s['id'] ?? null, $minCategories);
-                return ($s['approvedPoints'] >= $minPoints) && (count($s['categoryBreakdown']) >= $studentMinCategories);
-            })->count(),
-            'failed'  => $students->filter(function($s) use ($minPoints, $minCategories) {
-                $studentMinCategories = SCoreHelper::getMinCategoriesRequiredForYear($s['year'] ?? null, $s['id'] ?? null, $minCategories);
-                return !(($s['approvedPoints'] >= $minPoints) && (count($s['categoryBreakdown']) >= $studentMinCategories));
-            })->count(),
+            'met' => $students->where('finalStatus', 'Memenuhi')->count(),
+            'notMet' => $students->where('finalStatus', 'Belum Memenuhi')->count(),
+            'graduated' => $students->where('finalStatus', 'Lulus')->count(),
+            'onLeave' => $students->where('finalStatus', 'Cuti')->count(),
             'average' => round($students->avg('approvedPoints') ?? 0, 1)
         ];
 
@@ -417,6 +459,223 @@ class DashboardController extends Controller
         return view('admin_review', compact('submissions', 'stats', 'categories', 'students', 'studentStats', 'scoreSettings', 'studentsPagination', 'availableStudentYears', 'studentsFilters'));
     }
 
+    public function adminStudentDetail($studentId)
+    {
+        if (Auth::user()->role !== 'admin') {
+            return redirect()->route('dashboard');
+        }
+
+        $student = User::where('role', 'student')
+            ->where('student_id', $studentId)
+            ->with(['submissions' => function ($q) {
+                $q->with('category', 'subcategory')->orderBy('created_at', 'desc');
+            }])
+            ->firstOrFail();
+
+        $googleDriveService = app(GoogleDriveService::class);
+
+        $year = $this->resolveStudentYear($student->year, $student->student_id);
+        $semester = $this->calculateSemesterFromYear($year, (int) ($student->semester_offset ?? 0));
+
+        $approvedSubmissions = $student->submissions->where('status', 'Approved');
+        $approvedPoints = (float) $approvedSubmissions->sum('points_awarded');
+
+        $categoryBreakdown = [];
+        foreach ($approvedSubmissions as $sub) {
+            $catName = $sub->category->name ?? 'Other';
+            if (!isset($categoryBreakdown[$catName])) {
+                $categoryBreakdown[$catName] = [
+                    'count' => 0,
+                    'points' => 0,
+                ];
+            }
+
+            $categoryBreakdown[$catName]['count']++;
+            $categoryBreakdown[$catName]['points'] += (float) ($sub->points_awarded ?? 0);
+        }
+
+        $minPoints = SCoreHelper::getMinPointsRequired();
+        $defaultMinCategories = SCoreHelper::getMinCategoriesRequired();
+        $studentMinCategories = SCoreHelper::getMinCategoriesRequiredForYear($year, $student->student_id, $defaultMinCategories);
+        $requirementsMet = $approvedPoints >= $minPoints && count($categoryBreakdown) >= $studentMinCategories;
+
+        $academicStatus = in_array($student->academic_status, ['active', 'on_leave', 'graduated'], true)
+            ? $student->academic_status
+            : 'active';
+
+        $finalStatus = match ($academicStatus) {
+            'on_leave' => 'Cuti',
+            'graduated' => 'Lulus',
+            default => $requirementsMet ? 'Memenuhi' : 'Belum Memenuhi',
+        };
+
+        $submissions = $student->submissions->map(function ($sub) use ($googleDriveService) {
+            if ($sub->certificate_url) {
+                $fileUrl = $sub->certificate_url;
+            } elseif ($sub->certificate_path && !empty($sub->certificate_path)) {
+                $storageType = $sub->storage_type ?? 'local';
+                $fileUrl = $googleDriveService->getPublicUrl($sub->certificate_path, $storageType);
+            } else {
+                $fileUrl = null;
+            }
+
+            return [
+                'id' => $sub->id,
+                'title' => $sub->title,
+                'mainCategory' => $sub->category->name ?? '-',
+                'subcategory' => $sub->subcategory->name ?? '-',
+                'description' => $sub->description ?? '-',
+                'status' => $sub->status,
+                'points' => $sub->points_awarded,
+                'pointAdjustmentReason' => $sub->points_adjustment_reason,
+                'activityDate' => $sub->activity_date ? Carbon::parse($sub->activity_date)->format('d M Y') : '-',
+                'submittedAt' => $sub->created_at ? $sub->created_at->format('d M Y H:i') : '-',
+                'fileUrl' => $fileUrl,
+                'certificateName' => $sub->certificate_original_name ?? 'document.pdf',
+            ];
+        })->values();
+
+        $studentData = [
+            'id' => $student->student_id,
+            'name' => $student->name,
+            'major' => $student->major ?? '-',
+            'year' => $year,
+            'semester' => $semester,
+            'approvedPoints' => $approvedPoints,
+            'pendingCount' => $student->submissions->where('status', 'Waiting')->count(),
+            'approvedCount' => $approvedSubmissions->count(),
+            'totalSubmissions' => $student->submissions->count(),
+            'academicStatus' => $academicStatus,
+            'finalStatus' => $finalStatus,
+            'requirementsMet' => $requirementsMet,
+        ];
+
+        return view('admin_student_detail', [
+            'student' => $studentData,
+            'submissions' => $submissions,
+            'categoryBreakdown' => $categoryBreakdown,
+            'minPoints' => $minPoints,
+            'minCategories' => $studentMinCategories,
+        ]);
+    }
+
+    public function adminMasterData(Request $request)
+    {
+        if (Auth::user()->role !== 'admin') {
+            return redirect()->route('dashboard');
+        }
+
+        $search = trim((string) $request->query('search', ''));
+        $major = trim((string) $request->query('major', ''));
+        $year = trim((string) $request->query('year', ''));
+        $status = trim((string) $request->query('status', ''));
+
+        $hasAcademicStatusColumn = Schema::hasColumn('users', 'academic_status');
+        $minPoints = SCoreHelper::getMinPointsRequired();
+        $defaultMinCategories = SCoreHelper::getMinCategoriesRequired();
+
+        $query = User::where('role', 'student')
+            ->with(['submissions' => function ($q) {
+                $q->with('category')->orderBy('created_at', 'desc');
+            }]);
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('student_id', 'like', '%' . $search . '%');
+            });
+        }
+
+        if ($major !== '') {
+            $query->where('major', $major);
+        }
+
+        if ($year !== '') {
+            $query->where(function ($q) use ($year) {
+                $q->where('year', $year)
+                    ->orWhere(function ($q2) use ($year) {
+                        $q2->whereNull('year')
+                            ->whereRaw("CONCAT('20', SUBSTRING(CAST(student_id AS CHAR), 1, 2)) = ?", [$year]);
+                    });
+            });
+        }
+
+        $rows = $query->orderBy('student_id')->get()->map(function ($student) use ($hasAcademicStatusColumn, $minPoints, $defaultMinCategories) {
+            $resolvedYear = $this->resolveStudentYear($student->year, $student->student_id);
+            $semester = $this->calculateSemesterFromYear($resolvedYear, (int) ($student->semester_offset ?? 0));
+
+            $approvedSubmissions = $student->submissions->where('status', 'Approved');
+            $approvedPoints = (float) $approvedSubmissions->sum('points_awarded');
+
+            $categoryCount = $approvedSubmissions
+                ->pluck('student_category_id')
+                ->filter()
+                ->unique()
+                ->count();
+
+            $minCategories = SCoreHelper::getMinCategoriesRequiredForYear($resolvedYear, $student->student_id, $defaultMinCategories);
+            $requirementsMet = $approvedPoints >= $minPoints && $categoryCount >= $minCategories;
+
+            $academicStatus = $hasAcademicStatusColumn
+                ? (in_array($student->academic_status, ['active', 'on_leave', 'graduated'], true)
+                    ? $student->academic_status
+                    : 'active')
+                : 'active';
+
+            $finalStatus = match ($academicStatus) {
+                'on_leave' => 'Cuti',
+                'graduated' => 'Lulus',
+                default => $requirementsMet ? 'Memenuhi' : 'Belum Memenuhi',
+            };
+
+            return [
+                'id' => $student->student_id,
+                'name' => $student->name,
+                'major' => $student->major ?? '-',
+                'year' => $resolvedYear,
+                'semester' => $semester,
+                'approvedPoints' => $approvedPoints,
+                'approvedCount' => $approvedSubmissions->count(),
+                'pendingCount' => $student->submissions->where('status', 'Waiting')->count(),
+                'totalSubmissions' => $student->submissions->count(),
+                'academicStatus' => $academicStatus,
+                'finalStatus' => $finalStatus,
+            ];
+        })->values();
+
+        if ($status !== '') {
+            $rows = $rows->filter(function ($row) use ($status) {
+                return match ($status) {
+                    'met' => $row['finalStatus'] === 'Memenuhi',
+                    'not_met' => $row['finalStatus'] === 'Belum Memenuhi',
+                    'graduated' => $row['finalStatus'] === 'Lulus',
+                    'on_leave' => $row['finalStatus'] === 'Cuti',
+                    default => true,
+                };
+            })->values();
+        }
+
+        $availableYears = User::where('role', 'student')
+            ->get(['year', 'student_id'])
+            ->map(function ($student) {
+                return $this->resolveStudentYear($student->year, $student->student_id);
+            })
+            ->filter()
+            ->unique()
+            ->sortDesc()
+            ->values();
+
+        return view('admin_master_data', [
+            'rows' => $rows,
+            'availableYears' => $availableYears,
+            'filters' => [
+                'search' => $search,
+                'major' => $major,
+                'year' => $year,
+                'status' => $status,
+            ],
+        ]);
+    }
     /**
      * UPDATE PASSWORD USER (MAHASISWA & ADMIN)
      */

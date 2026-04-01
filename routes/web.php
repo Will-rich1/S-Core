@@ -52,6 +52,8 @@ Route::middleware(['auth'])->group(function () {
 
     // --- AREA ADMIN ---
     Route::get('/admin', [DashboardController::class, 'adminDashboard'])->name('admin.dashboard');
+    Route::get('/admin/master-data', [DashboardController::class, 'adminMasterData'])->name('admin.master-data');
+    Route::get('/admin/students/{studentId}/detail', [DashboardController::class, 'adminStudentDetail'])->name('admin.students.detail');
 
     // Approval / Rejection
     Route::post('/admin/submissions/{id}/approve', [SubmissionController::class, 'approve'])->name('admin.approve');
@@ -69,6 +71,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/students/delete', [UserController::class, 'deleteStudents'])->name('students.delete');
     Route::post('/admin/students/promote-semester', [UserController::class, 'promoteSemester'])->name('students.promote-semester');
     Route::post('/admin/students/demote-semester', [UserController::class, 'demoteSemester'])->name('students.demote-semester');
+    Route::post('/admin/students/{studentId}/academic-status', [UserController::class, 'updateAcademicStatus'])->name('students.update-academic-status');
+    Route::post('/admin/students/academic-status/bulk', [UserController::class, 'bulkUpdateAcademicStatus'])->name('students.bulk-update-academic-status');
     // Admin: reset user password
     Route::post('/admin/users/{id}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
 

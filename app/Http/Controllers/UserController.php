@@ -368,4 +368,88 @@ class UserController extends Controller
             return response()->json(['message' => 'Gagal menurunkan semester.'], 500);
         }
     }
+
+    public function updateAcademicStatus(Request $request, $studentId)
+    {
+        if (!Auth::user() || Auth::user()->role !== 'admin') {
+            if ($request->expectsJson() || $request->wantsJson()) {
+                return response()->json(['message' => 'Forbidden'], 403);
+            }
+
+            abort(403);
+        }
+
+        if (!Schema::hasColumn('users', 'academic_status')) {
+            $message = 'Kolom academic_status belum tersedia. Jalankan migrasi terlebih dahulu (php artisan migrate).';
+            if (!($request->expectsJson() || $request->wantsJson())) {
+                return redirect()->back()->with('error', $message);
+            }
+
+            return response()->json(['message' => $message], 422);
+        }
+
+        $validated = $request->validate([
+            'academic_status' => 'required|in:active,on_leave,graduated',
+        ]);
+
+        try {
+            $student = User::where('role', 'student')
+                ->where('student_id', $studentId)
+                ->firstOrFail();
+
+            $student->academic_status = $validated['academic_status'];
+            $student->save();
+
+            if (!($request->expectsJson() || $request->wantsJson())) {
+                return redirect()->back()->with('success', 'Status akademik mahasiswa berhasil diperbarui.');
+            }
+
+            return response()->json([
+                'message' => 'Status akademik mahasiswa berhasil diperbarui.',
+                'academic_status' => $student->academic_status,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error updating academic status: ' . $e->getMessage());
+
+            if (!($request->expectsJson() || $request->wantsJson())) {
+                return redirect()->back()->with('error', 'Gagal memperbarui status akademik.');
+            }
+
+            return response()->json(['message' => 'Gagal memperbarui status akademik.'], 500);
+        }
+    }
+
+    public function bulkUpdateAcademicStatus(Request $request)
+    {
+        if (!Auth::user() || Auth::user()->role !== 'admin') {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        if (!Schema::hasColumn('users', 'academic_status')) {
+            return response()->json([
+                'message' => 'Kolom academic_status belum tersedia. Jalankan migrasi terlebih dahulu (php artisan migrate).'
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'student_ids' => 'required|array|min:1',
+            'student_ids.*' => 'required|string',
+            'academic_status' => 'required|in:active,on_leave,graduated',
+        ]);
+
+        try {
+            $affected = User::where('role', 'student')
+                ->whereIn('student_id', $validated['student_ids'])
+                ->update(['academic_status' => $validated['academic_status']]);
+
+            return response()->json([
+                'message' => 'Status akademik mahasiswa terpilih berhasil diperbarui.',
+                'affected_count' => $affected,
+                'academic_status' => $validated['academic_status'],
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error bulk updating academic status: ' . $e->getMessage());
+            return response()->json(['message' => 'Gagal memperbarui status akademik massal.'], 500);
+        }
+    }
 }
