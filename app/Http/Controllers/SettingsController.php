@@ -16,7 +16,12 @@ class SettingsController extends Controller
     {
         return response()->json([
             'minPoints' => SCoreHelper::getMinPointsRequired(),
-            'minCategories' => SCoreHelper::getMinCategoriesRequired()
+            'minCategories' => SCoreHelper::getMinCategoriesRequired(),
+            'perfectMinPoints' => SCoreHelper::getPerfectMinPointsRequired(),
+            'submissionDateRuleMode' => SCoreHelper::getSubmissionDateRuleMode(),
+            'submissionDateRangeDays' => SCoreHelper::getSubmissionDateRangeDays(),
+            'submissionStartDate' => SCoreHelper::getSubmissionStartDate(),
+            'maintenanceMode' => SCoreHelper::isStudentMaintenanceModeEnabled(),
         ]);
     }
 
@@ -33,8 +38,25 @@ class SettingsController extends Controller
         // Validate input
         $validated = $request->validate([
             'minPoints' => 'required|integer|min:1|max:1000',
-            'minCategories' => 'required|integer|min:1|max:10'
+            'minCategories' => 'required|integer|min:1|max:10',
+            'perfectMinPoints' => 'nullable|integer|min:1|max:1000',
+            'submissionDateRuleMode' => 'required|in:rolling_days,fixed_start_date',
+            'submissionDateRangeDays' => 'nullable|integer|min:1|max:3650',
+            'submissionStartDate' => 'nullable|date',
+            'maintenanceMode' => 'nullable|boolean',
         ]);
+
+        if ($validated['submissionDateRuleMode'] === 'rolling_days' && empty($validated['submissionDateRangeDays'])) {
+            return response()->json([
+                'message' => 'Jumlah hari wajib diisi saat mode rentang hari dipilih.'
+            ], 422);
+        }
+
+        if ($validated['submissionDateRuleMode'] === 'fixed_start_date' && empty($validated['submissionStartDate'])) {
+            return response()->json([
+                'message' => 'Tanggal mulai wajib diisi saat mode tanggal mulai dipilih.'
+            ], 422);
+        }
 
         try {
             // Update settings
@@ -54,11 +76,62 @@ class SettingsController extends Controller
                 Auth::id()
             );
 
+            if (array_key_exists('perfectMinPoints', $validated) && $validated['perfectMinPoints'] !== null) {
+                SystemSetting::setSetting(
+                    'perfect_min_points',
+                    $validated['perfectMinPoints'],
+                    'integer',
+                    'Minimum points required for Perfect students list',
+                    Auth::id()
+                );
+            }
+
+            SystemSetting::setSetting(
+                'submission_date_rule_mode',
+                $validated['submissionDateRuleMode'],
+                'string',
+                'Submission date rule mode: rolling_days or fixed_start_date',
+                Auth::id()
+            );
+
+            if ($validated['submissionDateRuleMode'] === 'rolling_days') {
+                SystemSetting::setSetting(
+                    'submission_date_range_days',
+                    (int) $validated['submissionDateRangeDays'],
+                    'integer',
+                    'Activity date must be within X days from today',
+                    Auth::id()
+                );
+            }
+
+            if ($validated['submissionDateRuleMode'] === 'fixed_start_date') {
+                SystemSetting::setSetting(
+                    'submission_start_date',
+                    $validated['submissionStartDate'],
+                    'string',
+                    'Activity date must be on/after this date',
+                    Auth::id()
+                );
+            }
+
+            SystemSetting::setSetting(
+                'student_maintenance_mode',
+                (bool) ($validated['maintenanceMode'] ?? false),
+                'boolean',
+                'Student login is blocked and redirected to maintenance page when enabled',
+                Auth::id()
+            );
+
             return response()->json([
                 'message' => 'Settings updated successfully',
                 'data' => [
                     'minPoints' => $validated['minPoints'],
-                    'minCategories' => $validated['minCategories']
+                    'minCategories' => $validated['minCategories'],
+                    'perfectMinPoints' => $validated['perfectMinPoints'] ?? SCoreHelper::getPerfectMinPointsRequired(),
+                    'submissionDateRuleMode' => SCoreHelper::getSubmissionDateRuleMode(),
+                    'submissionDateRangeDays' => SCoreHelper::getSubmissionDateRangeDays(),
+                    'submissionStartDate' => SCoreHelper::getSubmissionStartDate(),
+                    'maintenanceMode' => SCoreHelper::isStudentMaintenanceModeEnabled(),
                 ]
             ]);
         } catch (\Exception $e) {
@@ -67,6 +140,30 @@ class SettingsController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Update minimum points for Perfect list page
+     */
+    public function updatePerfectPoints(Request $request)
+    {
+        if (Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Unauthorized');
+        }
+
+        $validated = $request->validate([
+            'perfect_min_points' => 'required|integer|min:1|max:1000',
+        ]);
+
+        SystemSetting::setSetting(
+            'perfect_min_points',
+            $validated['perfect_min_points'],
+            'integer',
+            'Minimum points required for Perfect students list',
+            Auth::id()
+        );
+
+        return redirect()->back()->with('success', 'Minimum poin Perfect berhasil diperbarui.');
     }
 
     /**
@@ -110,6 +207,12 @@ class SettingsController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
+        $request->merge([
+            'current_pin' => trim((string) $request->input('current_pin', '')),
+            'new_pin' => trim((string) $request->input('new_pin', '')),
+            'new_pin_confirmation' => trim((string) $request->input('new_pin_confirmation', '')),
+        ]);
+
         // Validate input
         $validated = $request->validate([
             'current_pin' => 'required|string|min:4|max:6',
@@ -119,10 +222,12 @@ class SettingsController extends Controller
 
         try {
             // Get current PIN from database
-            $currentStoredPin = SystemSetting::getSetting('security_pin', '123456');
+            $currentStoredPin = trim((string) SystemSetting::getSetting('security_pin', '123456'));
+            $currentInputPin = trim((string) $validated['current_pin']);
+            $newPin = trim((string) $validated['new_pin']);
 
             // Verify current PIN
-            if ($validated['current_pin'] !== $currentStoredPin) {
+            if ($currentInputPin !== $currentStoredPin) {
                 return response()->json([
                     'message' => 'Current PIN is incorrect'
                 ], 400);
@@ -131,7 +236,7 @@ class SettingsController extends Controller
             // Update PIN
             SystemSetting::setSetting(
                 'security_pin',
-                $validated['new_pin'],
+                $newPin,
                 'string',
                 'Security PIN for category management',
                 Auth::id()
@@ -161,13 +266,18 @@ class SettingsController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
+        $request->merge([
+            'pin' => trim((string) $request->input('pin', '')),
+        ]);
+
         $validated = $request->validate([
             'pin' => 'required|string'
         ]);
 
-        $correctPin = SystemSetting::getSetting('security_pin', '123456');
+        $correctPin = trim((string) SystemSetting::getSetting('security_pin', '123456'));
+        $inputPin = trim((string) $validated['pin']);
 
-        if ($validated['pin'] === $correctPin) {
+        if ($inputPin === $correctPin) {
             return response()->json([
                 'valid' => true,
                 'message' => 'PIN verified successfully'
@@ -189,6 +299,10 @@ class SettingsController extends Controller
         if (Auth::user()->role !== 'admin') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
+
+        $request->merge([
+            'new_pin' => trim((string) $request->input('new_pin', '')),
+        ]);
 
         // Validate input
         $validated = $request->validate([

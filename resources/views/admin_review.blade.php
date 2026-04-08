@@ -425,7 +425,7 @@
                                 <option value="">Pilih alasan penolakan</option>
                                 <option value="Sertifikat tidak sesuai dengan deskripsi kegiatan. Harap kirim ulang dengan dokumentasi yang benar.">Sertifikat tidak sesuai deskripsi kegiatan</option>
                                 <option value="Bukti/sertifikat tidak jelas atau tidak lengkap. Harap unggah versi yang lebih jelas.">Bukti tidak jelas atau tidak lengkap</option>
-                                <option value="Tanggal kegiatan melebihi batas waktu yang diizinkan (maksimal 1 bulan). Harap ajukan kegiatan dalam periode yang valid.">Tanggal kegiatan melebihi batas waktu</option>
+                                <option value="Tanggal kegiatan melebihi batas waktu yang diizinkan. Harap ajukan kegiatan dalam periode yang valid.">Tanggal kegiatan melebihi batas waktu</option>
                                 <option value="Kategori yang dipilih salah. Harap kirim ulang dengan kategori yang benar.">Kategori yang dipilih salah</option>
                                 <option value="Pengajuan duplikat terdeteksi. Kegiatan ini sudah pernah diajukan.">Pengajuan duplikat</option>
                                 <option value="Kegiatan tidak memenuhi persyaratan S-Core. Harap merujuk pada panduan.">Tidak memenuhi persyaratan S-Core</option>
@@ -522,7 +522,16 @@
                                 >
                                 Lulus
                             </label>
-                            <span class="text-xs text-gray-500">Jika dua checkbox tidak dicentang, status dianggap Aktif.</span>
+                            <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                                <input
+                                    type="checkbox"
+                                    class="rounded border-gray-300 text-slate-600 focus:ring-slate-500"
+                                    :checked="studentAcademicStatusDraft === 'non_active'"
+                                    @change="studentAcademicStatusDraft = $event.target.checked ? 'non_active' : 'active'"
+                                >
+                                Non Aktif
+                            </label>
+                            <span class="text-xs text-gray-500">Jika semua checkbox tidak dicentang, status dianggap Aktif.</span>
                         </div>
                         <div class="mt-3 flex items-center gap-3">
                             <button
@@ -986,6 +995,10 @@
                         </h4>
                         <div class="flex flex-col sm:flex-row gap-3">
                             <input type="text" x-model="newMainCategory" placeholder="Nama Kategori Utama" class="flex-1 border rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-green-500" />
+                            <label class="inline-flex items-center gap-2 text-xs sm:text-sm text-gray-700 px-3 py-2 border rounded-lg bg-white">
+                                <input type="checkbox" x-model="newMainCategoryIsMandatory" class="rounded border-gray-300 text-green-600 focus:ring-green-500" />
+                                <span>Wajib</span>
+                            </label>
                             <button @click="addMainCategory" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap">
                                 Add Main Category
                             </button>
@@ -1000,7 +1013,7 @@
                             </svg>
                             <span class="break-words">Tambah Subkategori Baru</span>
                         </h4>
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
                             <select x-model="newCategory.mainCategoryIndex" class="border rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <option value="">Pilih Kategori Utama</option>
                                 <template x-for="(cat, idx) in categories" :key="cat.id">
@@ -1010,6 +1023,10 @@
                             <input type="text" x-model="newCategory.name" placeholder="Nama Subkategori" class="border rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                             <input type="number" x-model="newCategory.points" placeholder="Poin" class="border rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                             <input type="text" x-model="newCategory.description" placeholder="Deskripsi" class="border rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                            <label class="inline-flex items-center gap-2 text-xs sm:text-sm text-gray-700 px-3 py-2 border rounded-lg bg-white">
+                                <input type="checkbox" x-model="newCategory.isMandatory" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                <span>Wajib</span>
+                            </label>
                         </div>
                         <button @click="addSubcategory" class="mt-3 w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap">
                             Add Subcategory
@@ -1027,12 +1044,19 @@
                                         <template x-if="!cat.isEditing">
                                             <h5 class="font-bold text-lg text-gray-800">
                                                 <span x-text="(catIndex + 1) + '. ' + cat.name"></span>
+                                                <span x-show="cat.is_mandatory" class="ml-2 inline-block text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">Wajib</span>
                                                 <span x-show="cat.is_active == 0 || cat.is_active === false" class="ml-2 inline-block text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">Tidak Aktif</span>
                                             </h5>
                                         </template>
                                     
                                     <template x-if="cat.isEditing">
-                                        <input type="text" x-model="cat.name" class="flex-1 border-2 border-blue-500 rounded-lg px-3 py-1.5 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 mr-3" />
+                                        <div class="flex-1 flex items-center gap-3 mr-3">
+                                            <input type="text" x-model="cat.name" class="flex-1 border-2 border-blue-500 rounded-lg px-3 py-1.5 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                            <label class="inline-flex items-center gap-2 text-xs sm:text-sm text-gray-700 px-3 py-2 border rounded-lg bg-white">
+                                                <input type="checkbox" x-model="cat.is_mandatory" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                                <span>Wajib</span>
+                                            </label>
+                                        </div>
                                     </template>
 
                                     <div class="flex gap-2">
@@ -1096,6 +1120,10 @@
                                                         <input type="text" x-model="subcat.name" placeholder="Name" class="w-full sm:flex-1 border rounded px-2 py-1 text-xs sm:text-sm">
                                                         <input type="number" x-model="subcat.points" placeholder="Pts" class="w-full sm:w-16 border rounded px-2 py-1 text-xs sm:text-sm">
                                                         <input type="text" x-model="subcat.description" placeholder="Desc" class="w-full sm:flex-1 border rounded px-2 py-1 text-xs sm:text-sm">
+                                                        <label class="inline-flex items-center gap-1 text-xs text-gray-700 px-2 py-1 border rounded bg-white">
+                                                            <input type="checkbox" x-model="subcat.is_mandatory" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                                            <span>Wajib</span>
+                                                        </label>
                                                         <div class="flex gap-2 w-full sm:w-auto justify-end">
                                                             <button @click="saveSubcategory(catIndex, subIndex)" class="text-green-600 hover:text-green-800"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg></button>
                                                             <button @click="cancelEditSubcategory(catIndex, subIndex)" class="text-gray-500 hover:text-gray-700"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
@@ -1108,6 +1136,7 @@
                                                         <div class="flex-1 min-w-0">
                                                             <h6 class="font-medium text-gray-800 text-xs sm:text-sm break-words">
                                                                 <span x-text="subcat.name"></span>
+                                                                <span x-show="subcat.is_mandatory" class="ml-2 inline-block text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded">Wajib</span>
                                                                 <span x-show="subcat.is_active == 0 || subcat.is_active === false" class="ml-2 inline-block text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">Tidak Aktif</span>
                                                             </h6>
                                                             <p class="text-xs text-gray-500 mt-1 break-words">
@@ -1626,6 +1655,13 @@
                             </svg>
                             Master Data
                         </a>
+
+                        <a href="{{ route('admin.perfect-data') }}" target="_blank" rel="noopener noreferrer" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 md:col-span-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15l-2.4 1.8.9-3-2.4-1.8h3l.9-3 .9 3h3l-2.4 1.8.9 3z" />
+                            </svg>
+                            Honorary Graduate
+                        </a>
                     </div>
 
                     <div class="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t pt-3">
@@ -1661,7 +1697,7 @@
                                 </svg>
                                 <span x-text="isPromotingSemester ? 'Memproses...' : 'Semester Naik'"></span>
                             </button>
-                            <p class="text-sm text-gray-500" x-text="`Menampilkan ${studentsPagination.from} - ${studentsPagination.to} dari ${studentsPagination.total} mahasiswa`"></p>
+                            <p class="text-sm text-gray-500" x-text="`Menampilkan ${studentsRange.from} - ${studentsRange.to} dari ${studentsRange.total} mahasiswa`"></p>
                         </div>
                     </div>
                     
@@ -1691,6 +1727,15 @@
                                     >
                                     Lulus
                                 </label>
+                                <label class="inline-flex items-center gap-2 text-sm text-gray-700">
+                                    <input
+                                        type="checkbox"
+                                        class="rounded border-gray-300 text-slate-600 focus:ring-slate-500"
+                                        :checked="bulkAcademicStatusDraft === 'non_active'"
+                                        @change="setBulkAcademicStatus('non_active', $event.target.checked)"
+                                    >
+                                    Non Aktif
+                                </label>
                                 <button
                                     @click="applyBulkAcademicStatus()"
                                     :disabled="isUpdatingBulkAcademicStatus"
@@ -1716,7 +1761,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm text-gray-600">Total Mahasiswa</p>
-                                <p class="text-2xl font-bold text-gray-800" x-text="studentsPagination.total"></p>
+                                <p class="text-2xl font-bold text-gray-800" x-text="studentsRange.total"></p>
                             </div>
                             <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                                 <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1780,7 +1825,7 @@
                                     <th class="text-center py-3 px-4 font-semibold text-sm w-12">
                                         <input type="checkbox" 
                                         @change="toggleSelectAll($event.target.checked)"
-                                        :checked="selectedStudents.length > 0 && selectedStudents.length === filteredStudentsList.length"
+                                        :checked="selectedStudents.length > 0 && selectedStudents.length === paginatedStudentsList.length"
                                         class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500">
                                 </th>
                                 <th class="text-left py-3 px-4 font-semibold text-sm">NIM</th>
@@ -1795,7 +1840,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                        <template x-for="student in filteredStudentsList" :key="student.id">
+                        <template x-for="student in paginatedStudentsList" :key="student.id">
                             <tr class="border-b hover:bg-blue-50 transition-colors group" x-data="{ showTooltip: false, tooltipX: 0, tooltipY: 0 }">
                                 <td class="text-center py-3 px-4">
                                     <input type="checkbox" 
@@ -1921,14 +1966,14 @@
                             <div class="flex justify-center">
                                 <input type="checkbox"
                                     @change="toggleSelectAll($event.target.checked)"
-                                    :checked="selectedStudents.length > 0 && selectedStudents.length === filteredStudentsList.length"
+                                    :checked="selectedStudents.length > 0 && selectedStudents.length === paginatedStudentsList.length"
                                     class="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500">
                             </div>
                             <span>Nama</span>
                             <span class="text-center">Status</span>
                         </div>
 
-                        <template x-for="student in filteredStudentsList" :key="'mobile-student-' + student.id">
+                        <template x-for="student in paginatedStudentsList" :key="'mobile-student-' + student.id">
                             <div
                                 class="grid grid-cols-[36px_1fr_86px] gap-2 items-center px-3 py-2.5 border-b cursor-pointer transition-colors"
                                 :class="selectedStudent?.id === student.id ? 'bg-blue-50' : 'hover:bg-gray-50'"
@@ -2068,7 +2113,7 @@
                 </div>
 
                 <div class="border-t px-4 py-3 mt-3 bg-white rounded-lg shadow flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <p class="text-sm text-gray-600" x-text="`Halaman ${studentsPagination.currentPage} dari ${studentsPagination.lastPage || 1}`"></p>
+                    <p class="text-sm text-gray-600" x-text="`Halaman ${studentsPagination.currentPage} dari ${studentsLastPage || 1}`"></p>
                     <div class="flex gap-2 justify-end">
                         <button
                             @click="goToStudentsPage(studentsPagination.currentPage - 1)"
@@ -2080,8 +2125,8 @@
                         </button>
                         <button
                             @click="goToStudentsPage(studentsPagination.currentPage + 1)"
-                            :disabled="studentsPagination.currentPage >= studentsPagination.lastPage"
-                            :class="studentsPagination.currentPage >= studentsPagination.lastPage ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'"
+                            :disabled="studentsPagination.currentPage >= studentsLastPage"
+                            :class="studentsPagination.currentPage >= studentsLastPage ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 text-white'"
                             class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                         >
                             Kanan
@@ -2124,16 +2169,17 @@
                                             <option value="all">Semua Angkatan</option>
                                             <option value="specific">Angkatan Tertentu</option>
                                         </select>
-                                        <input 
-                                            type="number" 
-                                            x-model="bulkScore.selectedYear" 
+                                        <select
+                                            x-model="bulkScore.selectedYear"
                                             :disabled="bulkScore.yearMode === 'all'"
                                             :class="bulkScore.yearMode === 'all' ? 'bg-gray-100 cursor-not-allowed' : ''"
-                                            placeholder="Masukkan angkatan" 
                                             class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            min="2020"
-                                            max="2030"
-                                        />
+                                        >
+                                            <option value="">Pilih angkatan</option>
+                                            <template x-for="year in studentYears" :key="year">
+                                                <option :value="year" x-text="year"></option>
+                                            </template>
+                                        </select>
                                     </div>
                                 </div>
 
@@ -2211,12 +2257,12 @@
                                     <svg class="w-10 h-10 text-gray-400 mb-2 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                     </svg>
-                                    <p class="text-gray-600 text-sm mb-1">Seret dan lepas PDF, JPG, atau PNG di sini</p>
+                                    <p class="text-gray-600 text-sm mb-1">Seret dan lepas file PDF di sini</p>
                                     <p class="text-gray-400 text-xs">atau</p>
                                     <p class="text-blue-500 text-sm font-medium mt-1">Pilih File</p>
                                 </div>
-                                <input type="file" x-ref="bulkCertificate" accept=".pdf,.jpg,.jpeg,.png" class="hidden" @change="bulkFileName = $event.target.files[0]?.name || ''" />
-                                <p class="text-xs text-gray-500 mt-2">Unggah PDF, JPG, atau PNG jika tersedia (maks 10MB)</p>
+                                <input type="file" x-ref="bulkCertificate" accept=".pdf,application/pdf" class="hidden" @change="handleBulkCertificateChange($event)" />
+                                <p class="text-xs text-gray-500 mt-2">Pengumpulan bukti hanya melalui PDF (maks 10MB)</p>
                                 <div x-show="bulkFileName" class="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
                                     <span class="text-sm text-gray-700" x-text="bulkFileName"></span>
                                     <button type="button" @click="bulkFileName = ''; $refs.bulkCertificate.value = ''" class="text-red-500 hover:text-red-700 text-sm">Hapus</button>
@@ -2711,7 +2757,7 @@
                         <p class="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">Atur persyaratan minimum agar mahasiswa dianggap LULUS</p>
                         
                         <form @submit.prevent="updateScoreSettings()" class="space-y-4">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                     <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
                                         Minimum Poin yang Dibutuhkan
@@ -2743,13 +2789,102 @@
                                         required
                                     />
                                 </div>
+
+                                <div>
+                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+                                        Minimum Poin Perfect
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        x-model.number="scoreSettings.perfectMinPoints"
+                                        min="1"
+                                        max="1000"
+                                        class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="contoh: 40"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="border border-gray-200 rounded-lg p-4 space-y-3">
+                                <div class="flex flex-col gap-2">
+                                    <p class="text-sm font-semibold text-gray-800">Aturan Batas Tanggal Pengumpulan</p>
+
+                                    <label class="inline-flex w-fit items-center gap-2 text-xs sm:text-sm font-semibold text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+                                        <input
+                                            type="checkbox"
+                                            class="rounded border-gray-300 text-rose-600 focus:ring-rose-500"
+                                            x-model="scoreSettings.maintenanceMode"
+                                        />
+                                        Mode Maintenance Mahasiswa
+                                    </label>
+                                </div>
+
+                                <label class="flex items-start gap-3 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        :checked="scoreSettings.submissionDateRuleMode === 'rolling_days'"
+                                        @change="scoreSettings.submissionDateRuleMode = 'rolling_days'"
+                                    />
+                                    <div class="flex-1">
+                                        <p class="text-xs sm:text-sm font-medium text-gray-700">Pakai batas dari jumlah hari terakhir</p>
+                                        <div class="mt-2 flex items-center gap-2">
+                                            <input
+                                                type="number"
+                                                x-model.number="scoreSettings.submissionDateRangeDays"
+                                                min="1"
+                                                max="3650"
+                                                :disabled="scoreSettings.submissionDateRuleMode !== 'rolling_days'"
+                                                class="w-32 border border-gray-300 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                                                placeholder="30"
+                                            />
+                                            <span class="text-xs sm:text-sm text-gray-600">hari</span>
+                                        </div>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-start gap-3 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        :checked="scoreSettings.submissionDateRuleMode === 'fixed_start_date'"
+                                        @change="scoreSettings.submissionDateRuleMode = 'fixed_start_date'"
+                                    />
+                                    <div class="flex-1">
+                                        <p class="text-xs sm:text-sm font-medium text-gray-700">Pakai batas mulai dari tanggal tertentu</p>
+                                        <div class="mt-2">
+                                            <input
+                                                type="date"
+                                                x-model="scoreSettings.submissionStartDate"
+                                                :disabled="scoreSettings.submissionDateRuleMode !== 'fixed_start_date'"
+                                                class="w-full md:w-64 border border-gray-300 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                                            />
+                                        </div>
+                                    </div>
+                                </label>
                             </div>
 
                             <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mt-4">
                                 <p class="text-xs sm:text-sm text-blue-800">
                                     <span class="font-semibold">Info:</span> Mahasiswa akan ditandai LULUS hanya jika memiliki setidaknya 
                                     <span class="font-bold" x-text="scoreSettings.minPoints"></span> points AND completed 
-                                    <span class="font-bold" x-text="scoreSettings.minCategories"></span> kategori
+                                    <span class="font-bold" x-text="scoreSettings.minCategories"></span> kategori. Daftar Perfect menggunakan minimum
+                                    <span class="font-bold" x-text="scoreSettings.perfectMinPoints"></span> poin.
+                                </p>
+                                <p class="text-xs sm:text-sm text-blue-800 mt-2">
+                                    Batas tanggal pengumpulan:
+                                    <span class="font-bold" x-show="scoreSettings.submissionDateRuleMode === 'rolling_days'">
+                                        maksimal <span x-text="scoreSettings.submissionDateRangeDays || 30"></span> hari dari hari ini
+                                    </span>
+                                    <span class="font-bold" x-show="scoreSettings.submissionDateRuleMode === 'fixed_start_date'">
+                                        mulai dari <span x-text="scoreSettings.submissionStartDate || '-'" ></span>
+                                    </span>
+                                </p>
+                                <p class="text-xs sm:text-sm mt-2" :class="scoreSettings.maintenanceMode ? 'text-rose-700' : 'text-green-700'">
+                                    Maintenance mahasiswa:
+                                    <span class="font-bold" x-text="scoreSettings.maintenanceMode ? 'AKTIF (mahasiswa akan melihat halaman maintenance saat login)' : 'NONAKTIF'"></span>
                                 </p>
                             </div>
 
@@ -3530,8 +3665,9 @@
         assignedAvailableSubcategories: [],
         
         newMainCategory: '',
+        newMainCategoryIsMandatory: false,
         newMainCategoryMaxPerSemester: 'none',
-        newCategory: { mainCategoryIndex: '', name: '', points: '', description: '' },
+        newCategory: { mainCategoryIndex: '', name: '', points: '', description: '', isMandatory: false },
         showInactiveCategories: false,
         
         // --- VARIABLE FILTER ---
@@ -3612,7 +3748,12 @@
         // S-Core Settings
         scoreSettings: {
             minPoints: @json($scoreSettings['minPoints'] ?? 20),
-            minCategories: @json($scoreSettings['minCategories'] ?? 5)
+            minCategories: @json($scoreSettings['minCategories'] ?? 5),
+            perfectMinPoints: @json($scoreSettings['perfectMinPoints'] ?? 40),
+            submissionDateRuleMode: @json($scoreSettings['submissionDateRuleMode'] ?? 'rolling_days'),
+            submissionDateRangeDays: @json($scoreSettings['submissionDateRangeDays'] ?? 30),
+            submissionStartDate: @json($scoreSettings['submissionStartDate'] ?? null),
+            maintenanceMode: @json($scoreSettings['maintenanceMode'] ?? false)
         },
 
         // ============================================================
@@ -3636,22 +3777,19 @@
                 this.yearFilterMode = 'specific';
             }
 
-            // Sync from URL as fallback so selected filters are reflected on first render.
-            const queryYearMode = queryParams.get('year_mode');
-            const queryYear = queryParams.get('year_filter');
-            const querySearch = queryParams.get('student_search');
-
-            if (queryYearMode) {
-                this.yearFilterMode = queryYearMode;
-            }
-            if (queryYear !== null) {
-                this.yearFilter = String(queryYear).trim();
-            }
-            if ((this.yearFilter || '').trim() !== '') {
-                this.yearFilterMode = 'specific';
-            }
-            if ((this.studentSearchQuery || '') === '' && querySearch) {
-                this.studentSearchQuery = querySearch;
+            // Clean legacy server-side students query params to avoid stale filter states after refresh.
+            const legacyStudentParams = ['students_page', 'students_per_page', 'student_search', 'major_filter', 'year_mode', 'year_filter'];
+            let hasLegacyStudentParams = false;
+            legacyStudentParams.forEach((key) => {
+                if (queryParams.has(key)) {
+                    queryParams.delete(key);
+                    hasLegacyStudentParams = true;
+                }
+            });
+            if (hasLegacyStudentParams) {
+                const nextQuery = queryParams.toString();
+                const nextUrl = `${window.location.pathname}${nextQuery ? '?' + nextQuery : ''}`;
+                window.history.replaceState({}, '', nextUrl);
             }
 
             // LOAD CATEGORIES dari API (Real-time)
@@ -3700,11 +3838,13 @@
                 // Transform dan tambahkan isEditing flag
                 fetchedCategories = fetchedCategories.map(cat => ({
                     ...cat,
+                    is_mandatory: !!cat.is_mandatory,
                     max_submissions_per_semester: this.normalizeCategorySemesterLimitValue(cat.max_submissions_per_semester),
                     isEditing: false,
                     isSavingLimit: false,
                     subcategories: (cat.subcategories || []).map(sub => ({
                         ...sub,
+                        is_mandatory: !!sub.is_mandatory,
                         isEditing: false
                     }))
                 }));
@@ -3718,11 +3858,13 @@
                 // Fallback: gunakan data awal jika API gagal
                 this.categories = this.categories.map(cat => ({
                     ...cat,
+                    is_mandatory: !!cat.is_mandatory,
                     max_submissions_per_semester: this.normalizeCategorySemesterLimitValue(cat.max_submissions_per_semester),
                     isEditing: false,
                     isSavingLimit: false,
                     subcategories: (cat.subcategories || []).map(sub => ({
                         ...sub,
+                        is_mandatory: !!sub.is_mandatory,
                         isEditing: false
                     }))
                 }));
@@ -3739,6 +3881,11 @@
                 const data = await response.json();
                 this.scoreSettings.minPoints = data.minPoints;
                 this.scoreSettings.minCategories = data.minCategories;
+                this.scoreSettings.perfectMinPoints = data.perfectMinPoints ?? this.scoreSettings.perfectMinPoints;
+                this.scoreSettings.submissionDateRuleMode = data.submissionDateRuleMode || 'rolling_days';
+                this.scoreSettings.submissionDateRangeDays = data.submissionDateRangeDays || 30;
+                this.scoreSettings.submissionStartDate = data.submissionStartDate || null;
+                this.scoreSettings.maintenanceMode = !!data.maintenanceMode;
             } catch (error) {
                 console.error('Error loading score settings:', error);
                 this.showAlert('error', 'Gagal', 'Tidak dapat memuat pengaturan S-Core');
@@ -3746,8 +3893,18 @@
         },
 
         async updateScoreSettings() {
-            if (!this.scoreSettings.minPoints || !this.scoreSettings.minCategories) {
+            if (!this.scoreSettings.minPoints || !this.scoreSettings.minCategories || !this.scoreSettings.perfectMinPoints) {
                 this.showAlert('warning', 'Tidak Lengkap', 'Harap isi semua kolom');
+                return;
+            }
+
+            if (this.scoreSettings.submissionDateRuleMode === 'rolling_days' && !this.scoreSettings.submissionDateRangeDays) {
+                this.showAlert('warning', 'Tidak Lengkap', 'Isi jumlah hari untuk batas tanggal pengumpulan.');
+                return;
+            }
+
+            if (this.scoreSettings.submissionDateRuleMode === 'fixed_start_date' && !this.scoreSettings.submissionStartDate) {
+                this.showAlert('warning', 'Tidak Lengkap', 'Pilih tanggal mulai untuk batas tanggal pengumpulan.');
                 return;
             }
 
@@ -3761,7 +3918,16 @@
                     },
                     body: JSON.stringify({
                         minPoints: parseInt(this.scoreSettings.minPoints),
-                        minCategories: parseInt(this.scoreSettings.minCategories)
+                        minCategories: parseInt(this.scoreSettings.minCategories),
+                        perfectMinPoints: parseInt(this.scoreSettings.perfectMinPoints),
+                        submissionDateRuleMode: this.scoreSettings.submissionDateRuleMode,
+                        submissionDateRangeDays: this.scoreSettings.submissionDateRuleMode === 'rolling_days'
+                            ? parseInt(this.scoreSettings.submissionDateRangeDays)
+                            : null,
+                        submissionStartDate: this.scoreSettings.submissionDateRuleMode === 'fixed_start_date'
+                            ? this.scoreSettings.submissionStartDate
+                            : null,
+                        maintenanceMode: !!this.scoreSettings.maintenanceMode
                     })
                 });
 
@@ -3846,25 +4012,29 @@
 
         // --- SECURITY PIN CHANGE FUNCTIONS ---
         async updateSecurityPin() {
+            const currentPin = (this.pinData.currentPin || '').trim();
+            const newPin = (this.pinData.newPin || '').trim();
+            const confirmPin = (this.pinData.confirmPin || '').trim();
+
             // Validation
-            if (!this.pinData.currentPin || !this.pinData.newPin || !this.pinData.confirmPin) {
+            if (!currentPin || !newPin || !confirmPin) {
                 this.showAlert('warning', 'Tidak Lengkap', 'Semua kolom wajib diisi');
                 return;
             }
 
             // Validate PIN format (4-6 digits)
             const pinRegex = /^[0-9]{4,6}$/;
-            if (!pinRegex.test(this.pinData.newPin)) {
+            if (!pinRegex.test(newPin)) {
                 this.showAlert('warning', 'Format Tidak Valid', 'PIN baru harus terdiri dari 4-6 digit');
                 return;
             }
 
-            if (this.pinData.newPin !== this.pinData.confirmPin) {
+            if (newPin !== confirmPin) {
                 this.showAlert('warning', 'Tidak Cocok', 'PIN baru dan konfirmasinya tidak cocok');
                 return;
             }
 
-            if (this.pinData.newPin === this.pinData.currentPin) {
+            if (newPin === currentPin) {
                 this.showAlert('warning', 'PIN Sama', 'PIN baru harus berbeda dari PIN saat ini');
                 return;
             }
@@ -3880,9 +4050,9 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({
-                        current_pin: this.pinData.currentPin,
-                        new_pin: this.pinData.newPin,
-                        new_pin_confirmation: this.pinData.confirmPin
+                        current_pin: currentPin,
+                        new_pin: newPin,
+                        new_pin_confirmation: confirmPin
                     })
                 });
 
@@ -4055,6 +4225,7 @@
             const academicStatus = student.academicStatus || 'active';
             if (academicStatus === 'on_leave') return 'Cuti';
             if (academicStatus === 'graduated') return 'Lulus';
+            if (academicStatus === 'non_active') return 'Non Aktif';
 
             return this.isStudentPassed(student) ? 'Memenuhi' : 'Belum Memenuhi';
         },
@@ -4065,6 +4236,7 @@
             if (label === 'Belum Memenuhi') return 'bg-red-100 text-red-700';
             if (label === 'Lulus') return 'bg-blue-100 text-blue-700';
             if (label === 'Cuti') return 'bg-amber-100 text-amber-700';
+            if (label === 'Non Aktif') return 'bg-slate-200 text-slate-700';
             return 'bg-gray-100 text-gray-700';
         },
 
@@ -4149,6 +4321,37 @@
 
                 return matchesSearch && matchesMajor && matchesYear && matchesStatus;
             });
+        },
+
+        get studentsLastPage() {
+            const total = this.filteredStudentsList.length;
+            const perPage = Math.max(1, Number(this.studentsPagination.perPage || 25));
+            return Math.max(1, Math.ceil(total / perPage));
+        },
+
+        get studentsRange() {
+            const total = this.filteredStudentsList.length;
+            const perPage = Math.max(1, Number(this.studentsPagination.perPage || 25));
+            const currentPage = Math.max(1, Math.min(Number(this.studentsPagination.currentPage || 1), this.studentsLastPage));
+
+            if (total === 0) {
+                return { from: 0, to: 0, total: 0 };
+            }
+
+            const from = ((currentPage - 1) * perPage) + 1;
+            const to = Math.min(currentPage * perPage, total);
+            return { from, to, total };
+        },
+
+        get paginatedStudentsList() {
+            const perPage = Math.max(1, Number(this.studentsPagination.perPage || 25));
+            const total = this.filteredStudentsList.length;
+            const lastPage = Math.max(1, Math.ceil(total / perPage));
+            const currentPage = Math.max(1, Math.min(Number(this.studentsPagination.currentPage || 1), lastPage));
+            const start = (currentPage - 1) * perPage;
+            const end = start + perPage;
+
+            return this.filteredStudentsList.slice(start, end);
         },
 
         get availableStudentYears() {
@@ -4794,7 +4997,8 @@
         },
 
         changeStudentsPerPage() {
-            this.goToStudentsPage(1, true);
+            this.studentsPagination.currentPage = 1;
+            this.selectedStudents = [];
         },
 
         goToSubmissionPage(targetPage) {
@@ -4825,90 +5029,32 @@
         },
 
         applyStudentFilters() {
-            const params = new URLSearchParams(window.location.search);
-            params.set('students_page', '1');
-            params.set('students_per_page', this.studentsPagination.perPage || 25);
-            params.set('menu', 'Students');
-
-            const normalizedSearch = (this.studentSearchQuery || '').trim();
-            if (normalizedSearch !== '') {
-                params.set('student_search', normalizedSearch);
-            } else {
-                params.delete('student_search');
-            }
-
-            if ((this.majorFilter || '') !== '') {
-                params.set('major_filter', this.majorFilter);
-            } else {
-                params.delete('major_filter');
-            }
-
             const normalizedYear = String(this.yearFilter ?? '').trim();
             const effectiveYearMode = normalizedYear !== '' ? 'specific' : (this.yearFilterMode || 'all');
 
             this.yearFilter = normalizedYear;
             this.yearFilterMode = effectiveYearMode;
-            params.set('year_mode', effectiveYearMode);
-
-            if (effectiveYearMode === 'specific' && normalizedYear !== '') {
-                params.set('year_filter', normalizedYear);
-            } else {
-                params.delete('year_filter');
-            }
-
-            const nextQuery = params.toString();
-            const currentQuery = window.location.search.replace(/^\?/, '');
-
-            if (nextQuery === currentQuery) {
-                return;
-            }
-
-            window.location.search = nextQuery;
+            this.studentsPagination.currentPage = 1;
+            this.selectedStudents = [];
         },
 
         goToStudentsPage(targetPage, forceReload = false) {
-            const maxPage = this.studentsPagination.lastPage || 1;
+            const maxPage = this.studentsLastPage || 1;
             const page = Math.max(1, Math.min(targetPage, maxPage));
 
             if (!forceReload && page === this.studentsPagination.currentPage) {
                 return;
             }
 
-            const params = new URLSearchParams(window.location.search);
-            params.set('students_page', page);
-            params.set('students_per_page', this.studentsPagination.perPage || 25);
-            params.set('menu', 'Students');
-
-            const normalizedSearch = (this.studentSearchQuery || '').trim();
-            if (normalizedSearch !== '') {
-                params.set('student_search', normalizedSearch);
-            } else {
-                params.delete('student_search');
-            }
-
-            if ((this.majorFilter || '') !== '') {
-                params.set('major_filter', this.majorFilter);
-            } else {
-                params.delete('major_filter');
-            }
-
-            const normalizedYear = String(this.yearFilter ?? '').trim();
-            params.set('year_mode', this.yearFilterMode || 'all');
-            if ((this.yearFilterMode || 'all') === 'specific' && normalizedYear !== '') {
-                params.set('year_filter', normalizedYear);
-            } else {
-                params.delete('year_filter');
-            }
-
-            window.location.search = params.toString();
+            this.studentsPagination.currentPage = page;
         },
 
         // Toggle select all students
         toggleSelectAll(checked) {
             if (checked) {
-                this.selectedStudents = this.filteredStudentsList.map(s => s.id);
-                if (!this.selectedStudent && this.filteredStudentsList.length > 0) {
-                    this.selectedStudent = this.filteredStudentsList[0];
+                this.selectedStudents = this.paginatedStudentsList.map(s => s.id);
+                if (!this.selectedStudent && this.paginatedStudentsList.length > 0) {
+                    this.selectedStudent = this.paginatedStudentsList[0];
                 }
             } else {
                 this.selectedStudents = [];
@@ -4981,7 +5127,9 @@
                 ? 'Cuti'
                 : this.bulkAcademicStatusDraft === 'graduated'
                     ? 'Lulus'
-                    : 'Aktif';
+                    : this.bulkAcademicStatusDraft === 'non_active'
+                        ? 'Non Aktif'
+                        : 'Aktif';
 
             this.isUpdatingBulkAcademicStatus = true;
 
@@ -5199,7 +5347,9 @@
         closePinModal() { this.showPinModal = false; },
         
         async verifyPin() {
-            if (!this.pinInput) {
+            const pin = (this.pinInput || '').trim();
+
+            if (!pin) {
                 this.pinError = true;
                 return;
             }
@@ -5213,7 +5363,7 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({
-                        pin: this.pinInput
+                        pin
                     })
                 });
 
@@ -5243,6 +5393,7 @@
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                 body: JSON.stringify({
                     name: this.newMainCategory,
+                    is_mandatory: !!this.newMainCategoryIsMandatory,
                     max_submissions_per_semester: this.parseCategorySemesterLimitValue(this.newMainCategoryMaxPerSemester)
                 })
             })
@@ -5254,6 +5405,7 @@
             .then(json => {
                 // Reload categories dari API untuk ensure sinkronisasi
                 this.newMainCategory = '';
+                this.newMainCategoryIsMandatory = false;
                 this.newMainCategoryMaxPerSemester = 'none';
                 this.showAlert('success', 'Tersimpan', 'Kategori berhasil ditambahkan. Memuat ulang...');
                 this.loadCategories();
@@ -5271,6 +5423,7 @@
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                 body: JSON.stringify({
                     name: cat.name,
+                    is_mandatory: !!cat.is_mandatory,
                     max_submissions_per_semester: this.parseCategorySemesterLimitValue(cat.max_submissions_per_semester)
                 })
             })
@@ -5375,13 +5528,14 @@
                     category_id: catId,
                     name: this.newCategory.name,
                     points: this.newCategory.points || 0,
-                    description: this.newCategory.description
+                    description: this.newCategory.description,
+                    is_mandatory: !!this.newCategory.isMandatory
                 })
             })
             .then(res => res.ok ? res.json() : Promise.reject(res))
             .then(() => {
                 // Reset form
-                this.newCategory = { mainCategoryIndex: '', name: '', points: '', description: '' };
+                this.newCategory = { mainCategoryIndex: '', name: '', points: '', description: '', isMandatory: false };
                 this.showAlert('success', 'Tersimpan', 'Subkategori berhasil ditambahkan. Memuat ulang...');
                 // Reload categories dari API untuk sinkronisasi
                 this.loadCategories();
@@ -5408,7 +5562,8 @@
                 body: JSON.stringify({
                     name: sub.name,
                     points: sub.points,
-                    description: sub.description
+                    description: sub.description,
+                    is_mandatory: !!sub.is_mandatory
                 })
             })
             .then(res => res.ok ? res.json() : Promise.reject(res))
@@ -5477,10 +5632,9 @@
             const files = e.dataTransfer.files;
             if (files.length > 0) {
                 const file = files[0];
-                // Validate allowed file types
-                const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
-                if (!allowedTypes.includes(file.type)) {
-                    this.showAlert('error', 'File Tidak Valid', 'Hanya file PDF, JPG, atau PNG yang diperbolehkan');
+                const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+                if (!isPdf) {
+                    this.showAlert('error', 'File Tidak Valid', 'Pengumpulan bukti hanya melalui PDF.');
                     return;
                 }
                 // Validate file size (10MB max)
@@ -5496,6 +5650,31 @@
                     this.$refs.bulkCertificate.files = dataTransfer.files;
                 }
             }
+        },
+
+        handleBulkCertificateChange(e) {
+            const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+            if (!file) {
+                this.bulkFileName = '';
+                return;
+            }
+
+            const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+            if (!isPdf) {
+                this.showAlert('error', 'File Tidak Valid', 'Pengumpulan bukti hanya melalui PDF.');
+                this.bulkFileName = '';
+                e.target.value = '';
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                this.showAlert('error', 'File Terlalu Besar', 'Ukuran file maksimum adalah 10MB');
+                this.bulkFileName = '';
+                e.target.value = '';
+                return;
+            }
+
+            this.bulkFileName = file.name;
         },
 
         // Bulk Score Management

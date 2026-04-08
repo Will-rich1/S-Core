@@ -11,11 +11,16 @@
         <div class="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
                 <h1 class="text-2xl font-bold">Master Data Mahasiswa</h1>
-                <p class="text-sm text-gray-600">Semua status mahasiswa tersedia di halaman ini (Memenuhi, Belum Memenuhi, Lulus, Cuti).</p>
+                <p class="text-sm text-gray-600">Semua status mahasiswa tersedia di halaman ini (Memenuhi, Belum Memenuhi, Lulus, Cuti, Non Aktif).</p>
             </div>
-            <a href="{{ route('admin.dashboard', ['menu' => 'Students']) }}" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium">
-                Kembali ke Admin
-            </a>
+            <div class="flex flex-wrap items-center gap-2">
+                <a href="{{ route('admin.perfect-data') }}" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium">
+                    Perfect Data
+                </a>
+                <a href="{{ route('admin.dashboard', ['menu' => 'Students']) }}" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium">
+                    Kembali ke Admin
+                </a>
+            </div>
         </div>
 
         <div class="bg-white rounded-xl border shadow-sm p-4 mb-4">
@@ -48,6 +53,7 @@
                     <option value="not_met" {{ ($filters['status'] ?? '') === 'not_met' ? 'selected' : '' }}>Belum Memenuhi</option>
                     <option value="graduated" {{ ($filters['status'] ?? '') === 'graduated' ? 'selected' : '' }}>Lulus</option>
                     <option value="on_leave" {{ ($filters['status'] ?? '') === 'on_leave' ? 'selected' : '' }}>Cuti</option>
+                    <option value="non_active" {{ ($filters['status'] ?? '') === 'non_active' ? 'selected' : '' }}>Non Aktif</option>
                 </select>
 
                 <div class="flex gap-2">
@@ -84,6 +90,7 @@
                                     'Belum Memenuhi' => 'bg-red-100 text-red-700',
                                     'Lulus' => 'bg-blue-100 text-blue-700',
                                     'Cuti' => 'bg-amber-100 text-amber-700',
+                                    'Non Aktif' => 'bg-slate-200 text-slate-700',
                                     default => 'bg-gray-100 text-gray-700'
                                 };
                             @endphp

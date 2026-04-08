@@ -69,6 +69,7 @@ class CategoryController extends Controller
             return [
                 'id' => $cat->id,
                 'name' => $cat->name,
+                'is_mandatory' => (bool) ($cat->is_mandatory ?? false),
                 'max_submissions_per_semester' => $maxPerSemester,
                 'used_this_semester' => $usedThisSemester,
                 'is_quota_full' => $isQuotaFull,
@@ -78,6 +79,7 @@ class CategoryController extends Controller
                         'name' => $sub->name,
                         'points' => $sub->points,
                         'description' => $sub->description,
+                        'is_mandatory' => (bool) ($sub->is_mandatory ?? false),
                         'approvedCount' => \App\Models\Submission::where('student_id', Auth::id())
                                                     ->where('student_subcategory_id', $sub->id)
                                                     ->where('status', 'Approved')
@@ -131,7 +133,8 @@ class CategoryController extends Controller
         $request->merge(['max_submissions_per_semester' => $maxPerSemester]);
         $request->validate([
             'name' => 'required|string|max:255',
-            'max_submissions_per_semester' => 'nullable|integer|min:1|max:10'
+            'max_submissions_per_semester' => 'nullable|integer|min:1|max:10',
+            'is_mandatory' => 'nullable|boolean',
         ]);
         
         // Auto-increment display_order
@@ -139,6 +142,7 @@ class CategoryController extends Controller
 
         $category = Category::create([
             'name' => $request->name,
+            'is_mandatory' => $request->boolean('is_mandatory'),
             'is_active' => true,
             'display_order' => $maxOrder + 1,
             'max_submissions_per_semester' => $request->max_submissions_per_semester,
@@ -162,13 +166,15 @@ class CategoryController extends Controller
         $request->merge(['max_submissions_per_semester' => $maxPerSemester]);
         $request->validate([
             'name' => 'required|string|max:255',
-            'max_submissions_per_semester' => 'nullable|integer|min:1|max:10'
+            'max_submissions_per_semester' => 'nullable|integer|min:1|max:10',
+            'is_mandatory' => 'nullable|boolean',
         ]);
 
         $category = Category::findOrFail($id);
         $category->update([
             'name' => $request->name,
             'max_submissions_per_semester' => $request->max_submissions_per_semester,
+            'is_mandatory' => $request->boolean('is_mandatory'),
         ]);
 
         return response()->json(['message' => 'Category updated successfully!']);
@@ -204,16 +210,23 @@ class CategoryController extends Controller
             'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
             'points' => 'required|integer|min:0',
-            'description' => 'nullable|string'
+            'description' => 'nullable|string',
+            'is_mandatory' => 'nullable|boolean',
         ]);
 
-        Subcategory::create([
+        $payload = [
             'category_id' => $request->category_id,
             'name' => $request->name,
             'points' => $request->points,
             'description' => $request->description,
             'is_active' => true
-        ]);
+        ];
+
+        if (Schema::hasColumn('subcategories', 'is_mandatory')) {
+            $payload['is_mandatory'] = $request->boolean('is_mandatory');
+        }
+
+        Subcategory::create($payload);
 
         return response()->json(['message' => 'Subcategory added successfully!']);
     }
@@ -223,15 +236,22 @@ class CategoryController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'points' => 'required|integer|min:0',
-            'description' => 'nullable|string'
+            'description' => 'nullable|string',
+            'is_mandatory' => 'nullable|boolean',
         ]);
 
         $sub = Subcategory::findOrFail($id);
-        $sub->update([
+        $payload = [
             'name' => $request->name,
             'points' => $request->points,
             'description' => $request->description
-        ]);
+        ];
+
+        if (Schema::hasColumn('subcategories', 'is_mandatory')) {
+            $payload['is_mandatory'] = $request->boolean('is_mandatory');
+        }
+
+        $sub->update($payload);
 
         return response()->json(['message' => 'Subcategory updated successfully!']);
     }

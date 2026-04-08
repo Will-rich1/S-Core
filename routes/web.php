@@ -8,6 +8,9 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SCoreReportController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\FileProxyController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\NewPasswordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +23,11 @@ Route::middleware('guest')->group(function () {
     Route::get('/', [AuthController::class, 'showLoginForm']);
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->name('login.process');
+
+    Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+    Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
+    Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.store');
 });
 
 // --- 2. JALUR SETELAH LOGIN (Wajib Login) ---
@@ -53,6 +61,7 @@ Route::middleware(['auth'])->group(function () {
     // --- AREA ADMIN ---
     Route::get('/admin', [DashboardController::class, 'adminDashboard'])->name('admin.dashboard');
     Route::get('/admin/master-data', [DashboardController::class, 'adminMasterData'])->name('admin.master-data');
+    Route::get('/admin/perfect-data', [DashboardController::class, 'adminPerfectData'])->name('admin.perfect-data');
     Route::get('/admin/students/{studentId}/detail', [DashboardController::class, 'adminStudentDetail'])->name('admin.students.detail');
 
     // Approval / Rejection
@@ -73,6 +82,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/students/demote-semester', [UserController::class, 'demoteSemester'])->name('students.demote-semester');
     Route::post('/admin/students/{studentId}/academic-status', [UserController::class, 'updateAcademicStatus'])->name('students.update-academic-status');
     Route::post('/admin/students/academic-status/bulk', [UserController::class, 'bulkUpdateAcademicStatus'])->name('students.bulk-update-academic-status');
+    Route::post('/admin/students/{studentId}/reset-points', [UserController::class, 'resetStudentPoints'])->name('students.reset-points');
     // Admin: reset user password
     Route::post('/admin/users/{id}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
 
@@ -100,6 +110,7 @@ Route::middleware(['auth'])->group(function () {
     // --- S-CORE SETTINGS ROUTES ---
     Route::get('/api/settings/score', [SettingsController::class, 'getScoreSettings'])->name('settings.score.get');
     Route::post('/admin/settings/score', [SettingsController::class, 'updateScoreSettings'])->name('settings.score.update');
+    Route::post('/admin/settings/perfect-points', [SettingsController::class, 'updatePerfectPoints'])->name('settings.perfect-points.update');
     Route::get('/api/admin/settings', [SettingsController::class, 'getAllSettings'])->name('settings.all');
 
     // --- SECURITY PIN ROUTES ---
@@ -113,5 +124,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/student/{student_id}/report', [SCoreReportController::class, 'downloadReport'])->name('student.report.download');
     Route::get('/student/{student_id}/report/check', [SCoreReportController::class, 'checkEligibility'])->name('student.report.check');
     Route::get('/student/{student_id}/status', [SCoreReportController::class, 'getStatus'])->name('student.status');
+
+    // File preview/download proxy (Google Drive/local)
+    Route::get('/submissions/{submissionId}/file', [FileProxyController::class, 'serveFile'])->name('submissions.file.preview');
 
 });

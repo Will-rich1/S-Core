@@ -11,7 +11,7 @@
         <div class="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
                 <h1 class="text-2xl font-bold">Detail Mahasiswa</h1>
-                <p class="text-sm text-gray-600">Halaman detail terpisah untuk review lebih luas dan nyaman.</p>
+                
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <a href="/student/{{ $student['id'] }}/report/view" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-medium">
@@ -76,6 +76,7 @@
                                 'Belum Memenuhi' => 'bg-red-100 text-red-700',
                                 'Lulus' => 'bg-blue-100 text-blue-700',
                                 'Cuti' => 'bg-amber-100 text-amber-700',
+                                'Non Aktif' => 'bg-slate-200 text-slate-700',
                                 default => 'bg-gray-100 text-gray-700'
                             };
                         @endphp
@@ -93,6 +94,7 @@
                         <option value="active" {{ $student['academicStatus'] === 'active' ? 'selected' : '' }}>Aktif</option>
                         <option value="on_leave" {{ $student['academicStatus'] === 'on_leave' ? 'selected' : '' }}>Cuti</option>
                         <option value="graduated" {{ $student['academicStatus'] === 'graduated' ? 'selected' : '' }}>Lulus</option>
+                        <option value="non_active" {{ $student['academicStatus'] === 'non_active' ? 'selected' : '' }}>Non Aktif</option>
                     </select>
                     <button type="submit" class="w-full px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium">
                         Simpan Status
@@ -117,6 +119,21 @@
             <div class="rounded-xl bg-white border p-4 shadow-sm">
                 <p class="text-sm text-gray-500">Total Pengajuan</p>
                 <p class="text-2xl font-bold text-gray-800">{{ $student['totalSubmissions'] }}</p>
+            </div>
+        </div>
+
+        <div class="rounded-xl bg-white border p-4 shadow-sm mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <h3 class="font-semibold">Reset Poin Mahasiswa</h3>
+                    <p class="text-xs text-gray-500">Aksi ini hanya mengubah nilai poin submission lama menjadi 0. Judul, kategori, dan data pengajuan tetap ada.</p>
+                </div>
+                <form method="POST" action="{{ route('students.reset-points', ['studentId' => $student['id']]) }}" onsubmit="return confirm('Reset semua poin existing mahasiswa ini ke 0? Data pengajuan tetap tersimpan.');">
+                    @csrf
+                    <button type="submit" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium">
+                        Reset Semua Poin ke 0
+                    </button>
+                </form>
             </div>
         </div>
 
@@ -207,6 +224,28 @@
                                 </td>
                                 <td class="py-3 px-4">
                                     <div class="flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                            title="Lihat Detail"
+                                            data-preview-scope
+                                            data-title="{{ e($sub['title']) }}"
+                                            data-category="{{ e($sub['mainCategory']) }}"
+                                            data-subcategory="{{ e($sub['subcategory']) }}"
+                                            data-status="{{ e($submissionLabel) }}"
+                                            data-description="{{ e($sub['description'] ?? '-') }}"
+                                            data-points="{{ $sub['points'] ?? '-' }}"
+                                            data-activity-date="{{ e($sub['activityDate'] ?? '-') }}"
+                                            data-submitted-at="{{ e($sub['submittedAt'] ?? '-') }}"
+                                            data-file-url="{{ e($sub['fileUrl'] ?? '') }}"
+                                            data-certificate-name="{{ e($sub['certificateName'] ?? 'document.pdf') }}"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </button>
+
                                         @if($sub['status'] === 'Approved')
                                             <button
                                                 type="button"
@@ -246,6 +285,90 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <div class="rounded-xl bg-white border shadow-sm mt-6">
+            <div class="px-4 py-3 border-b bg-gray-50">
+                <h3 class="font-semibold">History Reset Poin</h3>
+                <p class="text-xs text-gray-500 mt-1">Admin tetap bisa melihat total poin sebelum reset dan daftar submission yang terdampak.</p>
+            </div>
+            <div class="p-4 space-y-4">
+                @forelse($resetHistories as $history)
+                    <div class="rounded-lg border bg-white overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-xs">
+                                <thead class="bg-gray-100 text-gray-600">
+                                    <tr>
+                                        <th class="text-left px-3 py-2">Kategori Utama</th>
+                                        <th class="text-left px-3 py-2">Subkategori</th>
+                                        <th class="text-left px-3 py-2">Judul</th>
+                                        <th class="text-left px-3 py-2">Deskripsi</th>
+                                        <th class="text-center px-3 py-2">Poin Sebelum Reset</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($history['snapshot'] as $item)
+                                        <tr class="border-t align-top">
+                                            <td class="px-3 py-2">{{ $item['main_category'] ?? '-' }}</td>
+                                            <td class="px-3 py-2">{{ $item['subcategory'] ?? '-' }}</td>
+                                            <td class="px-3 py-2 font-medium">{{ $item['title'] ?? 'Tanpa Judul' }}</td>
+                                            <td class="px-3 py-2">{{ $item['description'] ?? '-' }}</td>
+                                            <td class="px-3 py-2 text-center font-semibold text-amber-700">{{ number_format((float) ($item['points_before'] ?? 0), 2) }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="px-3 py-3 text-center text-gray-500">Detail reset tidak tersedia.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="border-t bg-gray-50 px-3 py-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-5 gap-3 text-sm">
+                                <div>
+                                    <p class="text-gray-500 text-xs">Waktu Reset</p>
+                                    <p class="font-medium text-gray-800">{{ $history['createdAt'] }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-xs">Admin</p>
+                                    <p class="font-medium text-gray-800">{{ $history['adminName'] }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-xs">Poin Sebelum Reset</p>
+                                    <p class="font-semibold text-amber-700">{{ number_format($history['totalBefore'], 2) }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-xs">Poin Sesudah Reset</p>
+                                    <p class="font-semibold text-green-700">{{ number_format($history['totalAfter'], 2) }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500 text-xs">Jumlah Data</p>
+                                    <p class="font-semibold text-gray-800">{{ $history['affectedSubmissions'] }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="py-6 text-center text-gray-500">Belum ada history reset poin untuk mahasiswa ini.</div>
+                @endforelse
+            </div>
+            <div class="px-4 py-3 border-t bg-gray-50">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                    <div class="rounded-lg border bg-white px-3 py-2">
+                        <p class="text-gray-500 text-xs">Total Event Reset</p>
+                        <p class="font-semibold text-gray-800">{{ $resetHistorySummary['eventsCount'] }}</p>
+                    </div>
+                    <div class="rounded-lg border bg-white px-3 py-2">
+                        <p class="text-gray-500 text-xs">Total Data Terdampak</p>
+                        <p class="font-semibold text-gray-800">{{ $resetHistorySummary['totalAffectedSubmissions'] }}</p>
+                    </div>
+                    <div class="rounded-lg border bg-white px-3 py-2">
+                        <p class="text-gray-500 text-xs">Total Poin Yang Di-reset</p>
+                        <p class="font-semibold text-amber-700">{{ number_format($resetHistorySummary['totalPointsReset'], 2) }}</p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -301,13 +424,87 @@
                 </form>
             </div>
         </div>
+
+        <div id="previewScopeModal" class="hidden fixed inset-0 bg-black/50 z-50 items-center justify-center p-4">
+            <div class="bg-white w-full max-w-4xl rounded-xl shadow-xl overflow-hidden">
+                <div class="px-5 py-4 border-b flex items-center justify-between">
+                    <h4 class="text-lg font-semibold">Detail Pengajuan</h4>
+                    <button type="button" id="closePreviewScopeModal" class="text-gray-500 hover:text-gray-700 text-xl leading-none">&times;</button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
+                    <div class="p-5 border-r bg-gray-50">
+                        <div class="space-y-3 text-sm">
+                            <div>
+                                <p class="text-gray-500">Judul</p>
+                                <p id="previewTitle" class="font-semibold">-</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <p class="text-gray-500">Kategori</p>
+                                    <p id="previewCategory" class="font-medium">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500">Subkategori</p>
+                                    <p id="previewSubcategory" class="font-medium">-</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <p class="text-gray-500">Status</p>
+                                    <p id="previewStatus" class="font-medium">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500">Poin</p>
+                                    <p id="previewPoints" class="font-medium">-</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <p class="text-gray-500">Tanggal Kegiatan</p>
+                                    <p id="previewActivityDate" class="font-medium">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-gray-500">Dikirim</p>
+                                    <p id="previewSubmittedAt" class="font-medium">-</p>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-gray-500">Deskripsi</p>
+                                <p id="previewDescription" class="font-medium whitespace-pre-wrap">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-5">
+                        <p class="text-sm text-gray-500 mb-2">File Bukti</p>
+                        <p id="previewCertificateName" class="text-sm font-medium text-gray-700 mb-3">-</p>
+
+                        <div id="previewFileWrapper" class="hidden border rounded-lg overflow-hidden h-[420px] bg-white">
+                            <iframe id="previewFileFrame" src="" class="w-full h-full" title="Preview File"></iframe>
+                        </div>
+
+                        <div id="previewFileEmpty" class="border rounded-lg h-[420px] flex items-center justify-center text-sm text-gray-500 bg-gray-50">
+                            File tidak tersedia untuk dipreview.
+                        </div>
+
+                        <a id="previewOpenNewTab" href="#" target="_blank" rel="noopener noreferrer" class="hidden mt-3 inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium">
+                            Buka di Tab Baru
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         const editButtons = document.querySelectorAll('[data-edit-scope]');
+        const previewButtons = document.querySelectorAll('[data-preview-scope]');
         const modal = document.getElementById('editScopeModal');
+        const previewModal = document.getElementById('previewScopeModal');
         const closeModalBtn = document.getElementById('closeEditScopeModal');
         const cancelModalBtn = document.getElementById('cancelEditScopeModal');
+        const closePreviewModalBtn = document.getElementById('closePreviewScopeModal');
         const form = document.getElementById('editScopeForm');
 
         const modalScopeTitle = document.getElementById('modalScopeTitle');
@@ -319,6 +516,20 @@
         const modalAdminReason = document.getElementById('modalAdminReason');
         const modalReasonCombined = document.getElementById('modalReasonCombined');
 
+        const previewTitle = document.getElementById('previewTitle');
+        const previewCategory = document.getElementById('previewCategory');
+        const previewSubcategory = document.getElementById('previewSubcategory');
+        const previewStatus = document.getElementById('previewStatus');
+        const previewDescription = document.getElementById('previewDescription');
+        const previewPoints = document.getElementById('previewPoints');
+        const previewActivityDate = document.getElementById('previewActivityDate');
+        const previewSubmittedAt = document.getElementById('previewSubmittedAt');
+        const previewCertificateName = document.getElementById('previewCertificateName');
+        const previewFileWrapper = document.getElementById('previewFileWrapper');
+        const previewFileFrame = document.getElementById('previewFileFrame');
+        const previewFileEmpty = document.getElementById('previewFileEmpty');
+        const previewOpenNewTab = document.getElementById('previewOpenNewTab');
+
         const openModal = () => {
             modal.classList.remove('hidden');
             modal.classList.add('flex');
@@ -327,6 +538,17 @@
         const closeModal = () => {
             modal.classList.add('hidden');
             modal.classList.remove('flex');
+        };
+
+        const openPreviewModal = () => {
+            previewModal.classList.remove('hidden');
+            previewModal.classList.add('flex');
+        };
+
+        const closePreviewModal = () => {
+            previewModal.classList.add('hidden');
+            previewModal.classList.remove('flex');
+            previewFileFrame.src = '';
         };
 
         editButtons.forEach((button) => {
@@ -350,9 +572,49 @@
         closeModalBtn.addEventListener('click', closeModal);
         cancelModalBtn.addEventListener('click', closeModal);
 
+        previewButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const fileUrl = button.dataset.fileUrl || '';
+
+                previewTitle.textContent = button.dataset.title || '-';
+                previewCategory.textContent = button.dataset.category || '-';
+                previewSubcategory.textContent = button.dataset.subcategory || '-';
+                previewStatus.textContent = button.dataset.status || '-';
+                previewDescription.textContent = button.dataset.description || '-';
+                previewPoints.textContent = button.dataset.points || '-';
+                previewActivityDate.textContent = button.dataset.activityDate || '-';
+                previewSubmittedAt.textContent = button.dataset.submittedAt || '-';
+                previewCertificateName.textContent = button.dataset.certificateName || '-';
+
+                if (fileUrl) {
+                    previewFileFrame.src = fileUrl;
+                    previewFileWrapper.classList.remove('hidden');
+                    previewFileEmpty.classList.add('hidden');
+                    previewOpenNewTab.href = fileUrl;
+                    previewOpenNewTab.classList.remove('hidden');
+                } else {
+                    previewFileFrame.src = '';
+                    previewFileWrapper.classList.add('hidden');
+                    previewFileEmpty.classList.remove('hidden');
+                    previewOpenNewTab.href = '#';
+                    previewOpenNewTab.classList.add('hidden');
+                }
+
+                openPreviewModal();
+            });
+        });
+
+        closePreviewModalBtn.addEventListener('click', closePreviewModal);
+
         modal.addEventListener('click', (event) => {
             if (event.target === modal) {
                 closeModal();
+            }
+        });
+
+        previewModal.addEventListener('click', (event) => {
+            if (event.target === previewModal) {
+                closePreviewModal();
             }
         });
 

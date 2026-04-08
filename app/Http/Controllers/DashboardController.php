@@ -6,15 +6,30 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash; // Penting untuk cek password
 use App\Models\Submission;
+use App\Models\StudentPointResetHistory;
 use App\Models\Category;
 use App\Models\User;
 use App\Services\GoogleDriveService;
 use Carbon\Carbon;
 use App\Helpers\SCoreHelper;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Validator;
 
 class DashboardController extends Controller
 {
+    private function resolveSubmissionFileUrl($submission): ?string
+    {
+        if (!empty($submission->certificate_path)) {
+            return route('submissions.file.preview', ['submissionId' => $submission->id]);
+        }
+
+        if (!empty($submission->certificate_url)) {
+            return $submission->certificate_url;
+        }
+
+        return null;
+    }
+
     private function resolveStudentYear($year, $studentId): ?string
     {
         if (!empty($year)) {
@@ -70,6 +85,10 @@ class DashboardController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
+        if (SCoreHelper::isStudentMaintenanceModeEnabled()) {
+            return response()->view('maintenance-student', [], 503);
+        }
+
         $user = Auth::user();
         $resolvedYear = $this->resolveStudentYear($user->year, $user->student_id);
         $user->year = $resolvedYear;
@@ -90,19 +109,9 @@ class DashboardController extends Controller
             ->get();
 
         // Mapping Data untuk View Mahasiswa
-        $googleDriveService = app(GoogleDriveService::class);
-        $activities = $rawActivities->map(function($item) use ($googleDriveService) {
-            // Generate viewing URL - prioritas: certificate_url > generated from path
-            if ($item->certificate_url) {
-                $fileUrl = $item->certificate_url;
-            } elseif ($item->certificate_path && !empty($item->certificate_path)) {
-                // Generate URL dari certificate_path dan storage_type
-                $storageType = $item->storage_type ?? 'local';
-                $fileUrl = $googleDriveService->getPublicUrl($item->certificate_path, $storageType);
-            } else {
-                $fileUrl = null;
-            }
-            
+        $activities = $rawActivities->map(function($item) {
+            $fileUrl = $this->resolveSubmissionFileUrl($item);
+
             return [
                 'id'              => $item->id,
                 'mainCategory'    => $item->category->name ?? '-', 
@@ -151,6 +160,7 @@ class DashboardController extends Controller
                     'name' => $sub->name,
                     'points' => $sub->points,
                     'description' => $sub->description,
+                    'is_mandatory' => (bool) ($sub->is_mandatory ?? false),
                     'approvedCount' => (int) ($approvedCountBySubcategoryId[$sub->id] ?? 0),
                 ];
             })->values();
@@ -182,11 +192,18 @@ class DashboardController extends Controller
             return [
                 'id' => $cat->id,
                 'name' => $cat->name,
+                'is_mandatory' => (bool) ($cat->is_mandatory ?? false),
                 'subcategories' => $subcategories,
             ];
         });
 
-        return view('dashboard', compact('user', 'activities', 'stats', 'categoryGroups'));
+        $submissionDateSettings = [
+            'mode' => SCoreHelper::getSubmissionDateRuleMode(),
+            'rangeDays' => SCoreHelper::getSubmissionDateRangeDays(),
+            'startDate' => SCoreHelper::getSubmissionStartDate(),
+        ];
+
+        return view('dashboard', compact('user', 'activities', 'stats', 'categoryGroups', 'submissionDateSettings'));
     }
 
     /**
@@ -208,23 +225,13 @@ class DashboardController extends Controller
         ];
 
         // 2. Ambil SEMUA Submission untuk direview (Tab Review)
-        $googleDriveService = app(GoogleDriveService::class);
         $hasAcademicStatusColumn = Schema::hasColumn('users', 'academic_status');
         $submissions = Submission::with(['student', 'category', 'subcategory'])
             ->orderBy('created_at', 'desc')
             ->get()
-            ->map(function ($item) use ($googleDriveService, $hasAcademicStatusColumn) {
+            ->map(function ($item) use ($hasAcademicStatusColumn) {
                 $year = $this->resolveStudentYear($item->student->year ?? null, $item->student->student_id ?? null);
-
-                // Generate viewing URL
-                if ($item->certificate_url) {
-                    $fileUrl = $item->certificate_url;
-                } elseif ($item->certificate_path && !empty($item->certificate_path)) {
-                    $storageType = $item->storage_type ?? 'local';
-                    $fileUrl = $googleDriveService->getPublicUrl($item->certificate_path, $storageType);
-                } else {
-                    $fileUrl = null;
-                }
+                $fileUrl = $this->resolveSubmissionFileUrl($item);
 
                 return [
                     'id'            => $item->id,
@@ -233,7 +240,7 @@ class DashboardController extends Controller
                     'major'         => $item->student->major ?? '-',
                     'year'          => $year, 
                     'academicStatus'=> $hasAcademicStatusColumn
-                        ? (in_array($item->student->academic_status ?? 'active', ['active', 'on_leave', 'graduated'], true)
+                        ? (in_array($item->student->academic_status ?? 'active', ['active', 'on_leave', 'graduated', 'non_active'], true)
                             ? $item->student->academic_status
                             : 'active')
                         : 'active',
@@ -264,15 +271,12 @@ class DashboardController extends Controller
             $studentsPerPage = 25;
         }
 
-        $studentSearch = trim((string) $request->query('student_search', ''));
-        $majorFilter = (string) $request->query('major_filter', '');
-        $yearFilterMode = (string) $request->query('year_mode', 'all');
-        $yearFilter = trim((string) $request->query('year_filter', ''));
+        $studentSearch = '';
+        $majorFilter = '';
+        $yearFilterMode = 'all';
+        $yearFilter = '';
 
-        $studentsPage = (int) $request->query('students_page', 1);
-        if ($studentsPage < 1) {
-            $studentsPage = 1;
-        }
+        $studentsPage = 1;
 
         $minPoints = SCoreHelper::getMinPointsRequired();
         $minCategories = SCoreHelper::getMinCategoriesRequired();
@@ -285,37 +289,16 @@ class DashboardController extends Controller
             });
         }
 
-        if ($studentSearch !== '') {
-            $studentsQuery->where(function ($q) use ($studentSearch) {
-                $q->where('name', 'like', '%' . $studentSearch . '%')
-                    ->orWhere('student_id', 'like', '%' . $studentSearch . '%');
-            });
-        }
-
-        if ($majorFilter !== '') {
-            $studentsQuery->where('major', $majorFilter);
-        }
-
-        if ($yearFilterMode === 'specific' && $yearFilter !== '') {
-            $studentsQuery->where(function ($q) use ($yearFilter) {
-                $q->where('year', $yearFilter)
-                    ->orWhere(function ($q2) use ($yearFilter) {
-                        $q2->whereNull('year')
-                            ->whereRaw("CONCAT('20', SUBSTRING(CAST(student_id AS CHAR), 1, 2)) = ?", [$yearFilter]);
-                    });
-            });
-        }
-
-        $studentsPaginator = $studentsQuery
+        $studentCollection = $studentsQuery
             ->with(['submissions' => function($q) {
                 // Kita ambil submissions lengkap untuk modal detail history
                 $q->with('category', 'subcategory')->orderBy('created_at', 'desc'); 
             }])
             ->orderBy('student_id')
-            ->paginate($studentsPerPage, ['*'], 'students_page', $studentsPage);
+            ->get();
 
-        $students = $studentsPaginator->getCollection()
-            ->map(function ($student) use ($googleDriveService, $minPoints, $minCategories, $hasAcademicStatusColumn) {
+        $students = $studentCollection
+            ->map(function ($student) use ($minPoints, $minCategories, $hasAcademicStatusColumn) {
                 // Ambil hanya yang Approved untuk perhitungan poin total
                 $approvedSubmissions = $student->submissions->where('status', 'Approved');
                 
@@ -343,7 +326,7 @@ class DashboardController extends Controller
                 $requirementsMet = ($approvedPoints >= $minPoints) && (count($categoryBreakdown) >= $studentMinCategories);
 
                 $academicStatus = $hasAcademicStatusColumn
-                    ? (in_array($student->academic_status, ['active', 'on_leave', 'graduated'], true)
+                    ? (in_array($student->academic_status, ['active', 'on_leave', 'graduated', 'non_active'], true)
                         ? $student->academic_status
                         : 'active')
                     : 'active';
@@ -351,6 +334,7 @@ class DashboardController extends Controller
                 $finalStatus = match ($academicStatus) {
                     'on_leave' => 'Cuti',
                     'graduated' => 'Lulus',
+                    'non_active' => 'Non Aktif',
                     default => $requirementsMet ? 'Memenuhi' : 'Belum Memenuhi',
                 };
 
@@ -369,15 +353,8 @@ class DashboardController extends Controller
                     'finalStatus'      => $finalStatus,
 
                     // DATA UNTUK MODAL VIEW DETAILS (HISTORY)
-                    'submissions_list' => $student->submissions->map(function($sub) use ($googleDriveService) {
-                        if ($sub->certificate_url) {
-                            $fileUrl = $sub->certificate_url;
-                        } elseif ($sub->certificate_path && !empty($sub->certificate_path)) {
-                            $storageType = $sub->storage_type ?? 'local';
-                            $fileUrl = $googleDriveService->getPublicUrl($sub->certificate_path, $storageType);
-                        } else {
-                            $fileUrl = null;
-                        }
+                    'submissions_list' => $student->submissions->map(function($sub) {
+                        $fileUrl = $this->resolveSubmissionFileUrl($sub);
 
                         return [
                             'id'          => $sub->id, // ID Unik untuk Key AlpineJS
@@ -421,14 +398,20 @@ class DashboardController extends Controller
             ->sortDesc()
             ->values();
 
+        $studentsTotal = $students->count();
+        $studentsLastPage = max(1, (int) ceil($studentsTotal / max(1, $studentsPerPage)));
+        $studentsCurrentPage = min(max(1, $studentsPage), $studentsLastPage);
+        $studentsFrom = $studentsTotal > 0 ? (($studentsCurrentPage - 1) * $studentsPerPage) + 1 : 0;
+        $studentsTo = min($studentsCurrentPage * $studentsPerPage, $studentsTotal);
+
         $studentsPagination = [
-            'currentPage' => $studentsPaginator->currentPage(),
-            'lastPage' => $studentsPaginator->lastPage(),
-            'perPage' => $studentsPaginator->perPage(),
-            'total' => $studentsPaginator->total(),
-            'from' => $studentsPaginator->firstItem() ?? 0,
-            'to' => $studentsPaginator->lastItem() ?? 0,
-            'hasMorePages' => $studentsPaginator->hasMorePages(),
+            'currentPage' => $studentsCurrentPage,
+            'lastPage' => $studentsLastPage,
+            'perPage' => $studentsPerPage,
+            'total' => $studentsTotal,
+            'from' => $studentsFrom,
+            'to' => $studentsTo,
+            'hasMorePages' => $studentsCurrentPage < $studentsLastPage,
         ];
 
         $studentsFilters = [
@@ -453,7 +436,12 @@ class DashboardController extends Controller
         // Get S-Core settings
         $scoreSettings = [
             'minPoints' => $minPoints,
-            'minCategories' => $minCategories
+            'minCategories' => $minCategories,
+            'perfectMinPoints' => SCoreHelper::getPerfectMinPointsRequired(),
+            'submissionDateRuleMode' => SCoreHelper::getSubmissionDateRuleMode(),
+            'submissionDateRangeDays' => SCoreHelper::getSubmissionDateRangeDays(),
+            'submissionStartDate' => SCoreHelper::getSubmissionStartDate(),
+            'maintenanceMode' => SCoreHelper::isStudentMaintenanceModeEnabled(),
         ];
 
         return view('admin_review', compact('submissions', 'stats', 'categories', 'students', 'studentStats', 'scoreSettings', 'studentsPagination', 'availableStudentYears', 'studentsFilters'));
@@ -471,8 +459,6 @@ class DashboardController extends Controller
                 $q->with('category', 'subcategory')->orderBy('created_at', 'desc');
             }])
             ->firstOrFail();
-
-        $googleDriveService = app(GoogleDriveService::class);
 
         $year = $this->resolveStudentYear($student->year, $student->student_id);
         $semester = $this->calculateSemesterFromYear($year, (int) ($student->semester_offset ?? 0));
@@ -499,25 +485,19 @@ class DashboardController extends Controller
         $studentMinCategories = SCoreHelper::getMinCategoriesRequiredForYear($year, $student->student_id, $defaultMinCategories);
         $requirementsMet = $approvedPoints >= $minPoints && count($categoryBreakdown) >= $studentMinCategories;
 
-        $academicStatus = in_array($student->academic_status, ['active', 'on_leave', 'graduated'], true)
+        $academicStatus = in_array($student->academic_status, ['active', 'on_leave', 'graduated', 'non_active'], true)
             ? $student->academic_status
             : 'active';
 
         $finalStatus = match ($academicStatus) {
             'on_leave' => 'Cuti',
             'graduated' => 'Lulus',
+            'non_active' => 'Non Aktif',
             default => $requirementsMet ? 'Memenuhi' : 'Belum Memenuhi',
         };
 
-        $submissions = $student->submissions->map(function ($sub) use ($googleDriveService) {
-            if ($sub->certificate_url) {
-                $fileUrl = $sub->certificate_url;
-            } elseif ($sub->certificate_path && !empty($sub->certificate_path)) {
-                $storageType = $sub->storage_type ?? 'local';
-                $fileUrl = $googleDriveService->getPublicUrl($sub->certificate_path, $storageType);
-            } else {
-                $fileUrl = null;
-            }
+        $submissions = $student->submissions->map(function ($sub) {
+            $fileUrl = $this->resolveSubmissionFileUrl($sub);
 
             return [
                 'id' => $sub->id,
@@ -550,12 +530,40 @@ class DashboardController extends Controller
             'requirementsMet' => $requirementsMet,
         ];
 
+        $resetHistories = collect();
+        if (Schema::hasTable('student_point_reset_histories')) {
+            $resetHistories = StudentPointResetHistory::query()
+                ->with('admin:id,name')
+                ->where('student_id', $student->id)
+                ->orderByDesc('created_at')
+                ->get()
+                ->map(function ($history) {
+                    return [
+                        'id' => $history->id,
+                        'createdAt' => $history->created_at ? $history->created_at->format('d M Y H:i') : '-',
+                        'adminName' => $history->admin->name ?? 'Admin',
+                        'totalBefore' => (float) $history->total_points_before,
+                        'totalAfter' => (float) $history->total_points_after,
+                        'affectedSubmissions' => (int) $history->affected_submissions,
+                        'snapshot' => is_array($history->snapshot) ? $history->snapshot : [],
+                    ];
+                })->values();
+        }
+
+        $resetHistorySummary = [
+            'eventsCount' => $resetHistories->count(),
+            'totalPointsReset' => round((float) $resetHistories->sum('totalBefore'), 2),
+            'totalAffectedSubmissions' => (int) $resetHistories->sum('affectedSubmissions'),
+        ];
+
         return view('admin_student_detail', [
             'student' => $studentData,
             'submissions' => $submissions,
             'categoryBreakdown' => $categoryBreakdown,
             'minPoints' => $minPoints,
             'minCategories' => $studentMinCategories,
+            'resetHistories' => $resetHistories,
+            'resetHistorySummary' => $resetHistorySummary,
         ]);
     }
 
@@ -617,7 +625,7 @@ class DashboardController extends Controller
             $requirementsMet = $approvedPoints >= $minPoints && $categoryCount >= $minCategories;
 
             $academicStatus = $hasAcademicStatusColumn
-                ? (in_array($student->academic_status, ['active', 'on_leave', 'graduated'], true)
+                ? (in_array($student->academic_status, ['active', 'on_leave', 'graduated', 'non_active'], true)
                     ? $student->academic_status
                     : 'active')
                 : 'active';
@@ -625,6 +633,7 @@ class DashboardController extends Controller
             $finalStatus = match ($academicStatus) {
                 'on_leave' => 'Cuti',
                 'graduated' => 'Lulus',
+                'non_active' => 'Non Aktif',
                 default => $requirementsMet ? 'Memenuhi' : 'Belum Memenuhi',
             };
 
@@ -650,6 +659,7 @@ class DashboardController extends Controller
                     'not_met' => $row['finalStatus'] === 'Belum Memenuhi',
                     'graduated' => $row['finalStatus'] === 'Lulus',
                     'on_leave' => $row['finalStatus'] === 'Cuti',
+                    'non_active' => $row['finalStatus'] === 'Non Aktif',
                     default => true,
                 };
             })->values();
@@ -673,6 +683,110 @@ class DashboardController extends Controller
                 'major' => $major,
                 'year' => $year,
                 'status' => $status,
+            ],
+        ]);
+    }
+
+    public function adminPerfectData(Request $request)
+    {
+        if (Auth::user()->role !== 'admin') {
+            return redirect()->route('dashboard');
+        }
+
+        $search = trim((string) $request->query('search', ''));
+        $major = trim((string) $request->query('major', ''));
+        $year = trim((string) $request->query('year', ''));
+
+        $hasAcademicStatusColumn = Schema::hasColumn('users', 'academic_status');
+        $perfectMinPoints = (int) SCoreHelper::getPerfectMinPointsRequired();
+        $defaultMinCategories = SCoreHelper::getMinCategoriesRequired();
+
+        $query = User::where('role', 'student')
+            ->with(['submissions' => function ($q) {
+                $q->with('category')->orderBy('created_at', 'desc');
+            }]);
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('student_id', 'like', '%' . $search . '%');
+            });
+        }
+
+        if ($major !== '') {
+            $query->where('major', $major);
+        }
+
+        if ($year !== '') {
+            $query->where(function ($q) use ($year) {
+                $q->where('year', $year)
+                    ->orWhere(function ($q2) use ($year) {
+                        $q2->whereNull('year')
+                            ->whereRaw("CONCAT('20', SUBSTRING(CAST(student_id AS CHAR), 1, 2)) = ?", [$year]);
+                    });
+            });
+        }
+
+        $rows = $query->orderBy('student_id')->get()->map(function ($student) use ($hasAcademicStatusColumn, $defaultMinCategories, $perfectMinPoints) {
+            $resolvedYear = $this->resolveStudentYear($student->year, $student->student_id);
+            $semester = $this->calculateSemesterFromYear($resolvedYear, (int) ($student->semester_offset ?? 0));
+
+            $approvedSubmissions = $student->submissions->where('status', 'Approved');
+            $approvedPoints = (float) $approvedSubmissions->sum('points_awarded');
+
+            $categoryCount = $approvedSubmissions
+                ->pluck('student_category_id')
+                ->filter()
+                ->unique()
+                ->count();
+
+            $minCategories = SCoreHelper::getMinCategoriesRequiredForYear($resolvedYear, $student->student_id, $defaultMinCategories);
+            $categoriesMet = $categoryCount >= $minCategories;
+            $pointsMet = $approvedPoints >= $perfectMinPoints;
+
+            $academicStatus = $hasAcademicStatusColumn
+                ? (in_array($student->academic_status, ['active', 'on_leave', 'graduated', 'non_active'], true)
+                    ? $student->academic_status
+                    : 'active')
+                : 'active';
+
+            return [
+                'id' => $student->student_id,
+                'name' => $student->name,
+                'major' => $student->major ?? '-',
+                'year' => $resolvedYear,
+                'semester' => $semester,
+                'approvedPoints' => $approvedPoints,
+                'approvedCount' => $approvedSubmissions->count(),
+                'pendingCount' => $student->submissions->where('status', 'Waiting')->count(),
+                'totalSubmissions' => $student->submissions->count(),
+                'categoryCount' => $categoryCount,
+                'requiredCategories' => $minCategories,
+                'pointsMet' => $pointsMet,
+                'categoriesMet' => $categoriesMet,
+                'isPerfect' => $pointsMet && $categoriesMet && $academicStatus === 'active',
+                'academicStatus' => $academicStatus,
+            ];
+        })->filter(fn ($row) => $row['isPerfect'])->values();
+
+        $availableYears = User::where('role', 'student')
+            ->get(['year', 'student_id'])
+            ->map(function ($student) {
+                return $this->resolveStudentYear($student->year, $student->student_id);
+            })
+            ->filter()
+            ->unique()
+            ->sortDesc()
+            ->values();
+
+        return view('admin_perfect_data', [
+            'rows' => $rows,
+            'perfectMinPoints' => $perfectMinPoints,
+            'availableYears' => $availableYears,
+            'filters' => [
+                'search' => $search,
+                'major' => $major,
+                'year' => $year,
             ],
         ]);
     }
@@ -708,7 +822,7 @@ class DashboardController extends Controller
     public function bulkScore(Request $request)
     {
         // Validasi input
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'selectedMajor' => 'nullable|string|in:STI,BD,KWU',
             'selectedYear' => 'nullable|string',
             'selectedShift' => 'nullable|string|in:siang,sore',
@@ -717,8 +831,18 @@ class DashboardController extends Controller
             'activityTitle' => 'required|string|max:500',
             'description' => 'required|string',
             'activityDate' => 'required|date',
-            'certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'certificate' => 'nullable|file|mimes:pdf|max:10240',
+        ], [
+            'certificate.mimes' => 'Pengumpulan bukti hanya melalui PDF.',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
 
         try {
             // 1. Build query untuk target students

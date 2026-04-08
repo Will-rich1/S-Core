@@ -38,7 +38,7 @@
 <body class="bg-gray-50">
     <div class="login-container" x-data="loginForm()">
         <!-- Left Side - Campus Image (Hidden on mobile, visible on large screens) -->
-        <div class="hidden lg:block lg:w-1/2 bg-cover bg-center bg-blue-600" style="background-image: url('/images/campus.png')"></div>
+        <div class="hidden lg:block lg:w-1/2 bg-cover bg-center bg-blue-600" style="background-image: url('/images/Campus.jpeg')"></div>
 
         <!-- Right Side - Login Form -->
         <div class="w-full lg:w-1/2 flex flex-col justify-center items-center min-h-screen lg:min-h-auto px-4 py-8 sm:py-12 lg:py-0">
@@ -53,6 +53,12 @@
                 <!-- Login Form -->
                 <form action="/login" method="POST" @submit.prevent="handleSubmit" class="space-y-4">
                     @csrf
+
+                    @if(session('status'))
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                            <p class="text-green-700 text-sm">{{ session('status') }}</p>
+                        </div>
+                    @endif
                     
                     <!-- Email Input -->
                     <div>
@@ -97,6 +103,11 @@
                             </button>
                         </div>
                         <p x-show="passwordError" class="text-red-500 text-xs mt-1.5">Password must be filled in</p>
+                        <div class="mt-2 text-right">
+                            <a href="{{ route('password.request') }}" class="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium">
+                                Lupa password?
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Error Messages -->

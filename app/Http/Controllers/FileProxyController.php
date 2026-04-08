@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Submission;
 
@@ -15,6 +15,16 @@ class FileProxyController extends Controller
     public function serveFile($submissionId)
     {
         $submission = Submission::findOrFail($submissionId);
+
+        if (empty($submission->certificate_path)) {
+            abort(404, 'File not found');
+        }
+
+        $user = Auth::user();
+        $isOwner = (int) ($submission->student_id ?? 0) === (int) ($user->id ?? 0);
+        if (($user->role ?? null) !== 'admin' && !$isOwner) {
+            abort(403, 'Unauthorized');
+        }
         
         // Jika file di Google Drive
         if ($submission->storage_type === 'google') {
@@ -24,10 +34,12 @@ class FileProxyController extends Controller
                 $fileId = $submission->certificate_path;
                 
                 // Get file metadata untuk ukuran
-                $file = $service->files->get($fileId, ['fields' => 'size,mimeType']);
+                $file = $service->files->get($fileId, ['fields' => 'size,mimeType,name']);
                 
                 // Stream file langsung tanpa download ke memory
                 $response = $service->files->get($fileId, ['alt' => 'media']);
+                $mimeType = $file->mimeType ?: 'application/pdf';
+                $fileName = $submission->certificate_original_name ?: ($file->name ?: 'document.pdf');
                 
                 return response()->stream(
                     function () use ($response) {
@@ -39,9 +51,9 @@ class FileProxyController extends Controller
                     },
                     200,
                     [
-                        'Content-Type' => 'application/pdf',
-                        'Content-Disposition' => 'inline; filename="' . $submission->certificate_original_name . '"',
-                        'Content-Length' => $file->size,
+                        'Content-Type' => $mimeType,
+                        'Content-Disposition' => 'inline; filename="' . $fileName . '"',
+                        'Content-Length' => (string) ((int) ($file->size ?? 0)),
                         'Cache-Control' => 'public, max-age=3600',
                         'X-Frame-Options' => 'SAMEORIGIN',
                         'Accept-Ranges' => 'bytes',
@@ -56,7 +68,7 @@ class FileProxyController extends Controller
         
         // Jika file local
         if (Storage::disk('public')->exists($submission->certificate_path)) {
-            return response()->file(storage_path('app/public/' . $submission->certificate_path));
+            return response()->file(Storage::disk('public')->path($submission->certificate_path));
         }
         
         abort(404, 'File not found');

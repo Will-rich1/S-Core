@@ -6,8 +6,10 @@ use App\Models\Submission;
 use App\Models\Category;
 use App\Models\Subcategory;
 use App\Services\GoogleDriveService;
+use App\Helpers\SCoreHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class SubmissionController extends Controller
 {
@@ -17,14 +19,30 @@ class SubmissionController extends Controller
     public function store(Request $request)
     {
         // 1. Validasi Input
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'title'             => 'required|string|max:255',
             'description'       => 'required|string',
             'activity_date'     => 'required|date',
             'mainCategory'      => 'required|string', // Dikirim sebagai Nama Kategori
             'subcategory'       => 'required|string', // Dikirim sebagai Nama Subkategori
-            'certificate_file'  => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240', // Max 10MB
+            'certificate_file'  => 'required|file|mimes:pdf|max:10240', // Max 10MB
+        ], [
+            'certificate_file.mimes' => 'Pengumpulan bukti hanya melalui PDF.',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $dateValidation = SCoreHelper::validateSubmissionActivityDate((string) $request->activity_date);
+        if (!$dateValidation['valid']) {
+            return response()->json([
+                'message' => $dateValidation['message']
+            ], 422);
+        }
 
         try {
             $currentSemesterCycle = max(0, (int) (Auth::user()->semester_offset ?? 0));
@@ -128,14 +146,23 @@ class SubmissionController extends Controller
             return response()->json(['message' => 'Submission cannot be edited. Please delete and resubmit if needed.'], 403);
 
             // Validasi (File bersifat nullable/opsional disini)
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'title'             => 'required|string|max:255',
                 'description'       => 'required|string',
                 'activity_date'     => 'required|date',
                 'mainCategory'      => 'required|string',
                 'subcategory'       => 'required|string',
-                'certificate_file'  => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'certificate_file'  => 'nullable|file|mimes:pdf|max:10240',
+            ], [
+                'certificate_file.mimes' => 'Pengumpulan bukti hanya melalui PDF.',
             ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => $validator->errors()->first(),
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
 
             // Cari ID Kategori Baru (jika user mengubah kategori)
             $category = Category::where('name', $request->mainCategory)->first();

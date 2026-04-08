@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Submission;
+use App\Models\StudentPointResetHistory;
 use App\Models\Category;
 use App\Models\Subcategory;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -115,6 +117,84 @@ class UserController extends Controller
         ]);
     }
 
+
+    // Admin reset semua poin existing milik 1 mahasiswa menjadi 0 (tanpa menghapus data submission)
+    public function resetStudentPoints(Request $request, $studentId)
+    {
+        if (!Auth::user() || Auth::user()->role !== 'admin') {
+            return redirect()->back()->with('error', 'Hanya admin yang dapat melakukan reset poin.');
+        }
+
+        if (!Schema::hasTable('student_point_reset_histories')) {
+            return redirect()->back()->with('error', 'Fitur reset poin belum siap. Jalankan migrate terlebih dahulu.');
+        }
+
+        $student = User::where('role', 'student')
+            ->where('student_id', $studentId)
+            ->first();
+
+        if (!$student) {
+            return redirect()->back()->with('error', 'Mahasiswa tidak ditemukan.');
+        }
+
+        $submissionsToReset = Submission::query()
+            ->with(['category:id,name', 'subcategory:id,name'])
+            ->where('student_id', $student->id)
+            ->whereNotNull('points_awarded')
+            ->where('points_awarded', '>', 0)
+            ->orderBy('created_at')
+            ->get();
+
+        if ($submissionsToReset->isEmpty()) {
+            return redirect()->back()->with('success', 'Tidak ada poin yang perlu di-reset.');
+        }
+
+        $totalBefore = round((float) $submissionsToReset->sum('points_awarded'), 2);
+
+        $snapshot = $submissionsToReset->map(function ($submission) {
+            $activityDate = null;
+            if (!empty($submission->activity_date)) {
+                try {
+                    $activityDate = Carbon::parse($submission->activity_date)->format('Y-m-d');
+                } catch (\Throwable $e) {
+                    $activityDate = null;
+                }
+            }
+
+            return [
+                'submission_id' => $submission->id,
+                'main_category' => $submission->category->name ?? '-',
+                'subcategory' => $submission->subcategory->name ?? '-',
+                'title' => $submission->title,
+                'description' => $submission->description ?? '-',
+                'activity_date' => $activityDate,
+                'status' => $submission->status,
+                'points_before' => round((float) $submission->points_awarded, 2),
+            ];
+        })->values()->all();
+
+        DB::transaction(function () use ($student, $submissionsToReset, $totalBefore, $snapshot) {
+            StudentPointResetHistory::create([
+                'student_id' => $student->id,
+                'admin_id' => Auth::id(),
+                'total_points_before' => $totalBefore,
+                'total_points_after' => 0,
+                'affected_submissions' => $submissionsToReset->count(),
+                'snapshot' => $snapshot,
+            ]);
+
+            $submissionIds = $submissionsToReset->pluck('id');
+            Submission::whereIn('id', $submissionIds)->update([
+                'points_awarded' => 0,
+                'points_adjustment_reason' => 'Reset poin oleh admin pada ' . now()->format('d M Y H:i'),
+                'reviewed_by' => Auth::id(),
+                'reviewed_at' => now(),
+                'updated_at' => now(),
+            ]);
+        });
+
+        return redirect()->back()->with('success', 'Semua poin mahasiswa berhasil di-reset menjadi 0. Riwayat reset tersimpan.');
+    }
     // 2. Simpan Admin Manual
     public function storeAdmin(Request $request)
     {
@@ -389,7 +469,7 @@ class UserController extends Controller
         }
 
         $validated = $request->validate([
-            'academic_status' => 'required|in:active,on_leave,graduated',
+            'academic_status' => 'required|in:active,on_leave,graduated,non_active',
         ]);
 
         try {
@@ -434,7 +514,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'student_ids' => 'required|array|min:1',
             'student_ids.*' => 'required|string',
-            'academic_status' => 'required|in:active,on_leave,graduated',
+            'academic_status' => 'required|in:active,on_leave,graduated,non_active',
         ]);
 
         try {

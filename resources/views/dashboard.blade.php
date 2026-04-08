@@ -87,7 +87,7 @@
                                         <select x-model="formData.mainCategory" @change="updateAvailableSubcategoriesForSubmission()" class="w-full border rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                             <option value="">Pilih Kategori Utama</option>
                                             <template x-for="(catGroup, idx) in submissionCategoryGroups" :key="catGroup.id">
-                                                <option :value="idx" x-text="(idx + 1) + '. ' + catGroup.name"></option>
+                                                <option :value="idx" x-text="(idx + 1) + '. ' + catGroup.name + (isMandatoryCategory(catGroup) ? ' [Wajib]' : '')"></option>
                                             </template>
                                         </select>
                                     </div>
@@ -97,7 +97,7 @@
                                         <select x-model="formData.subcategory" class="w-full border rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                             <option value="">Pilih Subkategori</option>
                                             <template x-for="(sub, idx) in availableSubcategories" :key="idx">
-                                                <option :value="sub.name" x-text="sub.name + ' (' + sub.points + ' poin)'"></option>
+                                                <option :value="sub.name" x-text="sub.name + (isMandatorySubcategory(sub) ? ' [Wajib]' : '') + ' (' + sub.points + ' poin)'"></option>
                                             </template>
                                         </select>
                                     </div>
@@ -114,8 +114,8 @@
 
                                     <div>
                                         <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Tanggal Kegiatan <span class="text-red-500">*</span></label>
-                                        <input type="date" x-model="formData.activityDate" :max="maxDate" class="w-full border rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                                        <p class="text-xs text-gray-500 mt-1">Maksimal 1 bulan dari tanggal kegiatan</p>
+                                        <input type="date" x-model="formData.activityDate" :max="maxDate" :min="minActivityDate" class="w-full border rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                        <p class="text-xs text-gray-500 mt-1" x-text="submissionDateRuleHelperText"></p>
                                         <p x-show="dateValidationError" class="text-xs text-red-500 mt-1" x-text="dateValidationError"></p>
                                     </div>
 
@@ -263,7 +263,7 @@
                         <!-- Main Category -->
                         <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
                             <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Kategori Utama</label>
-                            <p class="text-sm font-medium text-gray-800" x-text="formData.mainCategory !== '' && formData.mainCategory !== null && submissionCategoryGroups[formData.mainCategory] ? (formData.mainCategory + 1) + '. ' + submissionCategoryGroups[formData.mainCategory].name : '-'"></p>
+                            <p class="text-sm font-medium text-gray-800" x-text="formData.mainCategory !== '' && formData.mainCategory !== null && submissionCategoryGroups[formData.mainCategory] ? (formData.mainCategory + 1) + '. ' + submissionCategoryGroups[formData.mainCategory].name + (isMandatoryCategory(submissionCategoryGroups[formData.mainCategory]) ? ' [Wajib]' : '') : '-'"></p>
                         </div>
 
                         <!-- Subcategory -->
@@ -463,7 +463,7 @@
                                             <select x-model="formData.mainCategory" @change="updateAvailableSubcategories()" class="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                                 <option value="">Pilih Kategori Utama</option>
                                                 <template x-for="(catGroup, idx) in categoryGroups" :key="catGroup.id">
-                                                    <option :value="idx" x-text="(idx + 1) + '. ' + catGroup.name"></option>
+                                                    <option :value="idx" x-text="(idx + 1) + '. ' + catGroup.name + (isMandatoryCategory(catGroup) ? ' [Wajib]' : '')"></option>
                                                 </template>
                                             </select>
                                         </div>
@@ -473,7 +473,7 @@
                                             <select x-model="formData.subcategory" class="w-full border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                                                 <option value="">Pilih Subkategori</option>
                                                 <template x-for="(sub, idx) in availableSubcategories" :key="idx">
-                                                    <option :value="sub.name" x-text="sub.name + ' (' + sub.points + ' poin)'"></option>
+                                                    <option :value="sub.name" x-text="sub.name + (isMandatorySubcategory(sub) ? ' [Wajib]' : '') + ' (' + sub.points + ' poin)'"></option>
                                                 </template>
                                             </select>
                                         </div>
@@ -1075,6 +1075,7 @@
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                                             </svg>
                                                             <span class="text-xs sm:text-sm" x-text="(index + 1) + '. ' + category.name"></span>
+                                                            <span x-show="isMandatoryCategory(category)" class="inline-flex items-center px-2 py-0.5 rounded text-[10px] sm:text-xs font-semibold bg-red-100 text-red-700">Wajib</span>
                                                         </div>
                                                     </td>
                                                     <td class="text-center py-2 sm:py-3 px-2 sm:px-4 font-semibold text-xs sm:text-sm w-20 sm:w-24"></td>
@@ -1090,6 +1091,7 @@
                                                             @mouseenter="showTooltip = true"
                                                             @mouseleave="showTooltip = false">
                                                             <span x-text="sub.name"></span>
+                                                            <span x-show="isMandatorySubcategory(sub)" class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] sm:text-xs font-semibold bg-red-100 text-red-700">Wajib</span>
                                                             <div x-show="showTooltip" 
                                                                 class="absolute left-6 sm:left-12 top-full mt-1 bg-gray-800 text-white text-xs rounded py-2 px-3 z-50 w-48 sm:w-64 shadow-lg"
                                                                 style="display: none;">
@@ -1118,7 +1120,7 @@
                         </div>
                         <template x-for="(category, index) in mandatoryCategoryGroups" :key="'mc-'+index">
                             <div class="border-b px-4 py-3 flex items-center justify-between">
-                                <span class="text-sm text-gray-800 font-medium flex-1 pr-3" x-text="(index + 1) + '. ' + category.name"></span>
+                                <span class="text-sm text-gray-800 font-medium flex-1 pr-3" x-text="(index + 1) + '. ' + category.name + (isMandatoryCategory(category) ? ' [Wajib]' : '')"></span>
                                 <span class="text-sm font-bold text-blue-600 w-16 text-center" x-text="getCategoryTotal(category.subcategories, 'totalPoints')"></span>
                             </div>
                         </template>
@@ -1496,11 +1498,11 @@
                                 <p class="text-xs sm:text-sm text-gray-600 ml-7">Tanggal aktivitas harus mengikuti aturan berikut:</p>
                                 <ul class="text-xs sm:text-sm text-gray-600 ml-7 space-y-1 list-disc list-inside mt-2">
                                     <li>Tanggal aktivitas tidak boleh berada di masa depan</li>
-                                    <li>Tanggal aktivitas tidak boleh lebih dari <strong>1 bulan ke belakang</strong> dari hari ini</li>
+                                    <li x-text="submissionDateRuleFaqText"></li>
                                     <li>Aturan ini memastikan pengajuan tepat waktu dan mencerminkan aktivitas terbaru</li>
                                 </ul>
                                 <div class="mt-2 ml-7 bg-yellow-50 border border-yellow-200 rounded p-2">
-                                    <p class="text-xs text-yellow-800"><strong>⚠️ Penting:</strong> Jika Anda memiliki aktivitas lebih lama dari 1 bulan yang belum diajukan, silakan hubungi admin untuk pertimbangan khusus atau persetujuan.</p>
+                                    <p class="text-xs text-yellow-800"><strong>⚠️ Penting:</strong> Jika aktivitas Anda berada di luar batas tanggal yang berlaku, silakan hubungi admin untuk pertimbangan khusus.</p>
                                 </div>
                             </div>
                             
@@ -1555,6 +1557,7 @@
             categoryGroups: @json($categoryGroups),
             submissionCategoryGroups: [],
             stats: @json($stats),
+            submissionDateSettings: @json($submissionDateSettings ?? ['mode' => 'rolling_days', 'rangeDays' => 30, 'startDate' => null]),
 
             // --- UI VARS ---
             showLogoutModal: false, showAddModal: false, showEditModal: false,
@@ -1599,6 +1602,40 @@
             },
 
             get maxDate() { return new Date().toISOString().split('T')[0]; },
+
+            get minActivityDate() {
+                if (this.submissionDateSettings.mode === 'fixed_start_date' && this.submissionDateSettings.startDate) {
+                    return this.submissionDateSettings.startDate;
+                }
+
+                if (this.submissionDateSettings.mode === 'rolling_days') {
+                    const days = parseInt(this.submissionDateSettings.rangeDays || 30, 10);
+                    const limit = new Date();
+                    limit.setHours(0, 0, 0, 0);
+                    limit.setDate(limit.getDate() - days);
+                    return limit.toISOString().split('T')[0];
+                }
+
+                return '';
+            },
+
+            get submissionDateRuleHelperText() {
+                if (this.submissionDateSettings.mode === 'fixed_start_date' && this.submissionDateSettings.startDate) {
+                    return `Minimal tanggal kegiatan: ${this.submissionDateSettings.startDate}`;
+                }
+
+                const days = parseInt(this.submissionDateSettings.rangeDays || 30, 10);
+                return `Maksimal ${days} hari dari hari ini`;
+            },
+
+            get submissionDateRuleFaqText() {
+                if (this.submissionDateSettings.mode === 'fixed_start_date' && this.submissionDateSettings.startDate) {
+                    return `Tanggal aktivitas harus sama atau setelah ${this.submissionDateSettings.startDate}`;
+                }
+
+                const days = parseInt(this.submissionDateSettings.rangeDays || 30, 10);
+                return `Tanggal aktivitas tidak boleh lebih dari ${days} hari ke belakang dari hari ini`;
+            },
 
             translateStatus(status) {
                 const map = {
@@ -1720,6 +1757,15 @@
                 return name.includes('orkess') || name.includes('retreat');
             },
 
+            isMandatorySubcategory(subcategory) {
+                if (Object.prototype.hasOwnProperty.call(subcategory, 'is_mandatory')) {
+                    return !!subcategory.is_mandatory;
+                }
+
+                const name = (subcategory?.name || '').toLowerCase();
+                return name.includes('itp toefl 450') || name.includes('setara') && name.includes('wajib');
+            },
+
             refreshSubmissionCategories() {
                 this.submissionCategoryGroups = this.categoryGroups.filter(cat => {
                     if (this.isMandatoryCategory(cat)) {
@@ -1761,9 +1807,31 @@
                 const parts = date.split('-');
                 const d = new Date(parts[0], parts[1]-1, parts[2]);
                 const today = new Date(); today.setHours(0,0,0,0);
-                const limit = new Date(today); limit.setMonth(limit.getMonth()-1);
+
                 if (d > today) { this.dateValidationError = 'Tanggal di masa depan tidak diperbolehkan'; return false; }
-                if (d < limit) { this.dateValidationError = 'Tanggal lebih dari 1 bulan yang lalu'; return false; }
+
+                if (this.submissionDateSettings.mode === 'fixed_start_date' && this.submissionDateSettings.startDate) {
+                    const startParts = this.submissionDateSettings.startDate.split('-');
+                    const startDate = new Date(startParts[0], startParts[1]-1, startParts[2]);
+                    startDate.setHours(0, 0, 0, 0);
+
+                    if (d < startDate) {
+                        this.dateValidationError = `Tanggal harus sama atau setelah ${this.submissionDateSettings.startDate}`;
+                        return false;
+                    }
+
+                    this.dateValidationError = '';
+                    return true;
+                }
+
+                const days = parseInt(this.submissionDateSettings.rangeDays || 30, 10);
+                const limit = new Date(today);
+                limit.setDate(limit.getDate() - days);
+                if (d < limit) {
+                    this.dateValidationError = `Tanggal melebihi batas ${days} hari`; 
+                    return false;
+                }
+
                 this.dateValidationError = ''; return true;
             },
 

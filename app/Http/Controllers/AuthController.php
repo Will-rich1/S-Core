@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash; // Tambahkan ini untuk hashing password
+use App\Helpers\SCoreHelper;
 
 class AuthController extends Controller
 {
@@ -30,6 +31,14 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
+
+            if (Auth::user()->role === 'student' && SCoreHelper::isStudentMaintenanceModeEnabled()) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return response()->view('maintenance-student', [], 503);
+            }
 
             // Redirect sesuai role
             if (Auth::user()->role === 'admin') {
