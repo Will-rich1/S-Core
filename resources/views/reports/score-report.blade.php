@@ -34,6 +34,14 @@
         }
 
         .header-logo {
+            width: auto;
+            height: 115px;
+            max-width: 100%;
+            object-fit: contain;
+            margin-bottom: 8px;
+        }
+
+        .header-subtitle {
             font-size: 12px;
             color: #666;
             margin-bottom: 5px;
@@ -215,9 +223,11 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="header-logo">SISTEM CORE ITBSS</div>
+            @if (extension_loaded('gd'))
+                <img class="header-logo" src="{{ public_path('images/logo.png') }}" alt="Logo ITBSS">
+            @endif
+            <div class="header-subtitle">SISTEM CORE ITBSS</div>
             <h1>S-CORE REPORT</h1>
-            <p>Laporan Pengakuan S-Core untuk Persyaratan Skripsi</p>
         </div>  
         
         <!-- Student Information -->
@@ -304,7 +314,7 @@
 
         <!-- Signature -->
         <div class="signature-section">
-            <p style="font-size: 11px; margin-bottom: 5px;">Disetujui oleh,</p>
+            <p style="font-size: 11px; margin-bottom: 5px;">Pontianak, {{ $generatedDate }}</p>
             <div style="margin-top: 60px;">
                 <p style="font-size: 11px; font-weight: bold; margin-bottom: 2px;">William Sandy</p>
                 <p style="font-size: 10px; color: #666;">Wakil Rektor Bidang Akademik dan</p>
@@ -312,10 +322,7 @@
             </div>
         </div>
         
-        <div class="footer">
-            <p>Laporan ini digenerate pada {{ $generatedDate }} pukul {{ $generatedTime }}</p>
-            <p>Sistem Core ITBSS v2.0 - Pengesahan Otomatis</p>
-        </div>
+        
     </div>
 </body>
 </html>

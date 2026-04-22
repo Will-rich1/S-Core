@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash; // Penting untuk cek password
 use App\Models\Submission;
 use App\Models\StudentPointResetHistory;
 use App\Models\Category;
+use App\Models\Subcategory;
 use App\Models\User;
 use App\Services\GoogleDriveService;
 use Carbon\Carbon;
@@ -556,6 +557,29 @@ class DashboardController extends Controller
             'totalAffectedSubmissions' => (int) $resetHistories->sum('affectedSubmissions'),
         ];
 
+        $individualAssignableSubcategories = Subcategory::query()
+            ->with('category:id,name')
+            ->where('is_active', true)
+            ->where(function ($query) {
+                $query->whereRaw('LOWER(subcategories.name) LIKE ?', ['%orkess%'])
+                    ->orWhereRaw('LOWER(subcategories.name) LIKE ?', ['%retreat%'])
+                    ->orWhereHas('category', function ($categoryQuery) {
+                        $categoryQuery->whereRaw('LOWER(name) LIKE ?', ['%orkess%'])
+                            ->orWhereRaw('LOWER(name) LIKE ?', ['%retreat%']);
+                    });
+            })
+            ->orderBy('name')
+            ->get()
+            ->map(function ($subcategory) {
+                return [
+                    'id' => $subcategory->id,
+                    'name' => $subcategory->name,
+                    'categoryName' => $subcategory->category->name ?? '-',
+                    'points' => (float) ($subcategory->points ?? 0),
+                ];
+            })
+            ->values();
+
         return view('admin_student_detail', [
             'student' => $studentData,
             'submissions' => $submissions,
@@ -564,6 +588,7 @@ class DashboardController extends Controller
             'minCategories' => $studentMinCategories,
             'resetHistories' => $resetHistories,
             'resetHistorySummary' => $resetHistorySummary,
+            'individualAssignableSubcategories' => $individualAssignableSubcategories,
         ]);
     }
 

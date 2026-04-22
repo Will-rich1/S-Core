@@ -18,6 +18,9 @@ return [
 
     'enabled' => env('TELESCOPE_ENABLED', true),
 
+    // Maximum rows allowed in telescope_entries before auto-clear runs.
+    'max_entries' => env('TELESCOPE_MAX_ENTRIES', 500),
+
     /*
     |--------------------------------------------------------------------------
     | Telescope Domain

@@ -137,6 +137,60 @@
             </div>
         </div>
 
+        <div class="rounded-xl bg-white border p-4 shadow-sm mb-6">
+            <div class="mb-3">
+                <h3 class="font-semibold">Penugasan S-Core Individu (Admin)</h3>
+                <p class="text-xs text-gray-500">Form ini khusus penugasan langsung per mahasiswa. Pilihan subkategori dibatasi ke OrKeSS dan Retreat.</p>
+            </div>
+
+            @if($individualAssignableSubcategories->isEmpty())
+                <div class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+                    Subkategori OrKeSS / Retreat belum tersedia atau nonaktif. Aktifkan dulu di manajemen kategori.
+                </div>
+            @else
+                <form method="POST" action="{{ route('admin.students.individual-score', ['studentId' => $student['id']]) }}" enctype="multipart/form-data" class="space-y-4">
+                    @csrf
+
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label for="subcategory_id" class="block text-sm text-gray-600 mb-1">Subkategori (Wajib)</label>
+                            <select id="subcategory_id" name="subcategory_id" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                @foreach($individualAssignableSubcategories as $option)
+                                    <option value="{{ $option['id'] }}" {{ old('subcategory_id') == $option['id'] ? 'selected' : '' }}>
+                                        {{ $option['categoryName'] }} - {{ $option['name'] }} ({{ number_format((float) $option['points'], 2) }} poin)
+                                    </option>
+                                @endforeach
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">Poin otomatis mengikuti subkategori yang dipilih. Pengajuan dari form admin ini langsung berstatus Disetujui.</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="activityTitle" class="block text-sm text-gray-600 mb-1">Judul Kegiatan</label>
+                        <input id="activityTitle" type="text" name="activityTitle" value="{{ old('activityTitle') }}" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan judul kegiatan" maxlength="500" required>
+                    </div>
+
+                    <div>
+                        <label for="description" class="block text-sm text-gray-600 mb-1">Deskripsi</label>
+                        <textarea id="description" name="description" rows="3" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan deskripsi kegiatan" required>{{ old('description') }}</textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label for="activityDate" class="block text-sm text-gray-600 mb-1">Tanggal Kegiatan</label>
+                            <input id="activityDate" type="date" name="activityDate" value="{{ old('activityDate') }}" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                    </div>
+
+                    <div class="pt-1 flex justify-end">
+                        <button type="submit" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium">
+                            Tambah Penugasan Individu
+                        </button>
+                    </div>
+                </form>
+            @endif
+        </div>
+
         <div class="rounded-xl bg-white border shadow-sm mb-6">
             <div class="px-4 py-3 border-b bg-gray-50">
                 <h3 class="font-semibold">Ringkasan Kategori</h3>

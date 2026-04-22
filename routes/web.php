@@ -9,6 +9,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SCoreReportController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\FileProxyController;
+use App\Http\Controllers\AdminIndividualScoreController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 
@@ -88,6 +89,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Bulk Score
     Route::post('/admin/bulk-score', [DashboardController::class, 'bulkScore'])->name('admin.bulk-score');
+    Route::post('/admin/students/{studentId}/individual-score', [AdminIndividualScoreController::class, 'store'])->name('admin.students.individual-score');
 
     // --- CATEGORY MANAGEMENT (BARU) ---
     // API ENDPOINTS - Get Categories (READ ONLY)
