@@ -32,7 +32,6 @@ class DatabaseSeeder extends Seeder
         // Aturan dasar aplikasi
         $settings = [
             ['key_name' => 'min_points_to_pass', 'value' => '20', 'data_type' => 'integer', 'description' => 'Minimum points required to pass S-Core', 'is_public' => true],
-            ['key_name' => 'security_pin', 'value' => '123456', 'data_type' => 'string', 'description' => 'PIN for category management access', 'is_public' => false],
             ['key_name' => 'max_file_size_mb', 'value' => '10', 'data_type' => 'integer', 'description' => 'Maximum file upload size in MB', 'is_public' => true],
             ['key_name' => 'submission_date_rule_mode', 'value' => 'rolling_days', 'data_type' => 'string', 'description' => 'Submission date rule mode: rolling_days or fixed_start_date', 'is_public' => true],
             ['key_name' => 'submission_date_range_days', 'value' => '30', 'data_type' => 'integer', 'description' => 'Activity date must be within X days from today', 'is_public' => true],

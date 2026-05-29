@@ -445,7 +445,14 @@ class DashboardController extends Controller
             'maintenanceMode' => SCoreHelper::isStudentMaintenanceModeEnabled(),
         ];
 
-        return view('admin_review', compact('submissions', 'stats', 'categories', 'students', 'studentStats', 'scoreSettings', 'studentsPagination', 'availableStudentYears', 'studentsFilters'));
+        // Ambil daftar akun admin untuk ditampilkan pada tab Admin
+        $currentAdminId = Auth::id();
+        $admins = User::where('role', 'admin')
+            ->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END', [$currentAdminId])
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
+
+        return view('admin_review', compact('submissions', 'stats', 'categories', 'students', 'studentStats', 'scoreSettings', 'studentsPagination', 'availableStudentYears', 'studentsFilters', 'admins'));
     }
 
     public function adminStudentDetail($studentId)

@@ -5,10 +5,37 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Helpers\SCoreHelper;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class SCoreReportController extends Controller
 {
+    private function buildVerificationUrl($student_id)
+    {
+        $student = User::where('student_id', $student_id)->firstOrFail();
+
+        return URL::signedRoute('student.report.verify', [
+            'student_id' => $student->student_id,
+        ], null, false);
+    }
+
+    private function buildQrDataUri($verificationUrl)
+    {
+        try {
+            $qrCode = resolve('qrcode');
+            $image = $qrCode->format('svg')
+                ->size(180)
+                ->margin(1)
+                ->generate($verificationUrl);
+
+            return 'data:image/svg+xml;base64,' . base64_encode($image);
+        } catch (\Throwable $e) {
+            // Fall back to the text placeholder in the Blade view.
+        }
+
+        return null;
+    }
+
     private function buildReportData($student_id)
     {
         $student = User::where('student_id', $student_id)->firstOrFail();
@@ -25,6 +52,29 @@ class SCoreReportController extends Controller
         }
 
         $categoryBreakdown = SCoreHelper::getCategoryBreakdown($student->id);
+        $verificationUrl = $this->buildVerificationUrl($student_id);
+
+        return [
+            'student' => $student,
+            'totalPoints' => $eligibility['totalPoints'],
+            'completedCategories' => $eligibility['completedCategories'],
+            'totalCategories' => $eligibility['totalCategories'],
+            'minPointsRequired' => $eligibility['minPointsRequired'],
+            'minCategoriesRequired' => $eligibility['minCategoriesRequired'],
+            'isPassed' => $eligibility['isEligible'],
+            'categoryBreakdown' => $categoryBreakdown,
+            'verificationUrl' => $verificationUrl,
+            'verificationQrDataUri' => $this->buildQrDataUri($verificationUrl),
+            'generatedDate' => now()->format('d M Y'),
+            'generatedTime' => now()->format('H:i')
+        ];
+    }
+
+    private function buildVerificationSummaryData($student_id)
+    {
+        $student = User::where('student_id', $student_id)->firstOrFail();
+        $eligibility = SCoreHelper::checkSCoreEligibility($student->id);
+        $categoryBreakdown = SCoreHelper::getCategoryBreakdown($student->id);
 
         return [
             'student' => $student,
@@ -36,7 +86,6 @@ class SCoreReportController extends Controller
             'isPassed' => $eligibility['isEligible'],
             'categoryBreakdown' => $categoryBreakdown,
             'generatedDate' => now()->format('d M Y'),
-            'generatedTime' => now()->format('H:i')
         ];
     }
 
@@ -66,6 +115,16 @@ class SCoreReportController extends Controller
         
         // Download file
         return $pdf->download('S-Core-Report-' . $data['student']->student_id . '-' . now()->format('YmdHis') . '.pdf');
+    }
+
+    /**
+     * Public verification page from QR scan.
+     */
+    public function verifyReport($student_id)
+    {
+        $data = $this->buildVerificationSummaryData($student_id);
+
+        return view('reports.score-report-verify', $data);
     }
 
     /**

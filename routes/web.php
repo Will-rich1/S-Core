@@ -79,6 +79,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/students/import', [UserController::class, 'importStudents'])->name('students.import');
     Route::post('/admins/store', [UserController::class, 'storeAdmin'])->name('admins.store');
     Route::post('/admin/students/delete', [UserController::class, 'deleteStudents'])->name('students.delete');
+    Route::post('/admin/admins/delete', [UserController::class, 'deleteAdmins'])->name('admins.delete');
     Route::post('/admin/students/promote-semester', [UserController::class, 'promoteSemester'])->name('students.promote-semester');
     Route::post('/admin/students/demote-semester', [UserController::class, 'demoteSemester'])->name('students.demote-semester');
     Route::post('/admin/students/{studentId}/academic-status', [UserController::class, 'updateAcademicStatus'])->name('students.update-academic-status');
@@ -115,12 +116,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/settings/perfect-points', [SettingsController::class, 'updatePerfectPoints'])->name('settings.perfect-points.update');
     Route::get('/api/admin/settings', [SettingsController::class, 'getAllSettings'])->name('settings.all');
 
-    // --- SECURITY PIN ROUTES ---
-    Route::get('/api/settings/security-pin', [SettingsController::class, 'getSecurityPin'])->name('settings.pin.get');
-    Route::post('/admin/settings/security-pin', [SettingsController::class, 'updateSecurityPin'])->name('settings.pin.update');
-    Route::post('/api/verify-security-pin', [SettingsController::class, 'verifySecurityPin'])->name('settings.pin.verify');
-    Route::post('/admin/reset-pin', [SettingsController::class, 'resetPin'])->name('admin.reset-pin');
-
     // --- S-CORE REPORT ROUTES ---
     Route::get('/student/{student_id}/report/view', [SCoreReportController::class, 'viewReport'])->name('student.report.view');
     Route::get('/student/{student_id}/report', [SCoreReportController::class, 'downloadReport'])->name('student.report.download');
@@ -131,3 +126,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/submissions/{submissionId}/file', [FileProxyController::class, 'serveFile'])->name('submissions.file.preview');
 
 });
+
+// --- 3. VERIFIKASI PUBLIK REPORT (SCAN QR) ---
+Route::get('/student/{student_id}/report/verify', [SCoreReportController::class, 'verifyReport'])
+    ->middleware('signed:relative')
+    ->name('student.report.verify');

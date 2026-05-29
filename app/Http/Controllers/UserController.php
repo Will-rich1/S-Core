@@ -409,6 +409,41 @@ class UserController extends Controller
         }
     }
 
+    public function deleteAdmins(Request $request)
+    {
+        if (!Auth::user() || Auth::user()->role !== 'admin') {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $request->validate([
+            'admin_ids' => 'required|array|min:1',
+            'admin_ids.*' => 'required|integer'
+        ]);
+
+        $adminIds = $request->input('admin_ids');
+        $deletedCount = 0;
+        $currentAdminId = Auth::id();
+
+        try {
+            foreach ($adminIds as $adminId) {
+                if ((int) $adminId === (int) $currentAdminId) {
+                    continue;
+                }
+
+                $user = User::where('id', $adminId)->where('role', 'admin')->first();
+                if ($user) {
+                    $user->delete();
+                    $deletedCount++;
+                }
+            }
+
+            return response()->json(['message' => 'Successfully deleted admins', 'deleted_count' => $deletedCount]);
+        } catch (\Exception $e) {
+            Log::error('Error deleting admins: '.$e->getMessage());
+            return response()->json(['message' => 'Failed to delete'], 500);
+        }
+    }
+
     public function promoteSemester(Request $request)
     {
         if (!Auth::user() || Auth::user()->role !== 'admin') {

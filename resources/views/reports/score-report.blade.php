@@ -160,8 +160,49 @@
         /* Signature Section */
         .signature-section {
             margin-top: 50px;
-            text-align: right;
+            display: flex;
+            justify-content: flex-end;
             page-break-inside: avoid;
+        }
+
+        .signature-column {
+            width: 250px;
+            margin-top: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 12px;
+            page-break-inside: avoid;
+        }
+
+        .verification-qr {
+            width: 120px;
+            height: 120px;
+            border: 1px solid #dbeafe;
+            border-radius: 8px;
+            background: white;
+            padding: 4px;
+        }
+
+        .signature-block {
+            text-align: right;
+        }
+
+        .signature-date {
+            font-size: 11px;
+            margin: 0;
+        }
+
+        .signature-name {
+            text-align: right;
+            margin-top: 6px;
+        }
+
+        .signature-role {
+            text-align: right;
+            color: #666;
+            font-size: 10px;
+            line-height: 1.45;
         }
 
         /* Footer */
@@ -267,7 +308,7 @@
             </div>
             <div style="margin-top:12px;">
                 <span class="badge {{ $isPassed ? 'badge-success' : 'badge-warning' }}">
-                    {{ $isPassed ? 'PASSED' : 'NOT PASSED' }}
+                    {{ $isPassed ? 'Memenuhi' : 'Belum Memenuhi' }}
                 </span>
             </div>
         </div>
@@ -313,14 +354,38 @@
         </div>
 
         <!-- Signature -->
-        <div class="signature-section">
-            <p style="font-size: 11px; margin-bottom: 5px;">Pontianak, {{ $generatedDate }}</p>
-            <div style="margin-top: 60px;">
-                <p style="font-size: 11px; font-weight: bold; margin-bottom: 2px;">William Sandy</p>
-                <p style="font-size: 10px; color: #666;">Wakil Rektor Bidang Akademik dan</p>
-                <p style="font-size: 10px; color: #666;">Kemahasiswaan</p>
+<div class="signature-section" style="width: 100%; display: block; clear: both; margin-top: 30px;">
+    <!-- Kotak pembungkus utama diatur melayang ke kanan (float: right) -->
+    <div class="signature-column" style="float: right; text-align: right; width: 250px;">
+        
+        <!-- Tanggal Rata Kanan -->
+        <p class="signature-date" style="margin-bottom: 10px; font-size: 11px;">Pontianak, {{ $generatedDate }}</p>
+        
+        <!-- Container QR Code diatur agar gambarnya menempel ke kanan -->
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+            @if(!empty($verificationQrDataUri))
+                <img class="verification-qr" src="{{ $verificationQrDataUri }}" alt="QR Verifikasi" style="display: inline-block; width: 120px; height: 120px;">
+            @else
+                <div class="verification-qr" style="display:inline-flex;align-items:center;justify-content:center;font-size:9px;text-align:center;color:#64748b;width:120px;height:120px;border:1px dashed #cbd5e1;">QR tidak tersedia</div>
+            @endif
+        </div>
+        
+        <!-- Blok Nama dan Jabatan Rata Kanan -->
+        <div class="signature-block">
+            <div class="signature-name">
+                <p style="font-size: 11px; font-weight: bold; margin: 0 0 2px 0;">William Sandy</p>
+            </div>
+            <div class="signature-role" style="font-size: 10px; line-height: 1.4; color: #475569; margin: 0;">
+                Wakil Rektor Bidang Akademik dan<br>
+                Kemahasiswaan
             </div>
         </div>
+
+    </div>
+    <!-- Penutup float agar layout di bawahnya tidak rusak -->
+    <div style="clear: both;"></div>
+</div>
+
         
         
     </div>

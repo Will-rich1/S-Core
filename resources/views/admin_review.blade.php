@@ -426,7 +426,7 @@
                                 <option value="Sertifikat tidak sesuai dengan deskripsi kegiatan. Harap kirim ulang dengan dokumentasi yang benar.">Sertifikat tidak sesuai deskripsi kegiatan</option>
                                 <option value="Bukti/sertifikat tidak jelas atau tidak lengkap. Harap unggah versi yang lebih jelas.">Bukti tidak jelas atau tidak lengkap</option>
                                 <option value="Tanggal kegiatan melebihi batas waktu yang diizinkan. Harap ajukan kegiatan dalam periode yang valid.">Tanggal kegiatan melebihi batas waktu</option>
-                                <option value="Kategori yang dipilih salah. Harap kirim ulang dengan kategori yang benar.">Kategori yang dipilih salah</option>
+                                <option value="Kegiatan tidak termasuk dalam kategori S-Core. Harap kirim ulang dengan kategori yang benar.">Kegiatan tidak termasuk dalam kategori S-Core</option>
                                 <option value="Pengajuan duplikat terdeteksi. Kegiatan ini sudah pernah diajukan.">Pengajuan duplikat</option>
                                 <option value="Kegiatan tidak memenuhi persyaratan S-Core. Harap merujuk pada panduan.">Tidak memenuhi persyaratan S-Core</option>
                                 <option value="other">Lainnya (sebutkan di bawah)</option>
@@ -758,60 +758,7 @@
             </div>
         </div>
 
-        <!-- PIN Verification Modal -->
-        <div x-show="showPinModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[70]" style="display: none;">
-            <div class="bg-white rounded-lg max-w-md w-full mx-4 shadow-2xl">
-                <div class="bg-red-500 text-white p-6 rounded-t-lg">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                        <div>
-                            <h3 class="text-xl font-semibold">Verifikasi Keamanan Diperlukan</h3>
-                            <p class="text-red-100 text-sm mt-1">Manajemen Kategori adalah operasi yang sensitif</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="p-6">
-                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
-                        <div class="flex">
-                            <svg class="w-5 h-5 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                            </svg>
-                            <div class="text-sm text-yellow-700">
-                                <p class="font-semibold">Peringatan!</p>
-                                <p>Perubahan kategori dapat mempengaruhi semua pengajuan mahasiswa. Silakan masukkan PIN untuk melanjutkan.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Masukkan Kode PIN</label>
-                        <input 
-                            type="password" 
-                            x-model="pinInput" 
-                            @keyup.enter="verifyPin"
-                            placeholder="Masukkan PIN 6 digit" 
-                            maxlength="6"
-                            class="w-full border-2 rounded-lg px-4 py-3 text-center text-2xl tracking-widest font-mono focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                            :class="pinError ? 'border-red-500 bg-red-50' : 'border-gray-300'"
-                        />
-                        <p x-show="pinError" class="text-red-600 text-sm mt-2 flex items-center gap-1">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                            </svg>
-                            PIN salah. Silakan coba lagi.
-                        </p>
-                    </div>
-
-                    <div class="flex gap-3">
-                        <button @click="closePinModal" class="flex-1 px-4 py-2.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium">Batal</button>
-                        <button @click="verifyPin" class="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium">Verifikasi PIN</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+     
 
         <!-- Confirmation Modals -->
         <!-- Edit Confirmation Modal -->
@@ -1908,10 +1855,10 @@
                                         
                                         <div class="space-y-2">
                                             <p class="text-xs font-semibold text-gray-700 mb-2">Poin per Kategori:</p>
-                                            <template x-for="(points, category) in student.categoryBreakdown" :key="category">
+                                            <template x-for="(entry, categoryId) in student.categoryBreakdown" :key="categoryId">
                                                 <div class="flex justify-between text-xs">
-                                                    <span class="text-gray-600 truncate pr-2" :title="category" x-text="category.substring(0, 35) + (category.length > 35 ? '...' : '')"></span>
-                                                    <span class="font-semibold text-blue-600" x-text="points + ' poin'"></span>
+                                                    <span class="text-gray-600 truncate pr-2" :title="entry.categoryName" x-text="entry.categoryName.substring(0, 35) + (entry.categoryName.length > 35 ? '...' : '')"></span>
+                                                    <span class="font-semibold text-blue-600" x-text="(entry.points || 0) + ' poin'"></span>
                                                 </div>
                                             </template>
                                         </div>
@@ -2566,6 +2513,7 @@
                                 </button>
                             </div>
                         </form>
+
                     </div>
 
                     <!-- Manual Add Student Form -->
@@ -2746,6 +2694,63 @@
                                 </button>
                             </div>
                         </form>
+
+                        <div class="bg-white rounded-lg shadow p-4 sm:p-6 mt-4" x-data="{ selectedAdmins: [], currentAdminId: {{ Auth::id() }}, adminIds: @json($admins->pluck('id')->values()), toggleAllAdmins(checked) { this.selectedAdmins = checked ? this.adminIds.filter(id => id !== this.currentAdminId) : []; }, toggleAdminSelection(adminId, checked) { if (adminId === this.currentAdminId) return; if (checked) { if (!this.selectedAdmins.includes(adminId)) this.selectedAdmins.push(adminId); } else { this.selectedAdmins = this.selectedAdmins.filter(id => id !== adminId); } }, isAllAdminsSelected() { return this.adminIds.filter(id => id !== this.currentAdminId).length > 0 && this.selectedAdmins.length === this.adminIds.filter(id => id !== this.currentAdminId).length; } }">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+                                <div>
+                                    <h3 class="text-base sm:text-lg font-semibold">Daftar Admin Terdaftar</h3>
+                                    <p class="text-sm text-gray-600">Cek daftar admin yang aktif, lalu pilih yang ingin dihapus bila diperlukan.</p>
+                                </div>
+                                <div x-show="selectedAdmins.length > 0" class="flex items-center gap-3 bg-red-50 border border-red-200 rounded-lg px-3 py-2" style="display: none;">
+                                    <span class="text-sm text-red-700 font-medium"><span x-text="selectedAdmins.length"></span> admin dipilih</span>
+                                    <button type="button" @click="$root.deleteSelectedAdmins(selectedAdmins)" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-xs font-medium flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        Hapus Terpilih
+                                    </button>
+                                </div>
+                            </div>
+
+                            @if(isset($admins) && $admins->isNotEmpty())
+                                <div class="border rounded-lg overflow-hidden">
+                                    <div class="grid grid-cols-[40px_1fr_auto] items-center gap-3 bg-gray-50 px-3 py-2 text-xs font-semibold uppercase text-gray-500 border-b">
+                                        <label class="inline-flex items-center justify-center">
+                                            <input type="checkbox" class="rounded border-gray-300 text-red-600 focus:ring-red-500" :checked="isAllAdminsSelected()" @change="toggleAllAdmins($event.target.checked)">
+                                        </label>
+                                        <span>Admin</span>
+                                        <span class="text-right">Aksi</span>
+                                    </div>
+                                    <div class="divide-y divide-gray-200">
+                                        @foreach($admins as $adm)
+                                            <div class="grid grid-cols-[40px_1fr_auto] items-center gap-3 px-3 py-3">
+                                                <label class="inline-flex items-center justify-center">
+                                                    @if($adm->id !== Auth::id())
+                                                        <input type="checkbox" class="rounded border-gray-300 text-red-600 focus:ring-red-500" :checked="selectedAdmins.includes({{ $adm->id }})" @change="toggleAdminSelection({{ $adm->id }}, $event.target.checked)">
+                                                    @endif
+                                                </label>
+                                                <div class="min-w-0">
+                                                    <div class="font-medium text-gray-800 truncate">{{ $adm->name }}</div>
+                                                    <div class="text-xs text-gray-500 truncate">{{ $adm->email }}</div>
+                                                </div>
+                                                @if($adm->id !== Auth::id())
+                                                    <button type="button" @click="deleteAdmin({{ $adm->id }}, @js($adm->name))" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-xs font-medium flex items-center gap-2 justify-self-end">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                        Hapus
+                                                    </button>
+                                                @else
+                                                    <span class="justify-self-end inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-700">Akun Anda</span>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @else
+                                <p class="text-sm text-gray-500">Belum ada akun admin terdaftar.</p>
+                            @endif
+                        </div>
                     </div>
                 </div>
 
@@ -2917,160 +2922,11 @@
                             <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Total Kategori: <span class="font-bold" x-text="categories.length"></span></span>
                         </div>
                         <button @click="requestCategoryManagement" class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
+                            
                             <span class="whitespace-nowrap">Kelola Kategori</span>
                         </button>
                     </div>
 
-                    <!-- Security PIN Management -->
-                    <div class="bg-white rounded-lg shadow p-4 sm:p-6">
-                        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center gap-2">
-                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                            <span class="break-words">PIN Keamanan</span>
-                        </h3>
-                        <p class="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">Ubah PIN keamanan yang diperlukan untuk mengelola kategori. PIN harus terdiri dari 4-6 digit.</p>
-                        
-                        <form @submit.prevent="updateSecurityPin()" class="space-y-4">
-                            <div class="grid grid-cols-1 gap-4">
-                                <!-- Current PIN -->
-                                <div>
-                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
-                                        PIN Saat Ini
-                                        <span class="text-red-500">*</span>
-                                    </label>
-                                    <div class="relative">
-                                        <input 
-                                            :type="showCurrentPin ? 'text' : 'password'" 
-                                            x-model="pinData.currentPin" 
-                                            maxlength="6"
-                                            pattern="[0-9]{4,6}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 pr-10 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            placeholder="Masukkan PIN saat ini"
-                                            required
-                                        />
-                                        <button 
-                                            type="button" 
-                                            @click="showCurrentPin = !showCurrentPin" 
-                                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                                        >
-                                            <svg x-show="!showCurrentPin" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                            <svg x-show="showCurrentPin" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- New PIN -->
-                                <div>
-                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
-                                        PIN Baru
-                                        <span class="text-red-500">*</span>
-                                    </label>
-                                    <div class="relative">
-                                        <input 
-                                            :type="showNewPin ? 'text' : 'password'" 
-                                            x-model="pinData.newPin" 
-                                            maxlength="6"
-                                            pattern="[0-9]{4,6}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 pr-10 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            placeholder="Masukkan PIN baru (4-6 digit)"
-                                            required
-                                        />
-                                        <button 
-                                            type="button" 
-                                            @click="showNewPin = !showNewPin" 
-                                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                                        >
-                                            <svg x-show="!showNewPin" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                            <svg x-show="showNewPin" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Confirm New PIN -->
-                                <div>
-                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
-                                        Konfirmasi PIN Baru
-                                        <span class="text-red-500">*</span>
-                                    </label>
-                                    <div class="relative">
-                                        <input 
-                                            :type="showConfirmPin ? 'text' : 'password'" 
-                                            x-model="pinData.confirmPin" 
-                                            maxlength="6"
-                                            pattern="[0-9]{4,6}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 pr-10 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            placeholder="Masukkan ulang PIN baru"
-                                            required
-                                        />
-                                        <button 
-                                            type="button" 
-                                            @click="showConfirmPin = !showConfirmPin" 
-                                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                                        >
-                                            <svg x-show="!showConfirmPin" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                            <svg x-show="showConfirmPin" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4 mt-4">
-                                <div class="flex items-start gap-2">
-                                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                    <div class="text-xs sm:text-sm text-yellow-800">
-                                        <p class="font-semibold">Penting:</p>
-                                        <p>PIN ini diperlukan untuk mengelola kategori (tambah, edit, hapus). Pastikan Anda mengingat PIN baru Anda.</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="flex flex-col sm:flex-row justify-end gap-3 mt-6">
-                                <button 
-                                    type="button"
-                                    @click="resetPinForm()" 
-                                    class="w-full sm:w-auto px-4 sm:px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-xs sm:text-sm font-medium transition-colors"
-                                >
-                                    Hapus
-                                </button>
-                                <button 
-                                    type="submit"
-                                    :disabled="isPinSubmitting"
-                                    :class="isPinSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'"
-                                    class="w-full sm:w-auto px-4 sm:px-6 py-2 bg-blue-500 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                                >
-                                    <svg x-show="!isPinSubmitting" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    <svg x-show="isPinSubmitting" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24" style="display: none;">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    <span class="whitespace-nowrap" x-text="isPinSubmitting ? 'Memperbarui...' : 'Perbarui PIN'"></span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
                 </div>
 
                 <!-- System Info Tab -->
@@ -3091,189 +2947,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- User Management moved to Settings -->
-            <!-- This section has been integrated into Settings > Student Accounts and Settings > Admin Accounts -->
-            <div x-show="false" style="display: none;">
-                <div class="mb-6">
-                    <h1 class="text-3xl font-bold text-gray-800 mb-2">User Management</h1>
-                    <p class="text-gray-600">Manage student and admin accounts</p>
-                </div>
-
-                <!-- Tab Navigation -->
-                <div class="mb-6 border-b border-gray-200">
-                    <nav class="flex gap-4">
-                        <button @click="userTab = 'students'" :class="userTab === 'students' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-2 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                            Student Accounts
-                        </button>
-                        <button @click="userTab = 'admins'" :class="userTab === 'admins' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'" class="py-2 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                            </svg>
-                            Admin Accounts
-                        </button>
-                    </nav>
-                </div>
-
-                <!-- Success/Error Messages -->
-                @if(session('success'))
-                    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <p class="text-green-800 font-medium">{{ session('success') }}</p>
-                        </div>
-                    </div>
-                @endif
-
-                @if($errors->any())
-                    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                        <div class="flex items-center gap-2 mb-2">
-                            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <p class="text-red-800 font-medium">Please fix the following errors:</p>
-                        </div>
-                        <ul class="text-red-700 text-sm ml-7 list-disc">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                <!-- Student Accounts Tab -->
-                <div x-show="userTab === 'students'" class="space-y-6">
-                    <!-- CSV Upload Form -->
-                    <div class="bg-white rounded-lg shadow p-4 sm:p-6">
-                        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center gap-2">
-                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                            </svg>
-                            <span class="break-words">Unggah Massal Akun Mahasiswa (CSV)</span>
-                        </h3>
-
-                        <div class="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
-                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-2">
-                                <p class="text-xs sm:text-sm text-blue-800"><strong>CSV Format Requirements:</strong></p>
-                                <a href="/sample_students.csv" download class="text-xs bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded flex items-center justify-center gap-1 whitespace-nowrap w-full sm:w-auto">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    Download Sample
-                                </a>
-                            </div>
-                            <p class="text-xs sm:text-sm text-blue-700 mb-2">The CSV file must have the following columns (in order):</p>
-                            <div class="bg-blue-100 rounded p-2 overflow-x-auto mb-2">
-                                <code class="text-xs whitespace-nowrap">Nama,Email,Password,student_id,major,batch_year,OrKeSS (WAJIB),Retreat (WAJIB),Kegiatan Ilmiah dan Penalaran,"Performance, Pengembangan, dan Perlombaan",Kepengurusan Organisasi/Kepanitiaan,Kegiatan Sosial</code>
-                            </div>
-                            <p class="text-xs text-blue-600 mb-1"><strong>Example:</strong></p>
-                            <div class="bg-blue-100 rounded p-2 overflow-x-auto">
-                                <code class="text-xs whitespace-nowrap">John Doe,john.doe@itbss.ac.id,password123,2021001,STI,2021,3,1,5,2,4,3</code>
-                            </div>
-                            <div class="mt-3 pt-3 border-t border-blue-200">
-                                <p class="text-xs text-blue-600"><strong>Notes:</strong></p>
-                                <ul class="text-xs text-blue-600 list-disc ml-4 mt-1 space-y-0.5">
-                                    <li>Header row is optional (auto-detected)</li>
-                                    <li>First 6 columns (Nama - batch_year) are <strong>required</strong></li>
-                                    <li>Score columns (7-12) are <strong>optional</strong> — use 0 or leave empty to skip</li>
-                                    <li>Major must be: STI, BD, or KWU</li>
-                                    <li>Email must be unique and use @itbss.ac.id domain</li>
-                                    <li>OrKeSS & Retreat scores go directly to their subcategory</li>
-                                    <li>Other scores go to "Migrasi" subcategory of each category</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <form action="{{ route('students.import') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
-                            @csrf
-                            <div>
-                                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Select CSV File <span class="text-red-500">*</span></label>
-                                <input type="file" name="csv_file" accept=".csv" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-
-                            <div class="flex justify-end">
-                                <button type="submit" class="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center justify-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                    </svg>
-                                    <span class="whitespace-nowrap">Upload & Import Students</span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <!-- Manual Add Student Form -->
-                    <div class="bg-white rounded-lg shadow p-4 sm:p-6">
-                        <h3 class="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center gap-2">
-                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                            </svg>
-                            <span class="break-words">Add Single Student Account</span>
-                        </h3>
-
-                        <form action="{{ route('students.store') }}" method="POST" class="space-y-4">
-                            @csrf
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- Name -->
-                                <div>
-                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Name <span class="text-red-500">*</span></label>
-                                    <input type="text" name="name" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter full name">
-                                </div>
-
-                                <!-- Email -->
-                                <div>
-                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Email <span class="text-red-500">*</span></label>
-                                    <input type="email" name="email" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter email address">
-                                </div>
-
-                                <!-- Password -->
-                                <div>
-                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Password <span class="text-red-500">*</span></label>
-                                    <input type="password" name="password" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter password (min 6 characters)">
-                                </div>
-
-                                <!-- Student ID -->
-                                <div>
-                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Student ID <span class="text-red-500">*</span></label>
-                                    <input type="text" name="student_id" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter student ID">
-                                </div>
-
-                                <!-- Major -->
-                                <div>
-                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Major <span class="text-red-500">*</span></label>
-                                    <select name="major" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="">Select Major</option>
-                                        <option value="STI">STI</option>
-                                        <option value="BD">BD</option>
-                                        <option value="KWU">KWU</option>
-                                    </select>
-                                </div>
-
-                                <!-- Batch Year -->
-                                <div>
-                                    <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Batch Year <span class="text-red-500">*</span></label>
-                                    <input type="number" name="batch_year" required class="w-full border border-gray-300 rounded-lg px-3 sm:px-4 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., 2022">
-                                </div>
-                            </div>
-
-                            <!-- Submit Button -->
-                            <div class="flex justify-end pt-4">
-                                <button type="submit" class="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium flex items-center justify-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                    </svg>
-                                    <span class="whitespace-nowrap">Add Student</span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
 
                 <!-- Admin Accounts Tab -->
                 <div x-show="userTab === 'admins'" class="space-y-6" x-data="{
@@ -3385,9 +3058,9 @@
                                 </button>
                             </div>
                         </form>
+
                     </div>
                 </div>
-            </div>
 
             <!-- Help Page -->
             <div x-show="activeMenu === 'Help'" style="display: none;">
@@ -3459,7 +3132,7 @@
                                     <li>Sertifikat tidak sesuai dengan deskripsi kegiatan</li>
                                     <li>Bukti tidak jelas atau tidak lengkap</li>
                                     <li>Tanggal kegiatan melewati batas waktu yang diizinkan</li>
-                                    <li>Kategori yang dipilih salah</li>
+                                    <li>Kegiatan tidak termasuk dalam kategori S-Core</li>
                                     <li>Pengajuan duplikat</li>
                                     <li>Tidak memenuhi persyaratan S-Core</li>
                                     <li>Lainnya (alasan kustom) - Pilih ini untuk menulis penjelasan Anda sendiri secara rinci</li>
@@ -3605,7 +3278,6 @@
         showDetailModal: false,
         showRejectModal: false,
         showCategoryModal: false,
-        showPinModal: false,
         showEditConfirmModal: false,
         showDeleteConfirmModal: false,
         showApproveModal: false,
@@ -3629,10 +3301,6 @@
         
         dragActiveBulk: false,
         bulkFileName: '',
-        
-        pinInput: '',
-        pinError: false,
-        isPinVerified: false,
         
         editingCategory: null,
         deletingCategory: null,
@@ -3697,6 +3365,7 @@
         
         // Selected Students for Deletion
         selectedStudents: [],
+        selectedAdmins: [],
         
         // Reset Password Modal
         showResetPasswordModal: false,
@@ -3733,17 +3402,6 @@
         showNewPassword: false,
         showConfirmPassword: false,
         isSubmitting: false,
-        
-        // Security PIN Change
-        pinData: {
-            currentPin: '',
-            newPin: '',
-            confirmPin: ''
-        },
-        showCurrentPin: false,
-        showNewPin: false,
-        showConfirmPin: false,
-        isPinSubmitting: false,
         
         // S-Core Settings
         scoreSettings: {
@@ -4008,82 +3666,6 @@
             } finally {
                 this.isSubmitting = false;
             }
-        },
-
-        // --- SECURITY PIN CHANGE FUNCTIONS ---
-        async updateSecurityPin() {
-            const currentPin = (this.pinData.currentPin || '').trim();
-            const newPin = (this.pinData.newPin || '').trim();
-            const confirmPin = (this.pinData.confirmPin || '').trim();
-
-            // Validation
-            if (!currentPin || !newPin || !confirmPin) {
-                this.showAlert('warning', 'Tidak Lengkap', 'Semua kolom wajib diisi');
-                return;
-            }
-
-            // Validate PIN format (4-6 digits)
-            const pinRegex = /^[0-9]{4,6}$/;
-            if (!pinRegex.test(newPin)) {
-                this.showAlert('warning', 'Format Tidak Valid', 'PIN baru harus terdiri dari 4-6 digit');
-                return;
-            }
-
-            if (newPin !== confirmPin) {
-                this.showAlert('warning', 'Tidak Cocok', 'PIN baru dan konfirmasinya tidak cocok');
-                return;
-            }
-
-            if (newPin === currentPin) {
-                this.showAlert('warning', 'PIN Sama', 'PIN baru harus berbeda dari PIN saat ini');
-                return;
-            }
-
-            this.isPinSubmitting = true;
-
-            try {
-                const response = await fetch('/admin/settings/security-pin', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        current_pin: currentPin,
-                        new_pin: newPin,
-                        new_pin_confirmation: confirmPin
-                    })
-                });
-
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.message || 'Gagal memperbarui PIN');
-                }
-
-                this.showAlert('success', 'Berhasil', 'PIN keamanan berhasil diperbarui');
-                
-                // Reset form
-                this.resetPinForm();
-
-            } catch (error) {
-                console.error('Error updating PIN:', error);
-                this.showAlert('error', 'Gagal', error.message || 'Tidak dapat memperbarui PIN. Periksa PIN saat ini.');
-            } finally {
-                this.isPinSubmitting = false;
-            }
-        },
-
-        resetPinForm() {
-            this.pinData = {
-                currentPin: '',
-                newPin: '',
-                confirmPin: ''
-            };
-            this.showCurrentPin = false;
-            this.showNewPin = false;
-            this.showConfirmPin = false;
         },
 
         // Reactivate main category - Open Modal
@@ -5102,6 +4684,23 @@
             });
         },
 
+        deleteAdmin(adminId, adminName) {
+            this.showAlert('warning', 'Konfirmasi Hapus', `Apakah Anda yakin ingin menghapus admin ${adminName}? Tindakan ini tidak dapat dibatalkan.`, true, () => {
+                this.performDeleteAdmins([adminId]);
+            });
+        },
+
+        deleteSelectedAdmins(adminIds) {
+            if (!adminIds || adminIds.length === 0) {
+                this.showAlert('warning', 'Tidak Ada Pilihan', 'Pilih setidaknya satu admin untuk dihapus.');
+                return;
+            }
+
+            this.showAlert('warning', 'Konfirmasi Hapus Massal', `Apakah Anda yakin ingin menghapus ${adminIds.length} admin? Tindakan ini tidak dapat dibatalkan.`, true, () => {
+                this.performDeleteAdmins([...adminIds]);
+            });
+        },
+
         setBulkAcademicStatus(status, checked) {
             if (checked) {
                 this.bulkAcademicStatusDraft = status;
@@ -5288,6 +4887,33 @@
             }
         },
 
+        async performDeleteAdmins(adminIds) {
+            try {
+                const response = await fetch('/admin/admins/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ admin_ids: adminIds })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Gagal menghapus admin');
+                }
+
+                this.showAlert('success', 'Berhasil', `Berhasil menghapus ${adminIds.length} admin. Memuat ulang...`);
+                this.selectedAdmins = [];
+                setTimeout(() => window.location.reload(), 1500);
+            } catch (error) {
+                console.error('Error deleting admins:', error);
+                this.showAlert('error', 'Gagal', error.message || 'Tidak dapat menghapus admin');
+            }
+        },
+
         confirmLogout() {
             fetch('{{ route("logout") }}', {
                 method: 'POST',
@@ -5343,45 +4969,7 @@
         },
 
         // --- MANAJEMEN KATEGORI (CATEGORY MANAGEMENT) ---
-        requestCategoryManagement() { this.showPinModal = true; this.pinInput = ''; this.pinError = false; },
-        closePinModal() { this.showPinModal = false; },
-        
-        async verifyPin() {
-            const pin = (this.pinInput || '').trim();
-
-            if (!pin) {
-                this.pinError = true;
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/verify-security-pin', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        pin
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.valid) {
-                    this.isPinVerified = true;
-                    this.showPinModal = false;
-                    this.showCategoryModal = true;
-                    this.pinError = false;
-                } else {
-                    this.pinError = true;
-                }
-            } catch (error) {
-                console.error('Error verifying PIN:', error);
-                this.pinError = true;
-            }
-        },
+        requestCategoryManagement() { this.showCategoryModal = true; },
         closeCategoryModal() { this.showCategoryModal = false; },
 
         // 1. ADD MAIN CATEGORY
