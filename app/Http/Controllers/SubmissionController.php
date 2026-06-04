@@ -650,4 +650,4 @@ class SubmissionController extends Controller
             return response()->json(['message' => 'Gagal menghapus data: ' . $e->getMessage()], 500);
         }
     }
-}
+} 

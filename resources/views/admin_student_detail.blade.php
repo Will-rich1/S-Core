@@ -128,12 +128,13 @@
                     <h3 class="font-semibold">Reset Poin Mahasiswa</h3>
                     <p class="text-xs text-gray-500">Aksi ini hanya mengubah nilai poin submission lama menjadi 0. Judul, kategori, dan data pengajuan tetap ada.</p>
                 </div>
-                <form method="POST" action="{{ route('students.reset-points', ['studentId' => $student['id']]) }}" onsubmit="return confirm('Reset semua poin existing mahasiswa ini ke 0? Data pengajuan tetap tersimpan.');">
-                    @csrf
-                    <button type="submit" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium">
-                        Reset Semua Poin ke 0
-                    </button>
-                </form>
+                <button
+                    type="button"
+                    id="openResetPointsModal"
+                    class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium"
+                >
+                    Reset Semua Poin ke 0
+                </button>
             </div>
         </div>
 
@@ -426,6 +427,52 @@
             </div>
         </div>
 
+        <div id="resetPointsModal" class="hidden fixed inset-0 bg-black/60 z-50 items-center justify-center p-4">
+            <div class="w-full max-w-2xl rounded-2xl bg-white shadow-2xl overflow-hidden">
+                <div class="flex items-start justify-between gap-4 border-b border-red-100 bg-red-50 px-5 py-4">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-red-600">Aksi Berisiko</p>
+                        <h4 class="mt-1 text-lg font-semibold text-gray-900">Reset seluruh poin mahasiswa</h4>
+                    </div>
+                    <button type="button" id="closeResetPointsModal" class="text-gray-500 hover:text-gray-700 text-2xl leading-none">&times;</button>
+                </div>
+
+                <div class="px-5 py-5 space-y-5">
+                    <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                        <p class="font-semibold">Perhatian</p>
+                        <p class="mt-1">Semua poin yang sudah disetujui untuk mahasiswa ini akan diubah menjadi 0. Riwayat pengajuan, judul, file, dan detail submission tidak akan dihapus.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                        <div class="rounded-xl border bg-gray-50 px-4 py-3">
+                            <p class="text-gray-500 text-xs">Mahasiswa</p>
+                            <p class="mt-1 font-semibold text-gray-900">{{ $student['name'] }}</p>
+                        </div>
+                        <div class="rounded-xl border bg-gray-50 px-4 py-3">
+                            <p class="text-gray-500 text-xs">Total Poin Saat Ini</p>
+                            <p class="mt-1 font-semibold text-emerald-700">{{ number_format((float) $student['approvedPoints'], 2) }}</p>
+                        </div>
+                        <div class="rounded-xl border bg-gray-50 px-4 py-3">
+                            <p class="text-gray-500 text-xs">Data Tersedia</p>
+                            <p class="mt-1 font-semibold text-gray-900">{{ $student['totalSubmissions'] }} pengajuan</p>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ route('students.reset-points', ['studentId' => $student['id']]) }}" class="space-y-4">
+                        @csrf
+                        <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                            Ketik atau baca ulang keputusan ini sebelum melanjutkan. Setelah disimpan, sistem akan mencatat riwayat reset.
+                        </div>
+
+                        <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-2">
+                            <button type="button" id="cancelResetPointsModal" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-sm font-medium text-gray-800">Batal</button>
+                            <button type="submit" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-medium">Ya, Reset ke 0</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <div id="editScopeModal" class="hidden fixed inset-0 bg-black/50 z-50 items-center justify-center p-4">
             <div class="bg-white w-full max-w-xl rounded-xl shadow-xl">
                 <div class="px-5 py-4 border-b flex items-center justify-between">
@@ -552,6 +599,10 @@
     </div>
 
     <script>
+        const resetPointsModal = document.getElementById('resetPointsModal');
+        const openResetPointsModalBtn = document.getElementById('openResetPointsModal');
+        const closeResetPointsModalBtn = document.getElementById('closeResetPointsModal');
+        const cancelResetPointsModalBtn = document.getElementById('cancelResetPointsModal');
         const editButtons = document.querySelectorAll('[data-edit-scope]');
         const previewButtons = document.querySelectorAll('[data-preview-scope]');
         const modal = document.getElementById('editScopeModal');
@@ -589,9 +640,19 @@
             modal.classList.add('flex');
         };
 
+        const openResetModal = () => {
+            resetPointsModal.classList.remove('hidden');
+            resetPointsModal.classList.add('flex');
+        };
+
         const closeModal = () => {
             modal.classList.add('hidden');
             modal.classList.remove('flex');
+        };
+
+        const closeResetModal = () => {
+            resetPointsModal.classList.add('hidden');
+            resetPointsModal.classList.remove('flex');
         };
 
         const openPreviewModal = () => {
@@ -622,6 +683,10 @@
                 openModal();
             });
         });
+
+        openResetPointsModalBtn.addEventListener('click', openResetModal);
+        closeResetPointsModalBtn.addEventListener('click', closeResetModal);
+        cancelResetPointsModalBtn.addEventListener('click', closeResetModal);
 
         closeModalBtn.addEventListener('click', closeModal);
         cancelModalBtn.addEventListener('click', closeModal);
@@ -663,6 +728,12 @@
         modal.addEventListener('click', (event) => {
             if (event.target === modal) {
                 closeModal();
+            }
+        });
+
+        resetPointsModal.addEventListener('click', (event) => {
+            if (event.target === resetPointsModal) {
+                closeResetModal();
             }
         });
 
